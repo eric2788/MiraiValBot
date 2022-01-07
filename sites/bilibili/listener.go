@@ -32,35 +32,29 @@ func StartListen(room int64) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Bilibili = append(listening.Bilibili, room)
+		listening.Bilibili = array.AddInt64(listening.Bilibili, room)
 	})
 
-	info, err := bot.GetModule(bc.Tag)
-
-	if err != nil {
-		return false, err
-	}
+	info, _ := bot.GetModule(bc.Tag)
 
 	broadcaster := info.Instance.(*bc.Broadcaster)
 
-	result := broadcaster.Subscribe(topic(room), MessageHandler)
-
-	return result, nil
+	return broadcaster.Subscribe(topic(room), MessageHandler)
 }
 
 func StopListen(room int64) (bool, error) {
 
 	index := array.IndexOfInt64(listening.Bilibili, room)
 
+	if index == -1 {
+		return false, nil
+	}
+
 	file.UpdateStorage(func() {
 		listening.Bilibili = array.RemoveInt64(listening.Bilibili, index)
 	})
 
-	info, err := bot.GetModule(bc.Tag)
-
-	if err != nil {
-		return false, err
-	}
+	info, _ := bot.GetModule(bc.Tag)
 
 	broadcaster := info.Instance.(*bc.Broadcaster)
 
@@ -74,7 +68,7 @@ func GetRoomInfo(room int64) (*RoomInfo, error) {
 		return info, nil
 	}
 
-	var info *RoomInfo
+	var info = &RoomInfo{}
 	if err := request.Get(fmt.Sprintf("%s?room_id=%d", Host, room), info); err != nil {
 		return nil, err
 	}

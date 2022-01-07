@@ -2,8 +2,13 @@ package youtube
 
 import (
 	"fmt"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/file"
+	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
+	"github.com/eric2788/MiraiValBot/utils/array"
 	"github.com/eric2788/MiraiValBot/utils/regex"
 	"github.com/eric2788/MiraiValBot/utils/request"
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -11,6 +16,8 @@ import (
 var (
 	CustomUrlPattern = regexp.MustCompile("(https?:\\/\\/)?(www\\.)?youtube\\.com\\/c\\/(?P<username>[\\w]+)")
 	ChannelPattern   = regexp.MustCompile("(https?:\\/\\/)?(www\\.)?youtube\\.com\\/(channel|user)\\/(?P<id>[\\w-]+)")
+	listening        = file.DataStorage.Listening
+	topic            = func(ch string) string { return fmt.Sprintf("ylive:%s", ch) }
 )
 
 func GetChannelPattern(username string) *regexp.Regexp {
@@ -31,11 +38,31 @@ func StartListen(channel string) (bool, error) {
 	if exist, ok := channelExistMap[channel]; ok && !exist {
 		return false, fmt.Errorf("頻道不存在")
 	} else if !ok {
-		// TODO do request check
+		if res, err := http.Get(fmt.Sprintf("https://youtube.com/channel/%s", channel)); err != nil {
+			return false, fmt.Errorf("嘗試檢查頻道時出現錯誤: %v", err)
+		} else if res.StatusCode == 404 {
+			channelExistMap[channel] = false
+			return false, fmt.Errorf("頻道不存在")
+		} else if res.StatusCode != 200 {
+			return false, fmt.Errorf("嘗試檢查頻道時出現異常: %d, %s", res.StatusCode, res.Status)
+		} else { // return 200
+			channelExistMap[channel] = true
+		}
 	}
 
-	// TODO do add and subscribe
-	return false, nil
+	file.UpdateStorage(func() {
+		listening.Youtube = array.AddString(listening.Youtube, channel)
+	})
+
+	info, err := bot.GetModule(bc.Tag)
+
+	if err != nil {
+		return false, err
+	}
+
+	broadcaster := info.Instance.(*bc.Broadcaster)
+
+	return broadcaster.Subscribe(topic(channel), MessageHandler)
 }
 
 func StopListen(channel string) (bool, error) {
@@ -43,8 +70,23 @@ func StopListen(channel string) (bool, error) {
 		return false, fmt.Errorf("不是一個有效的頻道ID")
 	}
 
-	// TODO do remove and unsubscribe
-	return false, nil
+	index := array.IndexOfString(listening.Youtube, channel)
+
+	if index == -1 {
+		return false, nil
+	}
+
+	file.UpdateStorage(func() {
+		listening.Youtube = array.RemoveString(listening.Youtube, index)
+	})
+
+	info, _ := bot.GetModule(bc.Tag)
+
+	broadcaster := info.Instance.(*bc.Broadcaster)
+
+	result := broadcaster.UnSubscribe(topic(channel))
+
+	return result, nil
 }
 
 // GetChannelId get channel id by url

@@ -13,9 +13,14 @@ import (
 
 const Tag = "valbot.broadcaster"
 
+type Subscriber struct {
+	Context    context.Context
+	CancelFunc context.CancelFunc
+}
+
 var (
 	instance = &Broadcaster{
-		subscribeMap: make(map[string]context.CancelFunc),
+		subscribeMap: make(map[string]Subscriber),
 	}
 	logger  = utils.GetModuleLogger(Tag)
 	ctx     = context.Background()
@@ -28,7 +33,7 @@ func init() {
 
 type Broadcaster struct {
 	rdb          *redis.Client
-	subscribeMap map[string]context.CancelFunc
+	subscribeMap map[string]Subscriber
 	bot          *bot.Bot
 }
 
@@ -63,11 +68,11 @@ func (b *Broadcaster) Serve(bot *bot.Bot) {
 		// 獲取所有離線訂閱
 		for _, topic := range handler.GetOfflineListening() {
 			// 進行訂閱
-			b.Subscribe(topic, handler)
+			_, _ = b.Subscribe(topic, handler)
 			count += 1
 		}
 	}
-	logger.Infof("已從離線重新訂閱 %d 個 topic。\n", count)
+	logger.Infof("已從離線重新訂閱 %d 個 topic。", count)
 }
 
 func (b *Broadcaster) Start(bot *bot.Bot) {
@@ -76,10 +81,24 @@ func (b *Broadcaster) Start(bot *bot.Bot) {
 
 func (b *Broadcaster) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 
+	defer wg.Done()
+
+	subWaitGroup := &sync.WaitGroup{}
+	subWaitGroup.Add(len(b.subscribeMap))
+
 	// 解除所有訂閱
-	for _, cancel := range b.subscribeMap {
-		cancel()
+	for topic, subscriber := range b.subscribeMap {
+		ctx, cancel := subscriber.Context, subscriber.CancelFunc
+		go func(topic string) {
+			cancel()
+			logger.Debugf("[Redis] 正在等待 topic %s 關閉 pubsub...", topic)
+			<-ctx.Done() // 等待 pubsub 關閉
+			logger.Debugf("[Redis] topic %s pubsub 關閉完成", topic)
+			subWaitGroup.Done()
+		}(topic)
 	}
+
+	subWaitGroup.Wait()
 
 	// 關閉 Redis
 	if err := b.rdb.Close(); err != nil {
@@ -96,6 +115,7 @@ func RegisterHandler(site string, handler MessageHandler) bool {
 		return false
 	} else {
 		siteMap[site] = handler
+		logger.Infof("已成功註冊網站 %s 的 PubSub 處理方式", site)
 		return true
 	}
 }

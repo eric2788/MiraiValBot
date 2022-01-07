@@ -2,9 +2,20 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
+
+type HttpError struct {
+	Code     int
+	Status   string
+	Response *http.Response
+}
+
+func (e HttpError) Error() string {
+	return fmt.Sprintf("%v: %s", e.Code, e.Status)
+}
 
 func Get(url string, response interface{}) error {
 
@@ -12,6 +23,12 @@ func Get(url string, response interface{}) error {
 
 	if err != nil {
 		return err
+	} else if res.StatusCode != 200 {
+		return &HttpError{
+			Code:     res.StatusCode,
+			Status:   res.Status,
+			Response: res,
+		}
 	}
 
 	return Read(res, response)

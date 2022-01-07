@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"testing"
 )
@@ -33,4 +34,19 @@ func TestPtr(t *testing.T) {
 	fmt.Println(a.B.C.Arr)
 	c2.Arr = append(c2.Arr, "world")
 	fmt.Println(a.B.C.Arr)
+}
+
+func TestCtxPtr(t *testing.T) {
+	var s *context.Context
+
+	fmt.Println(s == nil)
+
+	assignCtx(s)
+
+	fmt.Println(s == nil)
+}
+
+func assignCtx(s *context.Context) {
+	ctx := context.Background()
+	s = &ctx
 }

@@ -8,7 +8,7 @@ import (
 
 // 文件實例
 
-var ApplicationYaml *Configuration
+var ApplicationYaml *Configuration = &defaultConfig
 
 //
 

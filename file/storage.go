@@ -2,11 +2,13 @@ package file
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/Logiase/MiraiGo-Template/utils"
 	"io/fs"
 	"os"
 	"sync"
 )
+
+var logger = utils.GetModuleLogger("file.storage")
 
 type StorageData struct {
 	Answers   map[string]bool   `json:"answers"`
@@ -35,10 +37,10 @@ type Setting struct {
 
 const StoragePath = "data/valData.json"
 
-var DataStorage *StorageData
+var DataStorage *StorageData = &defaultStorageData
 var locker sync.Mutex
 
-var defaultStorageData = &StorageData{
+var defaultStorageData = StorageData{
 	Answers:   make(map[string]bool),
 	Responses: make(map[string]string),
 	Bilibili: &BilibiliSettings{
@@ -61,7 +63,7 @@ func LoadStorage() {
 	err := os.MkdirAll("data", fs.ModePerm)
 
 	if err != nil {
-		fmt.Printf("生成 data 文件夾時出現錯誤: %v", err)
+		logger.Fatalf("生成 data 文件夾時出現錯誤: %v", err)
 		os.Exit(1)
 	}
 
@@ -79,14 +81,14 @@ func LoadStorage() {
 	content, err := os.ReadFile(StoragePath)
 
 	if err != nil {
-		fmt.Printf("讀取 %s 失敗: %v\n", StoragePath, err)
+		logger.Fatalf("讀取 %s 失敗: %v\n", StoragePath, err)
 		os.Exit(1)
 	}
 
 	err = json.Unmarshal(content, DataStorage)
 
 	if err != nil {
-		fmt.Printf("加載 %s 失敗: %v\n", StoragePath, err)
+		logger.Fatalf("加載 %s 失敗: %v\n", StoragePath, err)
 		os.Exit(1)
 	}
 
@@ -99,13 +101,13 @@ func UpdateStorage(updateFunc func()) {
 	updateFunc()
 	content, err := json.Marshal(DataStorage)
 	if err != nil {
-		fmt.Printf("讀取最新數據內容時出現錯誤: %v\n", err)
+		logger.Warnf("讀取最新數據內容時出現錯誤: %v\n", err)
 		return
 	}
 	err = os.WriteFile(StoragePath, content, 0755)
 	if err != nil {
-		fmt.Printf("更新數據內容時出現錯誤: %v\n", err)
+		logger.Warnf("更新數據內容時出現錯誤: %v\n", err)
 		return
 	}
-	fmt.Println("數據內容已成功更新。")
+	logger.Infof("數據內容已成功更新。")
 }

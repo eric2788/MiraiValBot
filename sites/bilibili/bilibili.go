@@ -1,14 +1,32 @@
 package bilibili
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
 	"github.com/go-redis/redis/v8"
 )
 
+var logger = utils.GetModuleLogger("sites.bilibili")
+
 type messageHandler struct {
+}
+
+func (h *messageHandler) PubSubPrefix() string {
+	return "blive:"
+}
+
+func (h *messageHandler) ToLiveData(message *redis.Message) (interface{}, error) {
+	var liveData = &LiveData{}
+	err := json.Unmarshal([]byte(message.Payload), liveData)
+	return liveData, err
+}
+
+func (h *messageHandler) GetCommand(data interface{}) string {
+	return data.(*LiveData).Command
 }
 
 func (h *messageHandler) GetOfflineListening() []string {
@@ -20,15 +38,10 @@ func (h *messageHandler) GetOfflineListening() []string {
 	return topics
 }
 
-func (h *messageHandler) HandleMessage(bot *bot.Bot, message *redis.Message) {
-	//TODO implement me
-	panic("implement me")
-}
-
 func (h *messageHandler) HandleError(bot *bot.Bot, error error) {
 }
 
-var MessageHandler = &messageHandler{}
+var MessageHandler = broadcaster.BuildHandle(logger, &messageHandler{})
 
 func init() {
 	broadcaster.RegisterHandler("bilibili", MessageHandler)
