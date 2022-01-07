@@ -2,3 +2,4 @@
 application.yaml
 device.json
 /data/
+/logs/
