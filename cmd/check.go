@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -17,16 +16,16 @@ func check(args []string, source *command.MessageSource) error {
 		if member := qq.FindGroupMember(at); member != nil {
 			msg := message.NewSendingMessage()
 
-			msg.Append(message.NewText(fmt.Sprintf("UID: %d", member.Uin))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("名称: %s", member.Nickname))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("显示名称: %s", member.DisplayName()))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("卡片名称: %s", member.CardName))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("性别: %s", genderName(member.Gender)))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("加入日期: %s", toTime(member.JoinTime)))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("权限: %s", permissionName(member.Permission)))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("最后发言时间: %s", toTime(member.LastSpeakTime)))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("等级: %d", member.Level))).Append(message.NewText("\n"))
-			msg.Append(message.NewText(fmt.Sprintf("特别头衔: %s", member.SpecialTitle)))
+			msg.Append(qq.NewTextf("UID: %d", member.Uin)).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("名称: %s", member.Nickname)).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("显示名称: %s", member.DisplayName())).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("卡片名称: %s", member.CardName)).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("性别: %s", genderName(member.Gender))).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("加入日期: %s", toTime(member.JoinTime))).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("权限: %s", permissionName(member.Permission))).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("最后发言时间: %s", toTime(member.LastSpeakTime))).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("等级: %d", member.Level)).Append(message.NewText("\n"))
+			msg.Append(qq.NewTextf("特别头衔: %s", member.SpecialTitle))
 
 			source.Client.SendGroupMessage(source.Message.GroupCode, msg)
 		}

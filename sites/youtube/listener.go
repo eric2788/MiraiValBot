@@ -20,7 +20,7 @@ var (
 	topic            = func(ch string) string { return fmt.Sprintf("ylive:%s", ch) }
 )
 
-func GetChannelPattern(username string) *regexp.Regexp {
+func getChannelPattern(username string) *regexp.Regexp {
 	return regexp.MustCompile("\"browseId\":\"(?P<id>[\\w-]+)\",\"canonicalBaseUrl\":\"\\/c\\/" + username + "\"")
 }
 
@@ -106,7 +106,7 @@ func GetChannelId(url string) (string, error) {
 		return id, nil
 	}
 
-	ex := GetChannelPattern(username)
+	ex := getChannelPattern(username)
 
 	body, err := request.GetHtml(fmt.Sprintf("https://www.youtube.com/c/%s", username))
 

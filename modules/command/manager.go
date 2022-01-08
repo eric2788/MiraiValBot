@@ -41,7 +41,7 @@ func AddCommand(node Node) {
 }
 
 // NewParent 新增含分支指令的指令節點
-func NewParent(names []string, description string, adminOnly bool, nodes ...Node) Node {
+func NewParent(names []string, description string, nodes ...Node) Node {
 	if len(names) == 0 {
 		panic("指令名稱最少需要一個參數")
 	}
@@ -51,7 +51,7 @@ func NewParent(names []string, description string, adminOnly bool, nodes ...Node
 		Command:      cmd,
 		Alias:        alias,
 		ChildNodes:   nodes,
-		AdminOnly:    adminOnly,
+		AdminOnly:    false,
 		Placeholders: []string{},
 		Description:  description,
 		Handler:      nil,

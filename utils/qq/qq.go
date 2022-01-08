@@ -81,13 +81,7 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 }
 
 func FindGroupMember(uid int64) *client.GroupMemberInfo {
-	for _, member := range ValGroupInfo.Members {
-		m := *member
-		if m.Uin == uid {
-			return member
-		}
-	}
-	return nil
+	return ValGroupInfo.FindMember(uid)
 }
 
 func FindOtherGroupMember(members []*client.GroupMemberInfo, uid int64) *client.GroupMemberInfo {
