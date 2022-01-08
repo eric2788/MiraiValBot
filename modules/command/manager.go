@@ -82,6 +82,7 @@ func InvokeCommand(content string, admin bool, source *MessageSource) (*Response
 			Ignore: true,
 		}, nil
 	}
+	logger.Debugf("收到指令輸入: %s", content)
 	commands := strings.Split(strings.TrimPrefix(content, Prefix), " ")
 	cmd, args := commands[0], commands[1:]
 	for _, node := range commandTree {
@@ -115,7 +116,7 @@ func invokeCommandInternal(node Node, admin bool, parents []string, args []strin
 		if len(args) > 0 {
 			cmd, args := args[0], args[1:]
 			for _, subNode := range node.ChildNodes {
-				labels := append(node.Alias, node.Command)
+				labels := append(subNode.Alias, subNode.Command)
 				if array.IndexOfString(labels, cmd) != -1 {
 					return invokeCommandInternal(subNode, admin, parents, args, source)
 				}
@@ -150,12 +151,11 @@ func isNotCommand(content string) bool {
 }
 
 func showHelpLines(parents []string, nodes []Node) string {
-	lines := make([]string, len(nodes))
+	var lines []string
 	for _, node := range nodes {
 		subCommandLine := showHelpLine(parents, node)
 		lines = append(lines, subCommandLine)
 	}
-
 	return strings.Join(lines, "\n")
 }
 
@@ -166,6 +166,13 @@ func filterNecessary(placeholders []string) []string {
 }
 
 func showHelpLine(parents []string, node Node) string {
-	line := Prefix + strings.Join(parents, " ")
-	return fmt.Sprintf("%s %s %s - %s", line, node.Command, strings.Join(filterNecessary(node.Placeholders), " "), node.Description)
+	line := Prefix
+	for _, parent := range parents {
+		line += parent + " "
+	}
+	line += node.Command
+	for _, placeholder := range filterNecessary(node.Placeholders) {
+		line += placeholder + " "
+	}
+	return fmt.Sprintf("%s - %s", line, node.Description)
 }

@@ -5,9 +5,26 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
+	"github.com/eric2788/MiraiValBot/utils/qq"
 	"os"
 	"os/signal"
+
+	// 所有廣播訂閱平台
+	_ "github.com/eric2788/MiraiValBot/sites/bilibili"
+	_ "github.com/eric2788/MiraiValBot/sites/twitter"
+	_ "github.com/eric2788/MiraiValBot/sites/youtube"
+
+	// 所有 redis 訂閱處理器
+	_ "github.com/eric2788/MiraiValBot/handlers"
+
+	// 註冊模組
+	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
+	_ "github.com/eric2788/MiraiValBot/modules/command"
+
+	// 所有指令
+	_ "github.com/eric2788/MiraiValBot/cmd"
 )
 
 func init() {
@@ -40,9 +57,13 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	//bot.SaveToken()
 
 	// 刷新好友列表，群列表
 	bot.RefreshList()
+
+	qq.InitValGroupInfo(bot.Instance)
+	eventhook.HookBotEvents()
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, os.Kill)

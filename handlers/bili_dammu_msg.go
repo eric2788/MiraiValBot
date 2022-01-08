@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
 )
@@ -18,7 +17,7 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	uid := int64(userInfo[0].(float64))
 
 	// debug only
-	fmt.Printf("從房間 %d 收到來自 %s (%d) 的彈幕: %s\n", room, uname, uid, danmu)
+	logger.Infof("從房間 %d 收到來自 %s (%d) 的彈幕: %s\n", room, uname, uid, danmu)
 
 	return nil
 }

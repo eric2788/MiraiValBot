@@ -76,3 +76,16 @@ func GetRoomInfo(room int64) (*RoomInfo, error) {
 	roomInfoCache[room] = info
 	return info, nil
 }
+
+func ClearRoomInfo(room int64) bool {
+	if room != -1 {
+		if _, ok := roomInfoCache[room]; !ok {
+			return false
+		}
+		delete(roomInfoCache, room)
+		return true
+	} else {
+		roomInfoCache = make(map[int64]*RoomInfo)
+		return true
+	}
+}

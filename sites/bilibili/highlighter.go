@@ -7,28 +7,26 @@ import (
 
 var bSettings = file.DataStorage.Bilibili
 
-func HighlightUserExist(user int64) bool {
-	return array.IndexOfInt64(bSettings.HighLightedUsers, user) != -1
-}
-
 func AddHighlightUser(user int64) bool {
-	if HighlightUserExist(user) {
+
+	if array.IndexOfInt64(bSettings.HighLightedUsers, user) != -1 {
 		return false
 	}
 
 	file.UpdateStorage(func() {
-		bSettings.HighLightedUsers = append(bSettings.HighLightedUsers, user)
+		bSettings.HighLightedUsers = array.AddInt64(bSettings.HighLightedUsers, user)
 	})
 
 	return true
 }
 
 func RemoveHighlightUser(user int64) bool {
-	if !HighlightUserExist(user) {
-		return false
-	}
 
 	index := array.IndexOfInt64(bSettings.HighLightedUsers, user)
+
+	if index == -1 {
+		return false
+	}
 
 	file.UpdateStorage(func() {
 		bSettings.HighLightedUsers = array.RemoveInt64(bSettings.HighLightedUsers, index)
