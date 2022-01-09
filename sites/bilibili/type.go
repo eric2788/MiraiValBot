@@ -12,11 +12,11 @@ const (
 type LiveData struct {
 	Command  string `json:"command"`
 	LiveInfo struct {
-		UID    int64  `json:"uid"`
-		Title  string `json:"title"`
-		Name   string `json:"name"`
-		Cover  string `json:"cover"`
-		RoomId int64  `json:"room_id"`
+		UID    int64   `json:"uid"`
+		Title  string  `json:"title"`
+		Name   string  `json:"name"`
+		Cover  *string `json:"cover"`
+		RoomId int64   `json:"room_id"`
 	} `json:"live_info"`
 	Content map[string]interface{} `json:"content"`
 }

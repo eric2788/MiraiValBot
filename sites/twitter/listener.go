@@ -6,7 +6,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/utils/array"
 	"github.com/eric2788/MiraiValBot/utils/request"
 	"strings"
 )
@@ -42,7 +41,7 @@ func StartListen(user string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Twitter = array.AddString(listening.Twitter, user)
+		listening.Twitter.Add(user)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
@@ -54,14 +53,12 @@ func StartListen(user string) (bool, error) {
 
 func StopListen(user string) (bool, error) {
 
-	index := array.IndexOfString(listening.Twitter, user)
-
-	if index == -1 {
+	if !listening.Twitter.Contains(user) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Twitter = array.RemoveString(listening.Twitter, index)
+		listening.Twitter.Delete(user)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

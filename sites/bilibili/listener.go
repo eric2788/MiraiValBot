@@ -5,7 +5,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/utils/array"
 	"github.com/eric2788/MiraiValBot/utils/request"
 )
 
@@ -32,7 +31,7 @@ func StartListen(room int64) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Bilibili = array.AddInt64(listening.Bilibili, room)
+		listening.Bilibili.Add(room)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
@@ -44,14 +43,12 @@ func StartListen(room int64) (bool, error) {
 
 func StopListen(room int64) (bool, error) {
 
-	index := array.IndexOfInt64(listening.Bilibili, room)
-
-	if index == -1 {
+	if !listening.Bilibili.Contains(room) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Bilibili = array.RemoveInt64(listening.Bilibili, index)
+		listening.Bilibili.Delete(room)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

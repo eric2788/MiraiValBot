@@ -30,7 +30,7 @@ func (h *messageHandler) GetCommand(data interface{}) string {
 }
 
 func (h *messageHandler) GetOfflineListening() []string {
-	listening := file.DataStorage.Listening.Bilibili
+	listening := file.DataStorage.Listening.Bilibili.ToArr()
 	topics := make([]string, len(listening))
 	for i, v := range listening {
 		topics[i] = fmt.Sprintf("blive:%d", v)

@@ -2,12 +2,10 @@ package broadcaster
 
 import (
 	"context"
-	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/discord"
-	"github.com/eric2788/MiraiValBot/file"
-	"github.com/go-redis/redis/v8"
+	"github.com/eric2788/MiraiValBot/redis"
 	"sync"
 )
 
@@ -32,9 +30,7 @@ func init() {
 }
 
 type Broadcaster struct {
-	rdb          *redis.Client
 	subscribeMap map[string]Subscriber
-	bot          *bot.Bot
 }
 
 func (b *Broadcaster) MiraiGoModule() bot.ModuleInfo {
@@ -45,13 +41,7 @@ func (b *Broadcaster) MiraiGoModule() bot.ModuleInfo {
 }
 
 func (b *Broadcaster) Init() {
-	redisConfig := file.ApplicationYaml.Redis
-	host := fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port)
-	b.rdb = redis.NewClient(&redis.Options{
-		Addr:     host,
-		Password: redisConfig.Password,
-		DB:       redisConfig.Database,
-	})
+	redis.Init()
 }
 
 func (b *Broadcaster) PostInit() {
@@ -60,7 +50,6 @@ func (b *Broadcaster) PostInit() {
 }
 
 func (b *Broadcaster) Serve(bot *bot.Bot) {
-	b.bot = bot
 
 	logger.Info("正在重離線獲取訂閱...")
 	count := 0
@@ -101,7 +90,7 @@ func (b *Broadcaster) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 	subWaitGroup.Wait()
 
 	// 關閉 Redis
-	if err := b.rdb.Close(); err != nil {
+	if err := redis.Close(); err != nil {
 		logger.Warnf("關閉 Redis 時出現錯誤: %v", err)
 	} else {
 		logger.Info("Redis 已成功關閉連接")

@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	rdb "github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/utils/set"
 	"github.com/go-redis/redis/v8"
+
 	"math/rand"
 	"time"
 )
@@ -40,18 +42,18 @@ func (b *Broadcaster) Subscribe(topic string, handler MessageHandler) (bool, err
 	// 手動關閉的 context
 	handleCtx, handleCancel := context.WithCancel(ctx)
 
-	pubsub := b.rdb.Subscribe(handleCtx, topic)
+	pubsub := rdb.Subscribe(handleCtx, topic)
 	ifError := make(chan error)
 
 	// pubsub 關閉的 context
 	pubsubCtx, pubsubClose := context.WithCancel(ctx)
 
 	go handleMessage(topic, pubsub, handleCtx, pubsubClose, ifError, func(msg *redis.Message) {
-		handler.HandleMessage(b.bot, msg)
+		handler.HandleMessage(bot.Instance, msg)
 	})
 
 	go handleError(topic, handleCtx, ifError, func(err error) {
-		handler.HandleError(b.bot, err)
+		handler.HandleError(bot.Instance, err)
 		b.UnSubscribe(topic)
 		logger.Warnf("五秒後嘗試重新訂閱...")
 		<-time.After(time.Second * 5)

@@ -27,7 +27,7 @@ func (m *messageHandler) GetCommand(data interface{}) string {
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
-	listening := file.DataStorage.Listening.Twitter
+	listening := file.DataStorage.Listening.Twitter.ToArr()
 	topics := make([]string, len(listening))
 	for i, v := range listening {
 		topics[i] = fmt.Sprintf("twitter:%s", v)

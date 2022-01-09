@@ -5,7 +5,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/utils/array"
 	"github.com/eric2788/MiraiValBot/utils/regex"
 	"github.com/eric2788/MiraiValBot/utils/request"
 	"net/http"
@@ -51,7 +50,7 @@ func StartListen(channel string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Youtube = array.AddString(listening.Youtube, channel)
+		listening.Youtube.Add(channel)
 	})
 
 	info, err := bot.GetModule(bc.Tag)
@@ -70,14 +69,12 @@ func StopListen(channel string) (bool, error) {
 		return false, fmt.Errorf("不是一個有效的頻道ID")
 	}
 
-	index := array.IndexOfString(listening.Youtube, channel)
-
-	if index == -1 {
+	if !listening.Youtube.Contains(channel) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Youtube = array.RemoveString(listening.Youtube, index)
+		listening.Youtube.Delete(channel)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

@@ -1,11 +1,13 @@
 package qq
 
 import (
+	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
+	"github.com/eric2788/MiraiValBot/redis"
 	"strings"
 )
 
@@ -92,4 +94,33 @@ func FindOtherGroupMember(members []*client.GroupMemberInfo, uid int64) *client.
 		}
 	}
 	return nil
+}
+
+var key = func(g int64, m int64) string { return fmt.Sprintf("qq:group_%d:msg:%d", g, m) }
+
+func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
+	persistGroupMsg := &PersistentGroupMessage{}
+	exist, err := redis.Get(key(groupCode, seq), persistGroupMsg)
+	if err != nil {
+		return nil, err
+	} else if exist {
+		return persistGroupMsg.ToGroupMessage(), nil
+	}
+
+	msgList, err := bot.Instance.GetGroupMessages(groupCode, seq, seq+1)
+
+	if err != nil {
+		return nil, err
+	}
+	if len(msgList) > 0 {
+		msg := msgList[0]
+		persistGroupMsg.Parse(msg)
+		err = redis.Store(key(groupCode, seq), persistGroupMsg)
+		if err != nil {
+			logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+		}
+		return msg, nil
+	} else {
+		return nil, nil
+	}
 }
