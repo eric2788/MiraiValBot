@@ -13,7 +13,7 @@ func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	superchat, ok := d.(*bilibili.SuperChatMessageData)
 
 	if !ok {
-		return fmt.Errorf("解析 SuperChat 數據失敗，已略過")
+		return fmt.Errorf("解析 SuperChat 數據失敗")
 	}
 
 	msg := message.NewSendingMessage()

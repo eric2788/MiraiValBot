@@ -45,6 +45,18 @@ func GetHtml(url string) (string, error) {
 	return ReadString(res)
 }
 
+func GetBytesByUrl(url string) (img []byte, err error) {
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		err = res.Body.Close()
+	}()
+	img, err = ioutil.ReadAll(res.Body)
+	return
+}
+
 func ReadString(res *http.Response) (string, error) {
 	var err error
 

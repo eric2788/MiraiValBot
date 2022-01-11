@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"crypto/md5"
 	"errors"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/utils/qq"
 	"strings"
 )
 
@@ -20,22 +20,14 @@ func voice(args []string, source *command.MessageSource) error {
 		}
 	}()
 
-	data, err := source.Client.GetTts(content)
+	voiceElement, err := qq.NewTts(content)
 
 	if err != nil {
 		return err
 	}
 
-	voice := &message.VoiceElement{
-		Name: content,
-		Data: data,
-		Size: int32(len(data)),
-		Md5:  md5.New().Sum(data),
-	}
-
-	source.Client.SendGroupMessage(source.Message.GroupCode, message.NewSendingMessage().Append(voice))
-
-	return err
+	source.Client.SendGroupMessage(source.Message.GroupCode, message.NewSendingMessage().Append(voiceElement))
+	return nil
 }
 
 var voiceCommand = command.NewNode([]string{"voice", "speak", "语音"}, "语音指令", false, voice, "<讯息>")

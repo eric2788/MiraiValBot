@@ -96,11 +96,15 @@ func FindOtherGroupMember(members []*client.GroupMemberInfo, uid int64) *client.
 	return nil
 }
 
-var key = func(g int64, m int64) string { return fmt.Sprintf("qq:group_%d:msg:%d", g, m) }
+var toGroupKey = func(groupCode int64, key string) string { return fmt.Sprintf("qq:group_%d:%s", groupCode, key) }
+var toPrivateKey = func(uid int64, key string) string { return fmt.Sprintf("qq:private_%d:%s", uid, key) }
 
 func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
+
+	key := toGroupKey(groupCode, fmt.Sprintf("msg:%d", seq))
+
 	persistGroupMsg := &PersistentGroupMessage{}
-	exist, err := redis.Get(key(groupCode, seq), persistGroupMsg)
+	exist, err := redis.Get(key, persistGroupMsg)
 	if err != nil {
 		return nil, err
 	} else if exist {
@@ -115,7 +119,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	if len(msgList) > 0 {
 		msg := msgList[0]
 		persistGroupMsg.Parse(msg)
-		err = redis.Store(key(groupCode, seq), persistGroupMsg)
+		err = redis.Store(key, persistGroupMsg)
 		if err != nil {
 			logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
 		}

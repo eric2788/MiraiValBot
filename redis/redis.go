@@ -38,17 +38,24 @@ func Store(key string, arg interface{}) error {
 	if err != nil {
 		return err
 	}
-	return rdb.Set(ctx, key, buffer.Bytes(), time.Hour*86400).Err()
+	return StoreBytes(key, buffer.Bytes())
+}
+
+func StoreBytes(key string, data []byte) error {
+	return rdb.Set(ctx, key, data, time.Hour*86400).Err()
+}
+
+func GetBytes(key string) ([]byte, bool, error) {
+	b, err := rdb.Get(ctx, key).Bytes()
+	return b, err == rgo.Nil, err
 }
 
 func Get(key string, arg interface{}) (bool, error) {
-	b, err := rdb.Get(ctx, key).Bytes()
-	if err != nil {
-		if err == rgo.Nil {
-			return false, nil
-		} else {
-			return false, err
-		}
+	b, notExist, err := GetBytes(key)
+	if notExist {
+		return false, nil
+	} else if err != nil {
+		return false, err
 	}
 	buffer := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buffer)

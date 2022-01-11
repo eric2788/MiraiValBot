@@ -102,15 +102,25 @@ type TweetEntities struct {
 		ScreenName string `json:"screen_name"`
 	} `json:"user_mentions"`
 	Media *[]struct {
-		Id            int64  `json:"id"`
-		IdStr         string `json:"id_str"`
-		MediaUrl      string `json:"media_url"`
-		MediaUrlHttps string `json:"media_url_https"`
-		Url           string `json:"url"`
-		DisplayUrl    string `json:"display_url"`
-		ExpandUrl     string `json:"expand_url"`
-		Type          string `json:"type"`
+		Id            int64      `json:"id"`
+		IdStr         string     `json:"id_str"`
+		MediaUrl      string     `json:"media_url"`
+		MediaUrlHttps string     `json:"media_url_https"`
+		Url           string     `json:"url"`
+		DisplayUrl    string     `json:"display_url"`
+		ExpandUrl     string     `json:"expand_url"`
+		Type          string     `json:"type"`
+		VideoInfo     *VideoInfo `json:"video_info"`
 	} `json:"media"`
+}
+
+type VideoInfo struct {
+	DurationMillis int64 `json:"duration_millis"`
+	Variants       []struct {
+		BitRate     int64  `json:"bit_rate"`
+		ContentType string `json:"content_type"`
+		Url         string `json:"url"`
+	} `json:"variants"`
 }
 
 func (t TweetStreamData) IsDeleteTweet() bool {
