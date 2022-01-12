@@ -17,7 +17,7 @@ func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 正在B站直播", data.LiveInfo.Name))
 	msg.Append(qq.NewTextfLn("标题: %s", data.LiveInfo.Title))
-	msg.Append(qq.NewTextfLn("直播间: https://live.bilibili.com/%d", data.LiveInfo.RoomId))
+	msg.Append(qq.NewTextfLn("直播间: %s", biliRoomLink(data.LiveInfo.RoomId)))
 	if data.LiveInfo.Cover != nil {
 		cover := *data.LiveInfo.Cover
 		imgElement, err := qq.NewImageByUrl(cover)

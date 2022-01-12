@@ -12,28 +12,12 @@ import (
 
 func HandleTweetReply(bot *bot.Bot, data *twitter.TweetStreamData) error {
 
-	handleTweetDiscord(data)
-
-	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName))
-	msg.Append(qq.NewTextfLn("内容: %s", data.Text))
-	msg.Append(qq.NewTextf("回复贴文: https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
-
-	return withRisky(msg)
-}
-
-func handleTweetDiscord(data *twitter.TweetStreamData) {
-	msg := &discordgo.MessageEmbed{
-		Author: &discordgo.MessageEmbedAuthor{
-			Name:    data.User.Name,
-			URL:     "https://twitter.com/" + data.User.ScreenName,
-			IconURL: data.User.ProfileImageUrlHttps,
-		},
-		Description: fmt.Sprintf("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName),
+	discordMsg := &discordgo.MessageEmbed{
+		Description: fmt.Sprintf("[%s](%s) 回复了 [%s](%s) 的一则推文", data.User.Name, tweetUserLink(data.User.ScreenName), *data.InReplyToScreenName, tweetUserLink(*data.InReplyToScreenName)),
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "回复贴文",
-				Value: fmt.Sprintf("https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr),
+				Value: tweetStatusLink(*data.InReplyToScreenName, data.InReplyToStatusIdStr),
 			},
 			{
 				Name:  "回复内容",
@@ -41,8 +25,15 @@ func handleTweetDiscord(data *twitter.TweetStreamData) {
 			},
 		},
 	}
-	addEntitiesTweetDiscord(msg, data)
-	go discord.SendNewsEmbed(msg)
+
+	go discord.SendNewsEmbed(discordMsg)
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName))
+	msg.Append(qq.NewTextfLn("内容: %s", data.Text))
+	msg.Append(qq.NewTextf("回复贴文: https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
+
+	return withRisky(msg)
 }
 
 // withRisky error must be nil
