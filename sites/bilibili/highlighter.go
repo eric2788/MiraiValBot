@@ -4,16 +4,16 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 )
 
-var bSettings = file.DataStorage.Bilibili
+var bSettings = &file.DataStorage.Bilibili
 
 func AddHighlightUser(user int64) bool {
 
-	if bSettings.HighLightedUsers.Contains(user) {
+	if (*bSettings).HighLightedUsers.Contains(user) {
 		return false
 	}
 
 	file.UpdateStorage(func() {
-		bSettings.HighLightedUsers.Add(user)
+		(*bSettings).HighLightedUsers.Add(user)
 	})
 
 	return true
@@ -21,17 +21,17 @@ func AddHighlightUser(user int64) bool {
 
 func RemoveHighlightUser(user int64) bool {
 
-	if !bSettings.HighLightedUsers.Contains(user) {
+	if !(*bSettings).HighLightedUsers.Contains(user) {
 		return false
 	}
 
 	file.UpdateStorage(func() {
-		bSettings.HighLightedUsers.Delete(user)
+		(*bSettings).HighLightedUsers.Delete(user)
 	})
 
 	return true
 }
 
 func IsHighlighter(user int64) bool {
-	return bSettings.HighLightedUsers.Contains(user)
+	return (*bSettings).HighLightedUsers.Contains(user)
 }

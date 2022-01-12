@@ -19,6 +19,7 @@ type handler struct {
 	duration  time.Duration
 	ctx       context.Context
 	canceller context.CancelFunc
+	ticker    *time.Ticker
 	Started   bool
 }
 
@@ -67,13 +68,16 @@ func (t *Timer) Start(bot *bot.Bot) {
 
 func (t *Timer) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	for name := range t.timerMap {
-		_, err := t.StopTimer(name)
-		if err != nil {
-			logger.Warnf("中止計時器任務 %s 時出現錯誤: %v", name, err)
-			continue
-		}
+		go func(name string) {
+			_, err := t.StopTimer(name)
+			if err != nil {
+				logger.Warnf("中止計時器任務 %s 時出現錯誤: %v", name, err)
+			}
+		}(name)
 	}
+
 	t.wg.Wait()
 	logger.Info("定時器任務模組已關閉")
 }
@@ -87,6 +91,7 @@ func (t *Timer) StopTimer(name string) (bool, error) {
 			return false, nil
 		}
 
+		timer.ticker.Stop()
 		timer.canceller()
 		<-timer.ctx.Done()
 		timer.Started = false
@@ -107,10 +112,9 @@ func (t *Timer) StartTimer(name string, bot *bot.Bot) (bool, error) {
 		ctx, cancel := context.WithCancel(bgCtx)
 		timer.ctx = ctx
 		timer.canceller = cancel
-
-		ticker := time.NewTicker(timer.duration)
+		timer.ticker = time.NewTicker(timer.duration)
 		t.wg.Add(1)
-		go startTimer(name, ctx, ticker, bot, timer.job, t.wg)
+		go startTimer(name, ctx, timer.ticker, bot, timer.job, t.wg)
 		timer.Started = true
 		return true, nil
 	}

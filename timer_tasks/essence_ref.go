@@ -12,26 +12,26 @@ import (
 )
 
 var (
-	setting = file.DataStorage.Setting
+	setting = &file.DataStorage.Setting
 )
 
 func EssenceTask(bot *bot.Bot) (err error) {
 
-	if setting.LastChecked == 0 {
+	if (*setting).LastChecked == 0 {
 
 		file.UpdateStorage(func() {
-			setting.LastChecked = time.Now().Unix()
+			(*setting).LastChecked = time.Now().Unix()
 		})
 
 	} else {
-		duration := datetime.Duration(setting.LastChecked, time.Now().Unix())
+		duration := datetime.Duration((*setting).LastChecked, time.Now().Unix())
 
 		if duration.Day() < 1 {
 			return
 		}
 
 		file.UpdateStorage(func() {
-			setting.LastChecked = time.Now().Unix()
+			(*setting).LastChecked = time.Now().Unix()
 		})
 
 	}
@@ -84,7 +84,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 }
 
 func getCompareFunc() func(int64) bool {
-	if setting.YearlyCheck {
+	if (*setting).YearlyCheck {
 		return compareYearly
 	} else {
 		return compareMonthly
@@ -104,7 +104,7 @@ func compareMonthly(ts int64) bool {
 }
 
 func tellTime() string {
-	if setting.YearlyCheck {
+	if (*setting).YearlyCheck {
 		return "上年度"
 	} else {
 		return "上个月"

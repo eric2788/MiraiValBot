@@ -63,7 +63,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	//bot.SaveToken()
+	bot.SaveToken()
 
 	// 刷新好友列表，群列表
 	bot.RefreshList()

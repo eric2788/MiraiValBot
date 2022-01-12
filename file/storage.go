@@ -15,7 +15,8 @@ var logger = utils.GetModuleLogger("file.storage")
 
 const StoragePath = "data/valData.json"
 
-var DataStorage *StorageData
+var DataStorage *StorageData = makeWrapper(&defaultStorageData)
+
 var locker sync.Mutex
 
 var defaultStorageData = storageData{
@@ -70,7 +71,7 @@ func LoadStorage() {
 		os.Exit(1)
 	}
 
-	DataStorage = makeWrapper(&defaultStorageData)
+	DataStorage.parse(&defaultStorageData)
 }
 
 var edited = false

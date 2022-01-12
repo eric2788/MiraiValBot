@@ -18,7 +18,7 @@ const Host = "https://api.live.bilibili.com/room/v1/Room/get_info"
 
 var (
 	roomInfoCache = make(map[int64]*RoomInfo)
-	listening     = file.DataStorage.Listening
+	listening     = &file.DataStorage.Listening
 	topic         = func(room int64) string { return fmt.Sprintf("blive:%d", room) }
 )
 
@@ -31,7 +31,7 @@ func StartListen(room int64) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Bilibili.Add(room)
+		(*listening).Bilibili.Add(room)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
@@ -43,12 +43,12 @@ func StartListen(room int64) (bool, error) {
 
 func StopListen(room int64) (bool, error) {
 
-	if !listening.Bilibili.Contains(room) {
+	if !(*listening).Bilibili.Contains(room) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Bilibili.Delete(room)
+		(*listening).Bilibili.Delete(room)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

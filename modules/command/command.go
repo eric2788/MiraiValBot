@@ -43,7 +43,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 		if err != nil {
 			logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
 			errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
-			_ = qq.SendGroupMessage(errorMsg)
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
 			return
 		}
 
@@ -80,10 +80,10 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 			// 發送群組訊息提示
 			hintMessage := qq.CreateReply(msg).Append(message.NewText(responseContent))
-			_ = qq.SendGroupMessage(hintMessage)
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
 		} else if response.Content != "" {
 			m := qq.CreateReply(msg).Append(message.NewText(response.Content))
-			_ = qq.SendGroupMessage(m)
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
 		}
 	})
 

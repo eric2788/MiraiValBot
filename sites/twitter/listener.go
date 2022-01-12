@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	listening = file.DataStorage.Listening
+	listening = &file.DataStorage.Listening
 	userCache = make(map[string]*ExistUserResp)
 	logger    = utils.GetModuleLogger("sites.twitter")
 	topic     = func(user string) string { return fmt.Sprintf("twitter:%s", user) }
@@ -41,7 +41,7 @@ func StartListen(user string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Twitter.Add(user)
+		(*listening).Twitter.Add(user)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
@@ -53,12 +53,12 @@ func StartListen(user string) (bool, error) {
 
 func StopListen(user string) (bool, error) {
 
-	if !listening.Twitter.Contains(user) {
+	if !(*listening).Twitter.Contains(user) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Twitter.Delete(user)
+		(*listening).Twitter.Delete(user)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

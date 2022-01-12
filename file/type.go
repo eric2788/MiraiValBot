@@ -80,23 +80,27 @@ func (s *StorageData) toRealStorageData() *storageData {
 	}
 }
 
-func makeWrapper(s *storageData) *StorageData {
-	return &StorageData{
-		Answers:   s.Answers,
-		Responses: s.Responses,
-		Bilibili: &BilibiliSettings{
-			HighLightedUsers: set.FromInt64Arr(s.Bilibili.HighLightedUsers),
-		},
-		Setting: &Setting{
-			VerboseDelete: s.Setting.VerboseDelete,
-			Verbose:       s.Setting.Verbose,
-			YearlyCheck:   s.Setting.YearlyCheck,
-			LastChecked:   s.Setting.LastChecked,
-		},
-		Listening: &Listening{
-			Bilibili: set.FromInt64Arr(s.Listening.Bilibili),
-			Youtube:  set.FromStrArr(s.Listening.Youtube),
-			Twitter:  set.FromStrArr(s.Listening.Twitter),
-		},
+func (s *StorageData) parse(sd *storageData) {
+	s.Answers = sd.Answers
+	s.Responses = sd.Responses
+	s.Bilibili = &BilibiliSettings{
+		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
 	}
+	s.Setting = &Setting{
+		VerboseDelete: sd.Setting.VerboseDelete,
+		Verbose:       sd.Setting.Verbose,
+		YearlyCheck:   sd.Setting.YearlyCheck,
+		LastChecked:   sd.Setting.LastChecked,
+	}
+	s.Listening = &Listening{
+		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),
+		Youtube:  set.FromStrArr(sd.Listening.Youtube),
+		Twitter:  set.FromStrArr(sd.Listening.Twitter),
+	}
+}
+
+func makeWrapper(sd *storageData) *StorageData {
+	s := &StorageData{}
+	s.parse(sd)
+	return s
 }

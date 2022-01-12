@@ -15,7 +15,7 @@ import (
 var (
 	CustomUrlPattern = regexp.MustCompile("(https?:\\/\\/)?(www\\.)?youtube\\.com\\/c\\/(?P<username>[\\w]+)")
 	ChannelPattern   = regexp.MustCompile("(https?:\\/\\/)?(www\\.)?youtube\\.com\\/(channel|user)\\/(?P<id>[\\w-]+)")
-	listening        = file.DataStorage.Listening
+	listening        = &file.DataStorage.Listening
 	topic            = func(ch string) string { return fmt.Sprintf("ylive:%s", ch) }
 )
 
@@ -50,7 +50,7 @@ func StartListen(channel string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		listening.Youtube.Add(channel)
+		(*listening).Youtube.Add(channel)
 	})
 
 	info, err := bot.GetModule(bc.Tag)
@@ -69,12 +69,12 @@ func StopListen(channel string) (bool, error) {
 		return false, fmt.Errorf("不是一個有效的頻道ID")
 	}
 
-	if !listening.Youtube.Contains(channel) {
+	if !(*listening).Youtube.Contains(channel) {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		listening.Youtube.Delete(channel)
+		(*listening).Youtube.Delete(channel)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

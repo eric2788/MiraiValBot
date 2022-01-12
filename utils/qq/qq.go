@@ -9,6 +9,7 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/redis"
 	"strings"
+	"time"
 )
 
 var ValGroupInfo = &client.GroupInfo{
@@ -45,10 +46,32 @@ func InitValGroupInfo(bot *bot.Bot) {
 		return
 	}
 
-	ginfo.Members = members
+	ginfo.Update(func(info *client.GroupInfo) {
+		info.Members = members
+		info.Uin = file.ApplicationYaml.Val.GroupId
+	})
+
 	ValGroupInfo = ginfo
 
 	logger.Infof("以指定 %s (%d) 为 瓦群。(共 %d 個成員)", ValGroupInfo.Name, ValGroupInfo.Uin, len(ValGroupInfo.Members))
+}
+
+func RefreshGroupInfo() {
+	ValGroupInfo.Update(func(info *client.GroupInfo) {
+		ginfo, err := bot.Instance.GetGroupInfo(file.ApplicationYaml.Val.GroupId)
+		if err != nil {
+			logger.Warnf("刷新群资料时出现错误: %v", err)
+		} else {
+			ValGroupInfo.Name = ginfo.Name
+			ValGroupInfo.GroupCreateTime = ginfo.GroupCreateTime
+			ValGroupInfo.LastMsgSeq = ginfo.LastMsgSeq
+			ValGroupInfo.Code = ginfo.Code
+			ValGroupInfo.GroupLevel = ginfo.GroupLevel
+			ValGroupInfo.Memo = ginfo.Memo
+			ValGroupInfo.MaxMemberCount = ginfo.MaxMemberCount
+			ValGroupInfo.OwnerUin = ginfo.OwnerUin
+		}
+	})
 }
 
 func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
@@ -82,7 +105,18 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 	return content
 }
 
+func RefreshGroupMember() {
+	ValGroupInfo.Update(func(info *client.GroupInfo) {
+		if members, err := bot.Instance.GetGroupMembers(info); err != nil {
+			info.Members = members
+		} else {
+			logger.Warnf("更新群成员列表时出现错误: %v", err)
+		}
+	})
+}
+
 func FindGroupMember(uid int64) *client.GroupMemberInfo {
+	RefreshGroupMember()
 	return ValGroupInfo.FindMember(uid)
 }
 
@@ -130,9 +164,9 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 }
 
 func IsMuted(uid int64) bool {
-	member := FindGroupMember(bot.Instance.Uin)
+	member := FindGroupMember(uid)
 	if member == nil {
 		return false
 	}
-	return member.ShutUpTimestamp > 0
+	return member.ShutUpTimestamp > time.Now().Unix()
 }
