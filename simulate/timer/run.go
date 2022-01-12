@@ -21,6 +21,8 @@ func main() {
 	})
 
 	simulate.RunBasic()
-	simulate.SignalForStop()
+
+	<-time.After(time.Second * 10)
+	bot.Stop()
 
 }

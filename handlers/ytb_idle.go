@@ -9,8 +9,7 @@ import (
 
 func HandleIdle(bot *bot.Bot, info *youtube.LiveInfo) error {
 	msg := message.NewSendingMessage().Append(qq.NewTextf("%s 的油管直播已结束。", info.ChannelName))
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return qq.SendGroupMessage(msg)
 }
 
 func init() {

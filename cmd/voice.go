@@ -26,8 +26,7 @@ func voice(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, message.NewSendingMessage().Append(voiceElement))
-	return nil
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
 }
 
 var voiceCommand = command.NewNode([]string{"voice", "speak", "语音"}, "语音指令", false, voice, "<讯息>")

@@ -14,8 +14,7 @@ func checkRes(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("%s: %s\n", content, res))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func setRes(args []string, source *command.MessageSource) error {
@@ -26,8 +25,7 @@ func setRes(args []string, source *command.MessageSource) error {
 	})
 
 	reply := qq.CreateReply(source.Message).Append(qq.NewTextf("已成功设置 %s 的回应为 %s。", content, res))
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func removeRes(args []string, source *command.MessageSource) error {
@@ -45,8 +43,7 @@ func removeRes(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("移除成功。"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

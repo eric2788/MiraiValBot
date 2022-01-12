@@ -21,8 +21,7 @@ func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg.Append(qq.NewTextfLn("￥ %d", superchat.Price))
 	msg.Append(qq.NewTextf("「%s」", superchat.Message))
 
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return qq.SendGroupMessage(msg)
 }
 
 func init() {

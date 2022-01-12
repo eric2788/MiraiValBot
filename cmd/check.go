@@ -18,16 +18,21 @@ func check(args []string, source *command.MessageSource) error {
 
 			msg.Append(qq.NewTextfLn("UID: %d", member.Uin))
 			msg.Append(qq.NewTextfLn("名称: %s", member.Nickname))
+			if qq.IsMuted(member.Uin) {
+				msg.Append(qq.NewTextfLn("禁言结束时间: %s", datetime.FromSeconds(member.ShutUpTimestamp)))
+			}
 			msg.Append(qq.NewTextfLn("显示名称: %s", member.DisplayName()))
 			msg.Append(qq.NewTextfLn("卡片名称: %s", member.CardName))
 			msg.Append(qq.NewTextfLn("性别: %s", genderName(member.Gender)))
-			msg.Append(qq.NewTextfLn("加入日期: %s", datetime.Format(member.JoinTime)))
+			msg.Append(qq.NewTextfLn("加入日期: %s", datetime.FormatSeconds(member.JoinTime)))
 			msg.Append(qq.NewTextfLn("权限: %s", permissionName(member.Permission)))
-			msg.Append(qq.NewTextfLn("最后发言时间: %s", datetime.Format(member.LastSpeakTime)))
+			msg.Append(qq.NewTextfLn("最后发言时间: %s", datetime.FormatSeconds(member.LastSpeakTime)))
 			msg.Append(qq.NewTextfLn("等级: %d", member.Level))
 			msg.Append(qq.NewTextf("特别头衔: %s", member.SpecialTitle))
 
-			source.Client.SendGroupMessage(source.Message.GroupCode, msg)
+			if err := qq.SendGroupMessage(msg); err != nil {
+				return err
+			}
 		}
 	}
 

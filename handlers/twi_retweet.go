@@ -14,8 +14,7 @@ func HandleReTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 		msg.Append(qq.NewTextfLn("转发推文: "))
 		createTweetMessage(msg, data.RetweetedStatus)
 	}
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return withRisky(msg)
 }
 
 func HandleReTweetWithText(bot *bot.Bot, data *twitter.TweetStreamData) error {
@@ -26,8 +25,7 @@ func HandleReTweetWithText(bot *bot.Bot, data *twitter.TweetStreamData) error {
 		msg.Append(qq.NewTextfLn("转发推文: "))
 		createTweetMessage(msg, data.QuotedStatus)
 	}
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return withRisky(msg)
 }
 
 func init() {

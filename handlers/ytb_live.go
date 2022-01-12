@@ -16,7 +16,7 @@ func HandleLiveEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 
 	if info.Info != nil {
 		msg.Append(qq.NewTextfLn("标题: %s", info.Info.Title))
-		msg.Append(qq.NewTextfLn("开始时间: %s", datetime.Format(info.Info.PublishTime)))
+		msg.Append(qq.NewTextfLn("开始时间: %s", datetime.FormatSeconds(info.Info.PublishTime)))
 		msg.Append(qq.NewTextfLn("直播间: %s", getYTLink(info)))
 
 		if info.Info.Cover != nil {
@@ -33,8 +33,7 @@ func HandleLiveEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 		msg.Append(qq.NewTextf("直播间: %s", getYTLink(info)))
 	}
 
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return withRisky(msg)
 }
 
 func getYTLink(info *youtube.LiveInfo) string {

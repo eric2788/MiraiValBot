@@ -19,12 +19,18 @@ import (
 	// 所有 redis 訂閱處理器
 	_ "github.com/eric2788/MiraiValBot/handlers"
 
+	// 所有指令
+	_ "github.com/eric2788/MiraiValBot/cmd"
+
+	// 所有定時器任務
+	_ "github.com/eric2788/MiraiValBot/timer_tasks"
+
 	// 註冊模組
 	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
 	_ "github.com/eric2788/MiraiValBot/modules/command"
-
-	// 所有指令
-	_ "github.com/eric2788/MiraiValBot/cmd"
+	_ "github.com/eric2788/MiraiValBot/modules/response"
+	_ "github.com/eric2788/MiraiValBot/modules/timer"
+	_ "github.com/eric2788/MiraiValBot/modules/verbose"
 )
 
 func init() {

@@ -19,8 +19,7 @@ func yConvert(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 	reply.Append(qq.NewTextf("该链接的频道URL为: %s", id))
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func yListen(args []string, source *command.MessageSource) error {
@@ -36,8 +35,7 @@ func yListen(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("频道 %s 已启动监听", channelId))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func yTerminate(args []string, source *command.MessageSource) error {
@@ -54,8 +52,7 @@ func yTerminate(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("你尚未开始监听此频道。"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 
 }
 
@@ -63,14 +60,13 @@ func yListening(args []string, source *command.MessageSource) error {
 	listening := file.DataStorage.Listening.Youtube
 
 	reply := qq.CreateReply(source.Message)
-	if len(listening) > 0 {
+	if listening.Size() > 0 {
 		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening))
 	} else {
 		reply.Append(qq.NewTextf("没有监听的房间号"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

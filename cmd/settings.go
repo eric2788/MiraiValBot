@@ -19,8 +19,7 @@ func yearlyCheck(args []string, source *command.MessageSource) error {
 		s = "每月"
 	}
 	reply.Append(qq.NewTextf("已设置群精华消息检查间隔为 %s", s))
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func verbose(args []string, source *command.MessageSource) error {
@@ -29,8 +28,7 @@ func verbose(args []string, source *command.MessageSource) error {
 	})
 	reply := qq.CreateReply(source.Message)
 	reply.Append(qq.NewTextf("成功切换广播状态为 %v", file.DataStorage.Setting.Verbose))
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 
 }
 
@@ -40,8 +38,7 @@ func verboseDelete(args []string, source *command.MessageSource) error {
 	})
 	reply := qq.CreateReply(source.Message)
 	reply.Append(qq.NewTextf("已成功设置显示撤回消息为 %v", file.DataStorage.Setting.VerboseDelete))
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

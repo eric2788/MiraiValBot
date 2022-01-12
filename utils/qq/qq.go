@@ -44,8 +44,8 @@ func InitValGroupInfo(bot *bot.Bot) {
 		logger.Fatalf("獲取群 %d 的成員列表失敗", file.ApplicationYaml.Val.GroupId)
 		return
 	}
-	ginfo.Members = members
 
+	ginfo.Members = members
 	ValGroupInfo = ginfo
 
 	logger.Infof("以指定 %s (%d) 为 瓦群。(共 %d 個成員)", ValGroupInfo.Name, ValGroupInfo.Uin, len(ValGroupInfo.Members))
@@ -127,4 +127,12 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	} else {
 		return nil, nil
 	}
+}
+
+func IsMuted(uid int64) bool {
+	member := FindGroupMember(bot.Instance.Uin)
+	if member == nil {
+		return false
+	}
+	return member.ShutUpTimestamp > 0
 }

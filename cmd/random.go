@@ -14,14 +14,13 @@ func randomMember(args []string, source *command.MessageSource) error {
 
 	if len(members) == 0 {
 		reply := qq.CreateReply(source.Message).Append(message.NewText("群成员列表为空。"))
-		source.Client.SendGroupMessage(source.Message.GroupCode, reply)
+		_ = qq.SendGroupMessage(reply)
 		return nil
 	}
 
 	chosen := members[rand.Intn(len(members))]
 	reply := message.NewSendingMessage().Append(message.NewAt(chosen.Uin))
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func randomEssence(args []string, source *command.MessageSource) error {
@@ -37,7 +36,7 @@ func randomEssence(args []string, source *command.MessageSource) error {
 
 	if len(gpDist) == 0 {
 		reply := qq.CreateReply(source.Message).Append(message.NewText("群精华消息列表为空。"))
-		source.Client.SendGroupMessage(source.Message.GroupCode, reply)
+		_ = qq.SendGroupMessage(reply)
 		return nil
 	}
 
@@ -60,8 +59,7 @@ func randomEssence(args []string, source *command.MessageSource) error {
 		msg.Append(message.NewText("没有群精华消息"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, msg)
-	return nil
+	return qq.SendGroupMessage(msg)
 }
 
 var (

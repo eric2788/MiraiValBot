@@ -16,7 +16,7 @@ func HandleUpcomingEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 	if info.Info != nil {
 
 		msg.Append(qq.NewTextfLn("标题: %s", info.Info.Title))
-		msg.Append(qq.NewTextfLn("预定发布时间: %s", datetime.Format(info.Info.PublishTime)))
+		msg.Append(qq.NewTextfLn("预定发布时间: %s", datetime.FormatSeconds(info.Info.PublishTime)))
 		msg.Append(qq.NewTextfLn("待机: %s", getYTLink(info)))
 
 		if info.Info.Cover != nil {
@@ -33,8 +33,7 @@ func HandleUpcomingEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 		msg.Append(qq.NewTextf("待机: %s", getYTLink(info)))
 	}
 
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return withRisky(msg)
 }
 
 func init() {

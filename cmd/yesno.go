@@ -4,18 +4,16 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/modules/response"
 	"github.com/eric2788/MiraiValBot/utils/qq"
-	"regexp"
 )
-
-var yesNoPattern = regexp.MustCompile("^.+是.+吗[\\?？]*$")
 
 func setYesNo(args []string, source *command.MessageSource) error {
 	question, ans := args[0], args[1] == "true"
 
 	reply := qq.CreateReply(source.Message)
 
-	if !yesNoPattern.MatchString(question) {
+	if !response.YesNoPattern.MatchString(question) {
 		reply.Append(message.NewText("不是一个有效的问题"))
 	} else {
 		file.UpdateStorage(func() {
@@ -24,8 +22,7 @@ func setYesNo(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("已成功设置 %s 的答案为 %v", question, ans))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func removeYesNo(args []string, source *command.MessageSource) error {
@@ -42,8 +39,7 @@ func removeYesNo(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("已成功移除 %s 的答案", question))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func checkYesNo(args []string, source *command.MessageSource) error {
@@ -54,8 +50,7 @@ func checkYesNo(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("%s = %v\n", question, ans))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

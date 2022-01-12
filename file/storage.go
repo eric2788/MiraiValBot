@@ -2,10 +2,13 @@ package file
 
 import (
 	"encoding/json"
+	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/eric2788/MiraiValBot/modules/timer"
 	"io/fs"
 	"os"
 	"sync"
+	"time"
 )
 
 var logger = utils.GetModuleLogger("file.storage")
@@ -99,4 +102,11 @@ func SaveStorage() {
 	}
 	logger.Infof("數據內容已成功更新。")
 	edited = false
+}
+
+func init() {
+	timer.RegisterTimer("save.storage", time.Minute, func(bot *bot.Bot) (err error) {
+		SaveStorage()
+		return
+	})
 }

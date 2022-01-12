@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
@@ -35,14 +36,14 @@ func (c *command) HookEvent(bot *bot.Bot) {
 		admin := member.Permission >= client.Administrator
 		response, err := InvokeCommand(content, admin, source)
 
-		if e, ok := recover().(error); ok {
-			err = e
+		if e := recover(); e != nil {
+			err = fmt.Errorf(fmt.Sprintf("%v", e))
 		}
 
 		if err != nil {
 			logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
 			errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
-			ct.SendGroupMessage(msg.GroupCode, errorMsg)
+			_ = qq.SendGroupMessage(errorMsg)
 			return
 		}
 
@@ -65,11 +66,13 @@ func (c *command) HookEvent(bot *bot.Bot) {
 				helpMessage := message.NewSendingMessage().Append(message.NewText(response.Content))
 
 				if msg.Sender.IsFriend {
-					ct.SendPrivateMessage(msg.Sender.Uin, helpMessage)
-					logger.Infof("已向 %s (%d) 發送指令幫助的私人訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					if err = qq.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
+						logger.Infof("已向 %s (%d) 發送指令幫助的私人訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					}
 				} else {
-					ct.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage)
-					logger.Infof("已向 %s (%d) 發送指令幫助的臨時會話訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					if err = qq.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage); err == nil {
+						logger.Infof("已向 %s (%d) 發送指令幫助的臨時會話訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					}
 				}
 				responseContent = "未知参数，已私聊你指令列表。"
 
@@ -77,10 +80,10 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 			// 發送群組訊息提示
 			hintMessage := qq.CreateReply(msg).Append(message.NewText(responseContent))
-			ct.SendGroupMessage(msg.GroupCode, hintMessage)
+			_ = qq.SendGroupMessage(hintMessage)
 		} else if response.Content != "" {
 			m := qq.CreateReply(msg).Append(message.NewText(response.Content))
-			ct.SendGroupMessage(msg.GroupCode, m)
+			_ = qq.SendGroupMessage(m)
 		}
 	})
 

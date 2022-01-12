@@ -22,8 +22,7 @@ func tListen(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("该用户 %s 已启动监听", screenId))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 
 }
 
@@ -41,22 +40,20 @@ func tTerminate(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("你尚未开始监听此推特用户。"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func tListening(args []string, source *command.MessageSource) error {
 	listening := file.DataStorage.Listening.Twitter
 	reply := qq.CreateReply(source.Message)
 
-	if len(listening) > 0 {
+	if listening.Size() > 0 {
 		reply.Append(qq.NewTextf("正在监听的推特用户: %v", listening))
 	} else {
 		reply.Append(message.NewText("没有在监听的推特用户"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

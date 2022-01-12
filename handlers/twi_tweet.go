@@ -3,8 +3,10 @@ package handlers
 import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
+	"strings"
 )
 
 func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
@@ -13,8 +15,72 @@ func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NewTextfLn("%s 发布了一则新贴文", data.User.Name))
 	createTweetMessage(msg, data)
 
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return withRisky(msg)
+}
+
+func addEntitiesTweetDiscord(msg *discordgo.MessageEmbed, data *twitter.TweetStreamData) {
+	if msg.Fields == nil {
+		msg.Fields = make([]*discordgo.MessageEmbedField, 0)
+	}
+	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
+		urls := make([]string, 0)
+		for _, url := range data.Entities.Urls {
+			urls = append(urls, url.ExpandedUrl)
+		}
+		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+			Name:  "链接",
+			Value: strings.Join(urls, "\n"),
+		})
+	}
+
+	if data.ExtendedEntities.Media != nil && len(*data.ExtendedEntities.Media) > 0 {
+		if len(*data.ExtendedEntities.Media) == 1 {
+			m := (*data.ExtendedEntities.Media)[0]
+			switch m.Type {
+			case "photo":
+				msg.Image = &discordgo.MessageEmbedImage{
+					URL: m.MediaUrlHttps,
+				}
+			case "video":
+				for _, variant := range m.VideoInfo.Variants {
+					if variant.ContentType == "video/mp4" {
+						msg.Video = &discordgo.MessageEmbedVideo{
+							URL: variant.Url,
+						}
+						break
+					}
+				}
+			}
+		} else {
+			videoUrls := make([]string, 0)
+			photoUrls := make([]string, 0)
+			for _, m := range *data.ExtendedEntities.Media {
+				switch m.Type {
+				case "photo":
+					photoUrls = append(photoUrls, m.MediaUrlHttps)
+				case "video":
+					for _, variant := range m.VideoInfo.Variants {
+						if variant.ContentType == "video/mp4" {
+							videoUrls = append(videoUrls, variant.Url)
+							break
+						}
+					}
+				}
+			}
+			if len(videoUrls) > 0 {
+				msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+					Name:  "视频",
+					Value: strings.Join(videoUrls, "\n"),
+				})
+			}
+			if len(photoUrls) > 0 {
+				msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+					Name:  "图片",
+					Value: strings.Join(photoUrls, "\n"),
+				})
+			}
+		}
+	}
 }
 
 func createTweetMessage(msg *message.SendingMessage, data *twitter.TweetStreamData) {

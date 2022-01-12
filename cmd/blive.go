@@ -24,9 +24,7 @@ func bCare(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("高亮用户 %d 已存在", uid))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bUnCare(args []string, source *command.MessageSource) error {
@@ -44,23 +42,20 @@ func bUnCare(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("高亮用户 %d 不存在", uid))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bCaring(args []string, source *command.MessageSource) error {
 
 	reply := qq.CreateReply(source.Message)
 	users := file.DataStorage.Bilibili.HighLightedUsers
-	if len(users) > 0 {
+	if users.Size() > 0 {
 		reply.Append(qq.NewTextf("目前的高亮用户列表: %v", users))
 	} else {
 		reply.Append(message.NewText("暂无高亮用户"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bClearInfo(args []string, source *command.MessageSource) error {
@@ -88,8 +83,7 @@ func bClearInfo(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("房间 %d 没有资讯快取。", room))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bListen(args []string, source *command.MessageSource) error {
@@ -111,8 +105,7 @@ func bListen(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("该直播间(%d)已经启动监听。", room))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bTerminate(args []string, source *command.MessageSource) error {
@@ -135,21 +128,19 @@ func bTerminate(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("你尚未开始监听此直播房间。"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 func bListening(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 	listening := file.DataStorage.Listening.Bilibili
-	if len(listening) > 0 {
+	if listening.Size() > 0 {
 		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening))
 	} else {
 		reply.Append(message.NewText("没有正在监听的房间号"))
 	}
 
-	source.Client.SendGroupMessage(source.Message.GroupCode, reply)
-	return nil
+	return qq.SendGroupMessage(reply)
 }
 
 var (

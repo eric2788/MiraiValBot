@@ -1,13 +1,18 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/bwmarrin/discordgo"
+	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
 func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
+
+	handleLiveDiscord(data)
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 正在B站直播", data.LiveInfo.Name))
@@ -22,8 +27,32 @@ func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
 			msg.Append(imgElement)
 		}
 	}
-	bot.SendGroupMessage(qq.ValGroupInfo.Uin, msg)
-	return nil
+	return qq.SendGroupMessage(msg)
+}
+
+func handleLiveDiscord(data *bilibili.LiveData) {
+
+	discordMessage := &discordgo.MessageEmbed{
+		Description: fmt.Sprintf("[%s](%s) 正在B站直播", data.LiveInfo.Name, biliSpaceLink(data.LiveInfo.UID)),
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "标题",
+				Value: data.LiveInfo.Title,
+			},
+			{
+				Name:  "直播间",
+				Value: biliRoomLink(data.LiveInfo.RoomId),
+			},
+		},
+	}
+
+	if data.LiveInfo.Cover != nil {
+		discordMessage.Image = &discordgo.MessageEmbedImage{
+			URL: *data.LiveInfo.Cover,
+		}
+	}
+
+	go discord.SendNewsEmbed(discordMessage)
 }
 
 func init() {

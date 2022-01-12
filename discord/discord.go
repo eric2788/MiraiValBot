@@ -41,18 +41,12 @@ func Log(msg string, arg ...interface{}) {
 	}
 }
 
-func RunSafe(runner func(*discordgo.Session)) {
+func RunSafe(runner func(*discordgo.Session) error) {
 	if client == nil {
 		logger.Warnf("Discord 尚未啟動，無法進行操作")
 		return
 	}
-	runner(client)
-}
-
-func GoRunSafe(runner func(*discordgo.Session)) {
-	if client == nil {
-		logger.Warnf("Discord 尚未啟動，無法進行操作")
-		return
+	if err := runner(client); err != nil {
+		logger.Warnf("Discord 發送訊息時出現錯誤: %v", err)
 	}
-	go runner(client)
 }
