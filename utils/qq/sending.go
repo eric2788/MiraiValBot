@@ -61,7 +61,7 @@ func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) 
 
 	if result == nil || result.Id == -1 {
 		err = &MessageSendError{
-			Msg:    "群消息发送失败，帐号可能被风控",
+			Msg:    "群消息发送失败，该消息可能被风控",
 			Reason: Risked,
 		}
 	}

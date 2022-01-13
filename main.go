@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/config"
@@ -38,9 +39,15 @@ func init() {
 	utils.WriteLogToFS()
 }
 
+var cliDebug = flag.Bool("debug", false, "enable debug logging level")
+
 func main() {
 
-	simulate.EnableDebug()
+	flag.Parse()
+
+	if *cliDebug {
+		simulate.EnableDebug()
+	}
 
 	file.GenerateConfig()
 	file.GenerateDevice()

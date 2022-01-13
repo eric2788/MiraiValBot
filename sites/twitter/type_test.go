@@ -7,46 +7,6 @@ import (
 	"testing"
 )
 
-func isA() bool {
-	fmt.Println("is A")
-	return false
-}
-
-func isB() bool {
-	fmt.Println("is B")
-	return false
-}
-
-func isC() bool {
-	fmt.Println("is C")
-	return false
-}
-
-func isD() bool {
-	fmt.Println("is D")
-	return true
-}
-
-func TestSwitch(t *testing.T) {
-	switch {
-	case isB():
-		fmt.Println("B")
-		return
-	case isA():
-		fmt.Println("A")
-		return
-	case isC():
-		fmt.Println("C")
-		return
-	case isD():
-		fmt.Println("D")
-		return
-	default:
-		fmt.Println("Nil")
-		return
-	}
-}
-
 type TestPtr struct {
 	A *struct {
 		B int16

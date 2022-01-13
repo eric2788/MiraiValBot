@@ -17,7 +17,7 @@ func (m *messageHandler) HandleLiveData(bot *bot.Bot, data interface{}, handle i
 	}
 
 	if status == liveData.Status {
-		logger.Infof("%s 的油管狀態與上一次相同，已略過。", liveData.ChannelId)
+		logger.Debugf("%s 的油管狀態與上一次相同，已略過。", liveData.ChannelId)
 		return nil
 	}
 
