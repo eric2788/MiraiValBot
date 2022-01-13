@@ -14,14 +14,14 @@ func HandleIdle(bot *bot.Bot, info *youtube.LiveInfo) error {
 
 	go discord.SendNewsEmbed(&discordgo.MessageEmbed{
 		Author: &discordgo.MessageEmbedAuthor{
-			URL:  youtubeChannelLink(info.ChannelId),
+			URL:  youtube.GetChannelLink(info.ChannelId),
 			Name: info.ChannelName,
 		},
 		Description: fmt.Sprintf("%s 的油管直播已结束。", info.ChannelName),
 	})
 
 	msg := message.NewSendingMessage().Append(qq.NewTextf("%s 的油管直播已结束。", info.ChannelName))
-	return withRisky(msg)
+	return qq.SendGroupMessage(msg) // 一句，无需管理风控
 }
 
 func init() {

@@ -7,9 +7,8 @@ import (
 	rdb "github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/utils/set"
 	"github.com/go-redis/redis/v8"
-	"runtime/debug"
-
 	"math/rand"
+	"runtime/debug"
 	"time"
 )
 
@@ -108,6 +107,14 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 		logger.Infof("%s 的訂閱已停止。", topic)
 		close()
 	}()
+	defer func() {
+		if err := recover(); err != nil {
+			go func() {
+				logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v, from %v", topic, err, debug.Stack())
+				ifError <- fmt.Errorf("%v", err)
+			}()
+		}
+	}()
 	channel := make(chan *redis.Message)
 	go receivePubsub(ps, ctx, channel, ifError)
 	for {
@@ -117,12 +124,6 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 			return
 		case msg := <-channel:
 			handle(msg)
-			if err := recover(); err != nil {
-				go func() {
-					logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v, from %v", topic, err, debug.Stack())
-					ifError <- fmt.Errorf("%v", err)
-				}()
-			}
 		default:
 			break
 		}

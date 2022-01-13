@@ -127,10 +127,10 @@ func SendGroupTempMessage(gp int64, uid int64, msg *message.SendingMessage) (err
 }
 
 // SendRiskyMessage 发送风控几率大的消息並实行重试机制
-func SendRiskyMessage(maxTry int, seconds time.Duration, f func() error) {
+func SendRiskyMessage(maxTry int, seconds time.Duration, f func(currentTry int) error) {
 	try, stillRisky := 0, true
 	for try < maxTry {
-		if err := f(); err != nil {
+		if err := f(try); err != nil {
 			if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
 				logger.Warnf("发送消息出现风控，现正等候 %d 秒后重新发送", seconds)
 				<-time.After(time.Second * seconds)

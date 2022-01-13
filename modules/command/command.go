@@ -33,18 +33,25 @@ func (c *command) HookEvent(bot *bot.Bot) {
 			return
 		}
 
+		// avoid panic from InvokeCommand
+		defer func() {
+
+			if e := recover(); e != nil {
+				err := fmt.Errorf(fmt.Sprintf("%v", e))
+				logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
+				errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
+				_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
+				return
+			}
+
+		}()
+
 		admin := member.Permission >= client.Administrator
 		response, err := InvokeCommand(content, admin, source)
 
-		if e := recover(); e != nil {
-			err = fmt.Errorf(fmt.Sprintf("%v", e))
-		}
-
 		if err != nil {
-			logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
-			errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
-			_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
-			return
+			// throw as panic
+			panic(err.Error())
 		}
 
 		logger.Debugf("%+v", *response)

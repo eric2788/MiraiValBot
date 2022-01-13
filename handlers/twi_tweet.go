@@ -8,7 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
-	"strings"
+	"time"
 )
 
 func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
@@ -18,152 +18,36 @@ func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "内容",
-				Value: data.Text,
+				Value: twitter.TextWithoutTCLink(data.Text),
 			},
 		},
 	}
-	addEntitiesTweetDiscord(discordMessage, data)
+	twitter.AddEntitiesByDiscord(discordMessage, data)
 	go discord.SendNewsEmbed(discordMessage)
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 发布了一则新贴文", data.User.Name))
-	createTweetMessage(msg, data)
-
-	return withRisky(msg)
+	return tweetSendQQRisky(msg, data)
 }
 
-func tweetUserLink(screen string) string {
-	return fmt.Sprintf("https://twitter.com/%s", screen)
-}
-
-func tweetStatusLink(screen, status string) string {
-	return fmt.Sprintf("https://twitter.com/%s/status/%s", screen, status)
-}
-
-func addEntitiesTweetDiscord(msg *discordgo.MessageEmbed, data *twitter.TweetStreamData) {
-	msg.Author = &discordgo.MessageEmbedAuthor{
-		Name:    data.User.Name,
-		URL:     tweetUserLink(data.User.ScreenName),
-		IconURL: data.User.ProfileImageUrlHttps,
-	}
-	if msg.Fields == nil {
-		msg.Fields = make([]*discordgo.MessageEmbedField, 0)
-	}
-	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
-		urls := make([]string, 0)
-		for _, url := range data.Entities.Urls {
-			urls = append(urls, url.ExpandedUrl)
+func tweetSendQQRisky(msg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
+	go qq.SendRiskyMessage(5, time.Second*10, func(try int) error {
+		shows := []bool{
+			true, // 視頻
+			true, // 圖片
+			true, // 鏈接
+			true, // 內文
 		}
-		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
-			Name:  "链接",
-			Value: strings.Join(urls, "\n"),
-		})
-	}
 
-	if data.ExtendedEntities.Media != nil && len(*data.ExtendedEntities.Media) > 0 {
-		if len(*data.ExtendedEntities.Media) == 1 {
-			m := (*data.ExtendedEntities.Media)[0]
-			switch m.Type {
-			case "photo":
-				msg.Image = &discordgo.MessageEmbedImage{
-					URL: m.MediaUrlHttps,
-				}
-			case "video":
-				for _, variant := range m.VideoInfo.Variants {
-					if variant.ContentType == "video/mp4" {
-						msg.Video = &discordgo.MessageEmbedVideo{
-							URL: variant.Url,
-						}
-						break
-					}
-				}
-			}
-		} else {
-			videoUrls := make([]string, 0)
-			photoUrls := make([]string, 0)
-			for _, m := range *data.ExtendedEntities.Media {
-				switch m.Type {
-				case "photo":
-					photoUrls = append(photoUrls, m.MediaUrlHttps)
-				case "video":
-					for _, variant := range m.VideoInfo.Variants {
-						if variant.ContentType == "video/mp4" {
-							videoUrls = append(videoUrls, variant.Url)
-							break
-						}
-					}
-				}
-			}
-			if len(videoUrls) > 0 {
-				msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
-					Name:  "视频",
-					Value: strings.Join(videoUrls, "\n"),
-				})
-			}
-			if len(photoUrls) > 0 {
-				msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
-					Name:  "图片",
-					Value: strings.Join(photoUrls, "\n"),
-				})
+		if try > 0 {
+			for i := 0; i < try-1; i++ {
+				shows[i] = false
 			}
 		}
-	}
-}
-
-func createTweetMessage(msg *message.SendingMessage, data *twitter.TweetStreamData) {
-	// 内文
-	msg.Append(qq.NewTextLn(data.Text))
-	// 連結
-	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
-		msg.Append(qq.NewTextLn("链接: "))
-		for _, url := range data.Entities.Urls {
-			msg.Append(qq.NewTextfLn("- %s", url.ExpandedUrl))
-		}
-	}
-	// 媒體
-	if data.ExtendedEntities != nil && data.ExtendedEntities.Media != nil {
-		media := *data.ExtendedEntities.Media
-		for _, m := range media {
-			switch m.Type {
-			// 圖片
-			case "photo":
-				img, err := qq.NewImageByUrl(m.MediaUrlHttps)
-				if err != nil {
-					logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
-				} else {
-					msg.Append(img)
-				}
-			// 視頻
-			case "video":
-				videoInfo := m.VideoInfo
-				success := false
-				for _, variant := range videoInfo.Variants {
-					if variant.ContentType != "video/mp4" {
-						continue
-					}
-					video, err := qq.NewVideoByUrl(variant.Url, m.MediaUrlHttps)
-					if err != nil {
-						logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
-						continue
-					}
-					msg.Append(video)
-					success = true
-					break
-				}
-				if !success {
-					logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
-					img, err := qq.NewImageByUrl(m.MediaUrlHttps)
-					if err != nil {
-						logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
-					} else {
-						msg.Append(img)
-					}
-				}
-			default:
-				logger.Warnf("未知的媒體類型: %s", m.Type)
-			}
-		}
-	}
+		msg := twitter.CreateMessage(msg, data, shows...)
+		return qq.SendGroupMessage(msg)
+	})
+	return
 }
 
 func init() {

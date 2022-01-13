@@ -17,8 +17,10 @@ func HandleReTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 分享了一则推文", data.User.Name))
 	if data.RetweetedStatus != nil {
-		msg.Append(qq.NewTextfLn("转发推文: "))
-		createTweetMessage(msg, data.RetweetedStatus)
+		msg.Append(qq.NewTextLn("转发推文: "))
+		return tweetSendQQRisky(msg, data.RetweetedStatus)
+	} else {
+		msg.Append(qq.NewTextLn("[获取转发推文失败]"))
 	}
 
 	return withRisky(msg)
@@ -34,7 +36,7 @@ func handleRetweetDiscord(data *twitter.TweetStreamData, withText bool) {
 	if withText {
 		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
 			Name:  "附文",
-			Value: data.Text,
+			Value: twitter.TextWithoutTCLink(data.Text),
 		})
 	}
 
@@ -44,7 +46,7 @@ func handleRetweetDiscord(data *twitter.TweetStreamData, withText bool) {
 		retweetedDiscordMessage := &discordgo.MessageEmbed{
 			Description: data.Text,
 		}
-		addEntitiesTweetDiscord(retweetedDiscordMessage, data.RetweetedStatus)
+		twitter.AddEntitiesByDiscord(retweetedDiscordMessage, data.RetweetedStatus)
 		discord.SendNewsEmbed(retweetedDiscordMessage)
 	}
 
@@ -56,10 +58,12 @@ func HandleReTweetWithText(bot *bot.Bot, data *twitter.TweetStreamData) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 转发了一则推文", data.User.Name))
-	msg.Append(qq.NewTextfLn("附文: %s", data.Text))
+	msg.Append(qq.NewTextfLn("附文: %s", twitter.TextWithoutTCLink(data.Text)))
 	if data.QuotedStatus != nil {
-		msg.Append(qq.NewTextfLn("转发推文: "))
-		createTweetMessage(msg, data.QuotedStatus)
+		msg.Append(qq.NewTextLn("转发推文: "))
+		return tweetSendQQRisky(msg, data.QuotedStatus)
+	} else {
+		msg.Append(qq.NewTextLn("[获取转发推文失败]"))
 	}
 	return withRisky(msg)
 }
