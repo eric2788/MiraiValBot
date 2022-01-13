@@ -39,6 +39,11 @@ func tweetSendQQRisky(msg *message.SendingMessage, data *twitter.TweetStreamData
 			true, // 內文
 		}
 
+		/*
+			风控一次，没有视频
+			风控两次，没有图片
+			风控三次，没有链接
+		*/
 		if try > 0 {
 			for i := 0; i < try-1; i++ {
 				shows[i] = false

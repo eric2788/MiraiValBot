@@ -15,12 +15,12 @@ func HandleLiveEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 	dm := youtube.CreateDiscordMessage(dmDesc, info)
 	go discord.SendNewsEmbed(dm)
 
-	return youtubeSendQQRisky(info, fmt.Sprintf("%s 正在油管直播", info.ChannelName), "标题", "直播间", "开始时间")
+	return youtubeSendQQRisky(info, fmt.Sprintf("%s 正在油管直播", info.ChannelName))
 }
 
 func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (err error) {
 
-	titles := []string{"标题", "直播间", "开始时间"}
+	titles := []string{"标题", "开始时间", "直播间"}
 
 	for i, block := range blocks {
 		titles[i] = block
