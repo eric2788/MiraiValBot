@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/file"
 	rdb "github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/utils/set"
 	"github.com/go-redis/redis/v8"
@@ -115,7 +116,8 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 			}()
 		}
 	}()
-	channel := make(chan *redis.Message)
+	size := file.ApplicationYaml.Redis.Buffer // 每次最大接收数量 (buffer)
+	channel := make(chan *redis.Message, int(size))
 	go receivePubsub(ps, ctx, channel, ifError)
 	for {
 		select {

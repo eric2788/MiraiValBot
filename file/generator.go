@@ -29,6 +29,7 @@ type RedisConfig struct {
 	Port     int    `yaml:"port"`
 	Database int    `yaml:"database"`
 	Password string `yaml:"password"`
+	Buffer   uint16 `yaml:"buffer"`
 }
 
 type DiscordConfig struct {
@@ -52,6 +53,7 @@ var defaultConfig = Configuration{
 		Port:     6379,
 		Database: 1,
 		Password: "",
+		Buffer:   1024,
 	},
 }
 
