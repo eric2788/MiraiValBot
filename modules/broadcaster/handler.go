@@ -86,7 +86,7 @@ func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
 func BuildHandle(logger *logrus.Entry, handler BroadcastHandler) *BroadCastHandle {
 	return &BroadCastHandle{
 		logger:     logger,
-		exception:  set.StringSet{},
+		exception:  *set.NewString(),
 		handlerMap: make(map[string]interface{}),
 		handler:    handler,
 	}

@@ -25,6 +25,9 @@ func (m *MessageSendError) Error() string {
 }
 
 func SendGroupMessage(msg *message.SendingMessage) error {
+	if ValGroupInfo == nil {
+		return fmt.Errorf("群资料尚未加载。")
+	}
 	return SendGroupMessageByGroup(ValGroupInfo.Uin, msg)
 }
 

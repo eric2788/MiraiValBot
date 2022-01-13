@@ -27,7 +27,7 @@ func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
 			msg.Append(imgElement)
 		}
 	}
-	return qq.SendGroupMessage(msg)
+	return withRisky(msg)
 }
 
 func handleLiveDiscord(data *bilibili.LiveData) {

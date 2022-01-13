@@ -61,7 +61,7 @@ func yListening(args []string, source *command.MessageSource) error {
 
 	reply := qq.CreateReply(source.Message)
 	if listening.Size() > 0 {
-		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening))
+		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening.ToArr()))
 	} else {
 		reply.Append(qq.NewTextf("没有监听的房间号"))
 	}

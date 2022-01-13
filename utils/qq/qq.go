@@ -13,6 +13,7 @@ import (
 )
 
 var ValGroupInfo = &client.GroupInfo{
+	Uin:     file.ApplicationYaml.Val.GroupId,
 	Members: []*client.GroupMemberInfo{},
 }
 

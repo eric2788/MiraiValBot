@@ -50,7 +50,7 @@ func bCaring(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 	users := file.DataStorage.Bilibili.HighLightedUsers
 	if users.Size() > 0 {
-		reply.Append(qq.NewTextf("目前的高亮用户列表: %v", users))
+		reply.Append(qq.NewTextf("目前的高亮用户列表: %v", users.ToArr()))
 	} else {
 		reply.Append(message.NewText("暂无高亮用户"))
 	}
@@ -135,7 +135,7 @@ func bListening(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 	listening := file.DataStorage.Listening.Bilibili
 	if listening.Size() > 0 {
-		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening))
+		reply.Append(qq.NewTextf("正在监听的房间号: %v", listening.ToArr()))
 	} else {
 		reply.Append(message.NewText("没有正在监听的房间号"))
 	}

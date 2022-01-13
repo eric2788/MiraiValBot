@@ -48,7 +48,7 @@ func tListening(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 
 	if listening.Size() > 0 {
-		reply.Append(qq.NewTextf("正在监听的推特用户: %v", listening))
+		reply.Append(qq.NewTextf("正在监听的推特用户: %v", listening.ToArr()))
 	} else {
 		reply.Append(message.NewText("没有在监听的推特用户"))
 	}

@@ -30,7 +30,7 @@ func HandleEnterRoom(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextf("噔噔咚！你所关注的用户 %s 进入了 %s 的直播间。", uname, data.LiveInfo.Name))
 
-	return qq.SendGroupMessage(msg)
+	return withRisky(msg)
 }
 
 func init() {

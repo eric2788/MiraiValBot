@@ -21,7 +21,7 @@ func HandleIdle(bot *bot.Bot, info *youtube.LiveInfo) error {
 	})
 
 	msg := message.NewSendingMessage().Append(qq.NewTextf("%s 的油管直播已结束。", info.ChannelName))
-	return qq.SendGroupMessage(msg)
+	return withRisky(msg)
 }
 
 func init() {
