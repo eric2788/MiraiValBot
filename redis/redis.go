@@ -13,6 +13,12 @@ import (
 var rdb *rgo.Client
 var ctx = context.Background()
 
+const (
+	Permanent   = time.Hour * 86400
+	ShortMoment = time.Minute * 10
+	OneDay      = time.Hour * 24
+)
+
 func Init() {
 	redisConfig := file.ApplicationYaml.Redis
 	host := fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port)
@@ -38,11 +44,31 @@ func Store(key string, arg interface{}) error {
 	if err != nil {
 		return err
 	}
-	return StoreBytes(key, buffer.Bytes())
+	return StoreBytes(key, buffer.Bytes(), Permanent)
 }
 
-func StoreBytes(key string, data []byte) error {
-	return rdb.Set(ctx, key, data, time.Hour*86400).Err()
+func StoreTemp(key string, arg interface{}) error {
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+	err := enc.Encode(arg)
+	if err != nil {
+		return err
+	}
+	return StoreBytes(key, buffer.Bytes(), ShortMoment)
+}
+
+func StoreTimely(key string, arg interface{}, duration time.Duration) error {
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+	err := enc.Encode(arg)
+	if err != nil {
+		return err
+	}
+	return StoreBytes(key, buffer.Bytes(), duration)
+}
+
+func StoreBytes(key string, data []byte, duration time.Duration) error {
+	return rdb.Set(ctx, key, data, duration).Err()
 }
 
 func GetBytes(key string) ([]byte, bool, error) {

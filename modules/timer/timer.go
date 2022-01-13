@@ -71,13 +71,14 @@ func (t *Timer) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 
 	for name := range t.timerMap {
 		go func(name string) {
+			logger.Debugf("正在中止計時器任務 %s ...", name)
 			_, err := t.StopTimer(name)
 			if err != nil {
 				logger.Warnf("中止計時器任務 %s 時出現錯誤: %v", name, err)
 			}
 		}(name)
 	}
-
+	logger.Debugf("正在等待所有計時器任務關閉...")
 	t.wg.Wait()
 	logger.Info("定時器任務模組已關閉")
 }
@@ -88,13 +89,12 @@ func (t *Timer) StopTimer(name string) (bool, error) {
 	} else {
 
 		if !timer.Started {
+			logger.Debugf("計時器任務 %s 未開始，停止失敗。", name)
 			return false, nil
 		}
 
 		timer.ticker.Stop()
 		timer.canceller()
-		<-timer.ctx.Done()
-		timer.Started = false
 		return true, nil
 	}
 }
@@ -114,7 +114,12 @@ func (t *Timer) StartTimer(name string, bot *bot.Bot) (bool, error) {
 		timer.canceller = cancel
 		timer.ticker = time.NewTicker(timer.duration)
 		t.wg.Add(1)
-		go startTimer(name, ctx, timer.ticker, bot, timer.job, t.wg)
+		logger.Debugf("wg added 1")
+		go startTimer(name, ctx, timer.ticker, bot, timer.job, func() {
+			t.wg.Done()
+			logger.Debugf("wg removed 1")
+			timer.Started = false
+		})
 		timer.Started = true
 		return true, nil
 	}

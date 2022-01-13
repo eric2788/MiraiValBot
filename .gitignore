@@ -3,3 +3,4 @@ application.yaml
 device.json
 /data/
 /logs/
+session.token

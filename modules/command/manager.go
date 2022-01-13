@@ -87,6 +87,9 @@ func InvokeCommand(content string, admin bool, source *MessageSource) (*Response
 	cmd, args := commands[0], commands[1:]
 	for _, node := range commandTree {
 		labels := append(node.Alias, node.Command)
+
+		logger.Debugf("指令对比: %s vs %v", cmd, labels)
+
 		if array.IndexOfString(labels, cmd) != -1 {
 			return invokeCommandInternal(node, admin, []string{}, args, source)
 		}
@@ -117,6 +120,7 @@ func invokeCommandInternal(node Node, admin bool, parents []string, args []strin
 			cmd, args := args[0], args[1:]
 			for _, subNode := range node.ChildNodes {
 				labels := append(subNode.Alias, subNode.Command)
+				logger.Debugf("指令对比: %s vs %v, 参数: %v", cmd, labels, args)
 				if array.IndexOfString(labels, cmd) != -1 {
 					return invokeCommandInternal(subNode, admin, parents, args, source)
 				}

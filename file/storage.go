@@ -39,6 +39,9 @@ var defaultStorageData = storageData{
 }
 
 func LoadStorage() {
+	locker.Lock()
+	defer locker.Unlock()
+
 	err := os.MkdirAll("data", fs.ModePerm)
 
 	if err != nil {
@@ -90,7 +93,7 @@ func SaveStorage() {
 		return
 	}
 	locker.Lock()
-	defer locker.Lock()
+	defer locker.Unlock()
 	content, err := json.Marshal(DataStorage.toRealStorageData())
 	if err != nil {
 		logger.Warnf("讀取最新數據內容時出現錯誤: %v\n", err)

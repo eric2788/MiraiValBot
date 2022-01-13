@@ -13,12 +13,14 @@ import (
 
 func main() {
 
-	timer.RegisterTimer("A", time.Minute, func(bot *bot.Bot) error {
+	simulate.EnableDebug()
+
+	timer.RegisterTimer("A", time.Second*5, func(bot *bot.Bot) error {
 		fmt.Println("A for 5 seconds")
 		return nil
 	})
 
-	timer.RegisterTimer("B", time.Minute, func(bot *bot.Bot) error {
+	timer.RegisterTimer("B", time.Second*3, func(bot *bot.Bot) error {
 		fmt.Println("B for 3 seconds")
 		return nil
 	})

@@ -70,7 +70,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 		msg = message.NewSendingMessage()
 		msg.Append(qq.NewTextfLn("%s 设置了一则由 %s 所发送的消息为群精华消息: ", essence.AddDigestNick, essence.SenderNick))
 		essenceMsg, msgErr := qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.MessageID))
-		if msgErr != nil {
+		if msgErr != nil || essenceMsg == nil {
 			msg.Append(qq.NewTextf("获取消息失败: %v", msgErr))
 		} else {
 			for _, element := range essenceMsg.Elements {

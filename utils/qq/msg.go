@@ -32,7 +32,7 @@ func NewTts(text string) (*message.GroupVoiceElement, error) {
 
 func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, err error) {
 
-	key := toGroupKey(gp, fmt.Sprintf("tts:%x", md5.Sum([]byte(text))))
+	key := GroupKey(gp, fmt.Sprintf("tts:%x", md5.Sum([]byte(text))))
 
 	var groupVoiceElement = &message.GroupVoiceElement{}
 
@@ -67,7 +67,7 @@ func getTTS(text string) (data []byte, err error) {
 	}
 	data, err = bot.Instance.GetTts(text)
 	if err == nil {
-		redisError := redis.StoreBytes(key, data)
+		redisError := redis.StoreBytes(key, data, redis.Permanent)
 		if redisError != nil {
 			logger.Warnf("Redis 儲存 TTS 時出現錯誤: %v", redisError)
 		}

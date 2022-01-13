@@ -108,9 +108,9 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 func RefreshGroupMember() {
 	ValGroupInfo.Update(func(info *client.GroupInfo) {
 		if members, err := bot.Instance.GetGroupMembers(info); err != nil {
-			info.Members = members
-		} else {
 			logger.Warnf("更新群成员列表时出现错误: %v", err)
+		} else {
+			info.Members = members
 		}
 	})
 }
@@ -130,12 +130,12 @@ func FindOtherGroupMember(members []*client.GroupMemberInfo, uid int64) *client.
 	return nil
 }
 
-var toGroupKey = func(groupCode int64, key string) string { return fmt.Sprintf("qq:group_%d:%s", groupCode, key) }
+var GroupKey = func(groupCode int64, key string) string { return fmt.Sprintf("qq:group_%d:%s", groupCode, key) }
 var toPrivateKey = func(uid int64, key string) string { return fmt.Sprintf("qq:private_%d:%s", uid, key) }
 
 func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
 
-	key := toGroupKey(groupCode, fmt.Sprintf("msg:%d", seq))
+	key := GroupKey(groupCode, fmt.Sprintf("msg:%d", seq))
 
 	persistGroupMsg := &PersistentGroupMessage{}
 	exist, err := redis.Get(key, persistGroupMsg)

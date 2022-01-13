@@ -49,6 +49,7 @@ func (r *response) Start(bot *bot.Bot) {
 }
 
 func (r *response) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
 	logger.Info("自定義回應模組已關閉")
 }
 

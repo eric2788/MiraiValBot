@@ -124,8 +124,8 @@ func (c *command) Start(bot *bot.Bot) {
 }
 
 func (c *command) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
 	logger.Info("指令管理模組已關閉")
-	wg.Done()
 }
 
 func init() {

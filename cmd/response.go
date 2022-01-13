@@ -18,6 +18,7 @@ func checkRes(args []string, source *command.MessageSource) error {
 }
 
 func setRes(args []string, source *command.MessageSource) error {
+
 	content, res := args[0], args[1]
 
 	file.UpdateStorage(func() {
@@ -47,9 +48,9 @@ func removeRes(args []string, source *command.MessageSource) error {
 }
 
 var (
-	checkResCommand  = command.NewNode([]string{"check"}, "检查所有自定义回应", false, checkRes)
-	setResCommand    = command.NewNode([]string{"set"}, "检查所有自定义回应", false, setRes, "<文字>", "<回应>")
-	removeResCommand = command.NewNode([]string{"remove"}, "移除回应", false, removeRes, "<文字>")
+	checkResCommand  = command.NewNode([]string{"check", "检查"}, "检查所有自定义回应", false, checkRes)
+	setResCommand    = command.NewNode([]string{"set", "设置"}, "设置自定义回应", false, setRes, "<文字>", "<回应>")
+	removeResCommand = command.NewNode([]string{"remove", "移除"}, "移除回应", false, removeRes, "<文字>")
 )
 
 var resCommand = command.NewParent([]string{"res"}, "自定义回应",
