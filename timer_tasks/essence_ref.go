@@ -100,7 +100,7 @@ func compareYearly(ts int64) bool {
 func compareMonthly(ts int64) bool {
 	that := datetime.FromSeconds(ts)
 	now := time.Now()
-	return that.Day() == now.Day() && that.Year() != now.Year()
+	return that.Day() == now.Day() && !(that.Year() == now.Year() && that.Month() == now.Month())
 }
 
 func tellTime() string {
