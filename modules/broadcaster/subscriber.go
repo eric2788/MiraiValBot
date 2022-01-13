@@ -8,7 +8,6 @@ import (
 	rdb "github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/utils/set"
 	"github.com/go-redis/redis/v8"
-	"math/rand"
 	"runtime/debug"
 	"time"
 )
@@ -117,39 +116,20 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 		}
 	}()
 	size := file.ApplicationYaml.Redis.Buffer // 每次最大接收数量 (buffer)
-	channel := make(chan *redis.Message, int(size))
-	go receivePubsub(ps, ctx, channel, ifError)
+	channel := ps.Channel(redis.WithChannelSize(int(size)))
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Debugf("收到中止指令，正在停止訂閱 %s", topic)
 			return
-		case msg := <-channel:
+		case msg, ok := <-channel:
+			if !ok {
+				logger.Debugf("訂閱接收閘口關閉，正在停止訂閱 %s", topic)
+				return
+			}
 			handle(msg)
 		default:
 			break
 		}
 	}
-}
-
-func receivePubsub(ps *redis.PubSub, ctx context.Context, channel chan<- *redis.Message, ifError chan<- error) {
-	for {
-		// msg, err := fakeReceiveWithError(ps, ctx)
-		msg, err := ps.ReceiveMessage(ctx)
-		if err != nil {
-			go func() {
-				ifError <- err
-			}()
-			return
-		}
-		channel <- msg
-	}
-}
-
-func fakeReceiveWithError(ps *redis.PubSub, ctx context.Context) (msg *redis.Message, err error) {
-	msg, err = ps.ReceiveMessage(ctx)
-	if rand.Intn(1000)%10 == 0 {
-		err = fmt.Errorf("test Error")
-	}
-	return
 }
