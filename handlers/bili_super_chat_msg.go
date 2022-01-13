@@ -21,6 +21,10 @@ func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 		return fmt.Errorf("解析 SuperChat 數據失敗")
 	}
 
+	if !bilibili.IsHighlighter(superchat.UID) {
+		return nil
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("在 %s 的直播间收到来自 %s 的醒目留言", data.LiveInfo.Name, superchat.UserInfo.UName))
 	msg.Append(qq.NewTextfLn("￥ %d", superchat.Price))

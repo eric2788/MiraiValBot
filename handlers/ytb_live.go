@@ -35,14 +35,17 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 			fallthrough
 		case 1: // 风控一次，没有标题
 			fields[titles[2]] = datetime.FormatMillis(info.Info.PublishTime)
+			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, titles[0])
 			fallthrough
 		case 2: // 风控两次， 没有开始时间
 			fields[titles[1]] = fmt.Sprintf("https://youtu.be/%s", info.Info.Id)
+			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, titles[1])
 			fallthrough
 		case 4: // 风控三次，没有图片
 			image = false
+			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, "图片")
 		}
-		msg := youtube.CreateQQMessage(desc, info, image, titles[1], fields)
+		msg := youtube.CreateQQMessage(desc, info, image, titles[2], fields)
 		return qq.SendGroupMessage(msg)
 	})
 

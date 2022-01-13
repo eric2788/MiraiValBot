@@ -8,6 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
+	"strings"
 	"time"
 )
 
@@ -48,6 +49,7 @@ func tweetSendQQRisky(msg *message.SendingMessage, data *twitter.TweetStreamData
 			for i := 0; i < try-1; i++ {
 				shows[i] = false
 			}
+			logger.Warnf("推特广播被风控 %d 次，舍弃 %v 重发", try, strings.Join([]string{"視頻", "圖片", "鏈接", ""}[0:try-1], ", "))
 		}
 		msg := twitter.CreateMessage(msg, data, shows...)
 		return qq.SendGroupMessage(msg)
