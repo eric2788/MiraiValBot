@@ -10,9 +10,14 @@ import (
 
 func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	d := data.Content["data"]
-	superchat, ok := d.(*bilibili.SuperChatMessageData)
 
-	if !ok {
+	var superchat = &bilibili.SuperChatMessageData{}
+
+	if dict, ok := d.(map[string]interface{}); ok {
+		if err := superchat.Parse(dict); err != nil {
+			return err
+		}
+	} else {
 		return fmt.Errorf("解析 SuperChat 數據失敗")
 	}
 

@@ -1,5 +1,7 @@
 package bilibili
 
+import "encoding/json"
+
 const (
 	DanmuMsg         = "DANMU_MSG"
 	SendGift         = "SEND_GIFT"
@@ -8,6 +10,10 @@ const (
 	Live             = "LIVE"
 	InteractWord     = "INTERACT_WORD"
 )
+
+type MapParser interface {
+	Parse(m map[string]interface{}) error
+}
 
 type LiveData struct {
 	Command  string `json:"command"`
@@ -36,4 +42,12 @@ type SuperChatMessageData struct {
 		NameColor string `json:"name_color"`
 		UName     string `json:"uname"`
 	} `json:"user_info"`
+}
+
+func (d *SuperChatMessageData) Parse(m map[string]interface{}) error {
+	b, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, d)
 }
