@@ -75,7 +75,7 @@ func (l *liveRoomStatusHandler) HandleMessage(bot *bot.Bot, rd *redis.Message) {
 		msg.Append(qq.NewTextf("【%s】%s %s", status.Platform, status.GetRoom(), txt))
 	}
 
-	qq.SendRiskyMessage(5, 5, func(try int) error {
+	go qq.SendRiskyMessage(5, 5, func(try int) error {
 		return qq.SendGroupMessage(msg)
 	})
 }
