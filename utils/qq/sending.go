@@ -132,7 +132,7 @@ func SendRiskyMessage(maxTry int, seconds time.Duration, f func(currentTry int) 
 	for try < maxTry {
 		if err := f(try); err != nil {
 			if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
-				logger.Warnf("发送消息出现风控，现正等候 %d 秒后重新发送", seconds)
+				logger.Warnf("发送消息出现风控，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
 				<-time.After(time.Second * seconds)
 				try += 1
 			} else {
