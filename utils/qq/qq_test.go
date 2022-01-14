@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 )
 
 var testSerialized = `
@@ -18,4 +19,11 @@ func TestParseFromPersistence(t *testing.T) {
 	fmt.Printf("%+v\n", *persist)
 	gpMsg := persist.ToGroupMessage()
 	fmt.Printf("%+v", *gpMsg)
+}
+
+func TestDuration(t *testing.T) {
+
+	var sec time.Duration = 10
+
+	fmt.Printf("%d 秒", sec/time.Second)
 }

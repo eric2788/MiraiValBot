@@ -8,7 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
-	"time"
+	"strings"
 )
 
 func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
@@ -32,7 +32,7 @@ func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 
 func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
 
-	go qq.SendRiskyMessage(5, time.Second*10, func(try int) error {
+	go qq.SendRiskyMessage(5, 10, func(try int) error {
 
 		clone := message.NewSendingMessage()
 
@@ -59,6 +59,8 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 		if try > 4 {
 			alt = append(alt, fmt.Sprintf("哟，风控四次了，这推文会不会是在GHS啊？"))
 		}
+
+		logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
 
 		msg := twitter.CreateMessage(clone, data, alt...)
 		return qq.SendGroupMessage(msg)
