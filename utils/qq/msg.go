@@ -22,6 +22,10 @@ func NewTextLn(msg string) *message.TextElement {
 	return message.NewText(msg + "\n")
 }
 
+func NextLn() *message.TextElement {
+	return message.NewText("\n")
+}
+
 func CreateReply(source *message.GroupMessage) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewReply(source))
 }

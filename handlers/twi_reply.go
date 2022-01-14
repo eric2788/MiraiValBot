@@ -30,8 +30,11 @@ func HandleTweetReply(bot *bot.Bot, data *twitter.TweetStreamData) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName))
-	msg.Append(qq.NewTextf("回复贴文: https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
-	msg.Append(qq.NewTextLn("内容: "))
+	msg.Append(qq.NextLn())
+	msg.Append(qq.NewTextLn("回复贴文"))
+	msg.Append(qq.NewTextfLn("https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
+	msg.Append(qq.NextLn())
+	msg.Append(qq.NewTextLn("内容"))
 	return tweetSendQQRisky(msg, data)
 }
 

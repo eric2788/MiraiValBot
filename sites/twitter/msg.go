@@ -14,14 +14,18 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 	// 内文
 	msg.Append(qq.NewTextLn(noLinkText))
 
+	msg.Append(qq.NextLn())
+
 	// 額外的中文字來減低風控機率
 	for _, altStr := range alt {
 		msg.Append(qq.NewTextLn(altStr))
 	}
 
+	msg.Append(qq.NextLn())
+
 	// 連結
 	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
-		msg.Append(qq.NewTextLn("链接: "))
+		msg.Append(qq.NewTextLn("链接"))
 		for _, url := range data.Entities.Urls {
 			msg.Append(qq.NewTextfLn("- %s", url.ExpandedUrl))
 		}

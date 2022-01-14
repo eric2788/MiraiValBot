@@ -16,12 +16,17 @@ func HandleReTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 分享了一则推文", data.User.Name))
+	msg.Append(qq.NextLn())
+
 	if data.RetweetedStatus != nil {
-		msg.Append(qq.NewTextLn("转发的推文如下: "))
+		msg.Append(qq.NewTextLn("转发的推文如下"))
 		if data.RetweetedStatus.User.Id != data.User.Id {
-			msg.Append(qq.NewTextfLn("原作者: %s", data.RetweetedStatus.User.Name))
+			msg.Append(qq.NextLn())
+			msg.Append(qq.NewTextLn("原作者"))
+			msg.Append(qq.NewTextLn(data.RetweetedStatus.User.Name))
 		}
-		msg.Append(qq.NewTextLn("内容: "))
+		msg.Append(qq.NextLn())
+		msg.Append(qq.NewTextLn("内容"))
 		return tweetSendQQRisky(msg, data.RetweetedStatus)
 	} else {
 		msg.Append(qq.NewTextLn("[获取转发推文失败]"))
@@ -62,13 +67,19 @@ func HandleReTweetWithText(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 转发了一则推文", data.User.Name))
-	msg.Append(qq.NewTextfLn("附文: %s", twitter.TextWithoutTCLink(data.Text)))
+	msg.Append(qq.NextLn())
+	msg.Append(qq.NewTextLn("附文"))
+	msg.Append(qq.NewTextLn(twitter.TextWithoutTCLink(data.Text)))
+	msg.Append(qq.NextLn())
 	if data.QuotedStatus != nil {
-		msg.Append(qq.NewTextLn("转发的推文如下: "))
+		msg.Append(qq.NewTextLn("转发的推文如下"))
 		if data.QuotedStatus.User.Id != data.User.Id {
-			msg.Append(qq.NewTextfLn("原作者: %s", data.QuotedStatus.User.Name))
+			msg.Append(qq.NextLn())
+			msg.Append(qq.NewTextLn("原作者"))
+			msg.Append(qq.NewTextLn(data.QuotedStatus.User.Name))
 		}
-		msg.Append(qq.NewTextLn("内容: "))
+		msg.Append(qq.NextLn())
+		msg.Append(qq.NewTextLn("内容"))
 		return tweetSendQQRisky(msg, data.QuotedStatus)
 	} else {
 		msg.Append(qq.NewTextLn("[获取转发推文失败]"))
