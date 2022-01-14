@@ -5,6 +5,7 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/set"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
+	"runtime/debug"
 	"strings"
 )
 
@@ -72,7 +73,7 @@ func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
 	// avoid handle panic
 	defer func() {
 		if err := recover(); err != nil {
-			b.logger.Errorf("處理 %s 指令時出現嚴重錯誤: %v", command, err)
+			b.logger.Errorf("處理 %s 指令時出現嚴重錯誤: %v from %v", command, err, debug.Stack())
 		}
 	}()
 

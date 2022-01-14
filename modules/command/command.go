@@ -9,6 +9,7 @@ import (
 	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/utils/qq"
+	"runtime/debug"
 	"sync"
 )
 
@@ -38,10 +39,8 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 			if e := recover(); e != nil {
 				err := fmt.Errorf(fmt.Sprintf("%v", e))
-				logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
-				errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
-				_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
-				return
+				logger.Errorf("處理指令 %s 時出現严重錯誤: %v from %v", content, err, debug.Stack())
+				_ = qq.SendGroupMessageByGroup(msg.GroupCode, qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现严重错误: %v", err)))
 			}
 
 		}()
@@ -50,8 +49,10 @@ func (c *command) HookEvent(bot *bot.Bot) {
 		response, err := InvokeCommand(content, admin, source)
 
 		if err != nil {
-			// throw as panic
-			panic(err.Error())
+			logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
+			errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
+			return
 		}
 
 		logger.Debugf("%+v", *response)
