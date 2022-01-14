@@ -25,15 +25,14 @@ func HandleTweetReply(bot *bot.Bot, data *twitter.TweetStreamData) error {
 			},
 		},
 	}
-
+	twitter.AddEntitiesByDiscord(discordMsg, data)
 	go discord.SendNewsEmbed(discordMsg)
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName))
-	msg.Append(qq.NewTextfLn("内容: %s", twitter.TextWithoutTCLink(data.Text)))
 	msg.Append(qq.NewTextf("回复贴文: https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
-
-	return withRisky(msg)
+	msg.Append(qq.NewTextLn("内容: "))
+	return tweetSendQQRisky(msg, data)
 }
 
 // withRisky error must be nil
