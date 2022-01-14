@@ -19,7 +19,7 @@ func HandleReTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NextLn())
 
 	if data.RetweetedStatus != nil {
-		msg.Append(qq.NewTextLn("转发的推文如下"))
+		msg.Append(qq.NewTextLn("================="))
 		if data.RetweetedStatus.User.Id != data.User.Id {
 			msg.Append(qq.NextLn())
 			msg.Append(qq.NewTextLn("原作者"))
@@ -72,7 +72,7 @@ func HandleReTweetWithText(_ *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NewTextLn(twitter.TextWithoutTCLink(data.Text)))
 	msg.Append(qq.NextLn())
 	if data.QuotedStatus != nil {
-		msg.Append(qq.NewTextLn("转发的推文如下"))
+		msg.Append(qq.NewTextLn("================="))
 		if data.QuotedStatus.User.Id != data.User.Id {
 			msg.Append(qq.NextLn())
 			msg.Append(qq.NewTextLn("原作者"))
