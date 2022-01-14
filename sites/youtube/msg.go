@@ -58,6 +58,16 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 	}
 
 	if info.Info != nil {
+
+		var publishTime string
+		t, err := datetime.ParseISOStr(info.Info.PublishTime)
+		if err != nil {
+			publishTime = datetime.FormatMillis(t.UnixMilli())
+		} else {
+			logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)
+			publishTime = info.Info.PublishTime // 使用原本的 string
+		}
+
 		dm.Fields = append(dm.Fields,
 			&discordgo.MessageEmbedField{
 				Name:   blocks[0],
@@ -69,7 +79,7 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 				Inline: true,
 			}, &discordgo.MessageEmbedField{
 				Name:  blocks[2],
-				Value: datetime.FormatMillis(info.Info.PublishTime),
+				Value: publishTime,
 			}, &discordgo.MessageEmbedField{
 				Name:  blocks[3],
 				Value: GetYTLink(info),

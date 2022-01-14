@@ -15,7 +15,7 @@ type LiveInfo struct {
 		Cover       *string `json:"cover"`
 		Title       string  `json:"title"`
 		Id          string  `json:"id"`
-		PublishTime int64   `json:"publishTime"`
+		PublishTime string  `json:"publishTime"`
 		Description string  `json:"description"`
 	} `json:"info"`
 }

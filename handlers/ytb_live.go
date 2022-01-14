@@ -26,24 +26,31 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 		titles[i] = block
 	}
 
-	go qq.SendRiskyMessage(5, 10, func(currentTry int) error {
+	go qq.SendRiskyMessage(5, 10, func(try int) error {
 		fields := make(map[string]string)
 		image := true
-		switch currentTry {
-		case 0: // 风控0次，所有标题
-			fields[titles[0]] = info.Info.Title
-			fallthrough
-		case 1: // 风控一次，没有标题
-			fields[titles[2]] = datetime.FormatMillis(info.Info.PublishTime)
-			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, titles[0])
-			fallthrough
-		case 2: // 风控两次， 没有开始时间
-			fields[titles[1]] = fmt.Sprintf("https://youtu.be/%s", info.Info.Id)
-			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, titles[1])
-			fallthrough
-		case 4: // 风控三次，没有图片
-			image = false
-			logger.Warnf("油管广播被风控 %d 次，舍弃 %s 重发", currentTry, "图片")
+		if info.Info != nil { // 防止 NPE
+
+			if try < 1 { // 風控一次，沒有標題
+				fields[titles[0]] = info.Info.Title
+			}
+
+			if try < 2 { // 風控兩次，沒有開始時間
+				t, err := datetime.ParseISOStr(info.Info.PublishTime)
+				if err != nil {
+					fields[titles[1]] = datetime.FormatMillis(t.UnixMilli())
+				} else {
+					logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)
+					fields[titles[1]] = info.Info.PublishTime // 使用原本的 string
+				}
+			}
+
+			if try < 3 { // 風控三次，沒有圖片
+				image = false
+			}
+
+			fields[titles[2]] = fmt.Sprintf("https://youtu.be/%s", info.Info.Id)
+
 		}
 		msg := youtube.CreateQQMessage(desc, info, image, titles[2], fields)
 		return qq.SendGroupMessage(msg)

@@ -7,7 +7,10 @@ import (
 	"strings"
 )
 
-func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...string) *message.SendingMessage {
+// CreateMessage 短視頻要單獨發送，否則無法發送原文
+func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...string) (*message.SendingMessage, []*message.ShortVideoElement) {
+
+	videos := make([]*message.ShortVideoElement, 0)
 
 	noLinkText := TextWithoutTCLink(data.Text)
 
@@ -57,7 +60,7 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 						logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
 						continue
 					}
-					msg.Append(video)
+					videos = append(videos, video)
 					success = true
 					break
 				}
@@ -75,7 +78,7 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 			}
 		}
 	}
-	return msg
+	return msg, videos
 }
 
 func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, data *TweetStreamData) {

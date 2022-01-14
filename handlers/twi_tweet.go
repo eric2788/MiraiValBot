@@ -64,8 +64,20 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 			logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
 		}
 
-		msg := twitter.CreateMessage(clone, data, alt...)
-		return qq.SendGroupMessage(msg)
+		msg, videos := twitter.CreateMessage(clone, data, alt...)
+
+		// 先發送推文內容
+		if err := qq.SendGroupMessage(msg); err != nil {
+			return err
+		}
+		// 後發送視頻訊息
+		for _, video := range videos {
+			if err := qq.SendGroupMessage(message.NewSendingMessage().Append(video)); err != nil {
+				return err
+			}
+		}
+
+		return nil
 	})
 	return
 }
