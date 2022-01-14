@@ -7,33 +7,23 @@ import (
 	"strings"
 )
 
-func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, fields ...bool) *message.SendingMessage {
-
-	shows := []bool{
-		true, // 視頻
-		true, // 圖片
-		true, // 鏈接
-		true, // 內文
-	}
-
-	for i, field := range fields {
-		fields[i] = field
-	}
+func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...string) *message.SendingMessage {
 
 	noLinkText := TextWithoutTCLink(data.Text)
 
-	if shows[3] {
-		// 内文
-		msg.Append(qq.NewTextLn(noLinkText))
+	// 内文
+	msg.Append(qq.NewTextLn(noLinkText))
+
+	// 額外的中文字來減低風控機率
+	for _, altStr := range alt {
+		msg.Append(qq.NewTextLn(altStr))
 	}
 
-	if shows[2] {
-		// 連結
-		if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
-			msg.Append(qq.NewTextLn("链接: "))
-			for _, url := range data.Entities.Urls {
-				msg.Append(qq.NewTextfLn("- %s", url.ExpandedUrl))
-			}
+	// 連結
+	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
+		msg.Append(qq.NewTextLn("链接: "))
+		for _, url := range data.Entities.Urls {
+			msg.Append(qq.NewTextfLn("- %s", url.ExpandedUrl))
 		}
 	}
 
@@ -44,40 +34,36 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, fields ..
 			switch m.Type {
 			// 圖片
 			case "photo":
-				if shows[1] {
+				img, err := qq.NewImageByUrl(m.MediaUrlHttps)
+				if err != nil {
+					logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
+				} else {
+					msg.Append(img)
+				}
+			// 視頻
+			case "video":
+				videoInfo := m.VideoInfo
+				success := false
+				for _, variant := range videoInfo.Variants {
+					if variant.ContentType != "video/mp4" {
+						continue
+					}
+					video, err := qq.NewVideoByUrl(variant.Url, m.MediaUrlHttps)
+					if err != nil {
+						logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
+						continue
+					}
+					msg.Append(video)
+					success = true
+					break
+				}
+				if !success {
+					logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
 					img, err := qq.NewImageByUrl(m.MediaUrlHttps)
 					if err != nil {
 						logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
 					} else {
 						msg.Append(img)
-					}
-				}
-			// 視頻
-			case "video":
-				if shows[0] {
-					videoInfo := m.VideoInfo
-					success := false
-					for _, variant := range videoInfo.Variants {
-						if variant.ContentType != "video/mp4" {
-							continue
-						}
-						video, err := qq.NewVideoByUrl(variant.Url, m.MediaUrlHttps)
-						if err != nil {
-							logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
-							continue
-						}
-						msg.Append(video)
-						success = true
-						break
-					}
-					if !success {
-						logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
-						img, err := qq.NewImageByUrl(m.MediaUrlHttps)
-						if err != nil {
-							logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
-						} else {
-							msg.Append(img)
-						}
 					}
 				}
 			default:

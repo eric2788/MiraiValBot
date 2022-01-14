@@ -8,7 +8,6 @@ import (
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
-	"strings"
 	"time"
 )
 
@@ -31,27 +30,37 @@ func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 	return tweetSendQQRisky(msg, data)
 }
 
-func tweetSendQQRisky(msg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
+func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
+
 	go qq.SendRiskyMessage(5, time.Second*10, func(try int) error {
-		shows := []bool{
-			true, // 視頻
-			true, // 圖片
-			true, // 鏈接
-			true, // 內文
+
+		clone := message.NewSendingMessage()
+
+		for _, element := range originalMsg.Elements {
+			clone.Append(element)
 		}
 
-		/*
-			风控一次，没有视频
-			风控两次，没有图片
-			风控三次，没有链接
-		*/
-		if try > 0 {
-			for i := 0; i < try-1; i++ {
-				shows[i] = false
-			}
-			logger.Warnf("推特广播被风控 %d 次，舍弃 %v 重发", try, strings.Join([]string{"視頻", "圖片", "鏈接", ""}[0:try-1], ", "))
+		var alt []string
+
+		// 风控时尝试加随机文字看看会不会减低？
+
+		if try > 1 {
+			alt = append(alt, fmt.Sprintf("(此推文已被风控 %d 次)", try))
 		}
-		msg := twitter.CreateMessage(msg, data, shows...)
+
+		if try > 2 {
+			alt = append(alt, fmt.Sprintf("你好谢谢小笼包再见"))
+		}
+
+		if try > 3 {
+			alt = append(alt, fmt.Sprintf("卧槽，这个推文真牛逼!"))
+		}
+
+		if try > 4 {
+			alt = append(alt, fmt.Sprintf("哟，风控四次了，这推文会不会是在GHS啊？"))
+		}
+
+		msg := twitter.CreateMessage(clone, data, alt...)
 		return qq.SendGroupMessage(msg)
 	})
 	return
