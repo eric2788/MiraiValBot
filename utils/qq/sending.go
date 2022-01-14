@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"runtime/debug"
 	"time"
 )
 
@@ -34,10 +35,11 @@ func SendGroupMessage(msg *message.SendingMessage) error {
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			err = fmt.Errorf(fmt.Sprintf("recovered while sending group message: %v", recovered))
+			err = fmt.Errorf(fmt.Sprintf("致命错误 => %v from %s", recovered, debug.Stack()))
 		}
 		if err != nil {
-			logger.Error(err)
+			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
+			logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
 		}
 	}()
 

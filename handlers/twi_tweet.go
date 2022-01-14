@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func HandleTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	discordMessage := &discordgo.MessageEmbed{
 		Description: fmt.Sprintf("%s 发布了一则贴文", data.User.Name),
@@ -40,27 +40,29 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 			clone.Append(element)
 		}
 
-		var alt []string
+		alt := make([]string, 0)
 
 		// 风控时尝试加随机文字看看会不会减低？
 
-		if try > 1 {
-			alt = append(alt, fmt.Sprintf("(此推文已被风控 %d 次)", try))
+		if try >= 1 {
+			alt = append(alt, fmt.Sprintf("[此推文已被风控 %d 次]", try))
 		}
 
-		if try > 2 {
+		if try >= 2 {
 			alt = append(alt, fmt.Sprintf("你好谢谢小笼包再见"))
 		}
 
-		if try > 3 {
+		if try >= 3 {
 			alt = append(alt, fmt.Sprintf("卧槽，这个推文真牛逼!"))
 		}
 
-		if try > 4 {
+		if try >= 4 {
 			alt = append(alt, fmt.Sprintf("哟，风控四次了，这推文会不会是在GHS啊？"))
 		}
 
-		logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
+		if try > 0 {
+			logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
+		}
 
 		msg := twitter.CreateMessage(clone, data, alt...)
 		return qq.SendGroupMessage(msg)

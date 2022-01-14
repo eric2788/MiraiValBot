@@ -10,7 +10,7 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
-func HandleReTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleReTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	go handleRetweetDiscord(data, false)
 
@@ -18,7 +18,9 @@ func HandleReTweet(bot *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NewTextfLn("%s 分享了一则推文", data.User.Name))
 	if data.RetweetedStatus != nil {
 		msg.Append(qq.NewTextLn("转发的推文如下: "))
-		msg.Append(qq.NewTextfLn("原作者: %s", data.RetweetedStatus.User.Name))
+		if data.RetweetedStatus.User.Id != data.User.Id {
+			msg.Append(qq.NewTextfLn("原作者: %s", data.RetweetedStatus.User.Name))
+		}
 		msg.Append(qq.NewTextLn("内容: "))
 		return tweetSendQQRisky(msg, data.RetweetedStatus)
 	} else {
@@ -54,7 +56,7 @@ func handleRetweetDiscord(data *twitter.TweetStreamData, withText bool) {
 
 }
 
-func HandleReTweetWithText(bot *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleReTweetWithText(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	go handleRetweetDiscord(data, true)
 
@@ -63,7 +65,9 @@ func HandleReTweetWithText(bot *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NewTextfLn("附文: %s", twitter.TextWithoutTCLink(data.Text)))
 	if data.QuotedStatus != nil {
 		msg.Append(qq.NewTextLn("转发的推文如下: "))
-		msg.Append(qq.NewTextfLn("原作者: %s", data.QuotedStatus.User.Name))
+		if data.QuotedStatus.User.Id != data.User.Id {
+			msg.Append(qq.NewTextfLn("原作者: %s", data.QuotedStatus.User.Name))
+		}
 		msg.Append(qq.NewTextLn("内容: "))
 		return tweetSendQQRisky(msg, data.QuotedStatus)
 	} else {
