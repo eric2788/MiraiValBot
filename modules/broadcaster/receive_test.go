@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func TestChannel(t *testing.T) {
+func BenchmarkChannel(b *testing.B) {
 
 	channel := make(chan int, 1024)
 
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
-		for i := 0; i < 10; i++ {
+		for i := 0; i < b.N; i++ {
 			fmt.Printf("sent: %v\n", i)
 			channel <- i
 		}
@@ -31,7 +31,7 @@ func TestChannel(t *testing.T) {
 				return
 			}
 			fmt.Printf("received: %v\n", s)
-			<-time.After(time.Second)
+			<-time.After(time.Second / 10)
 		}
 	}()
 

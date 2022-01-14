@@ -128,8 +128,6 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 				return
 			}
 			handle(msg)
-		default:
-			break
 		}
 	}
 }

@@ -16,7 +16,10 @@ func startTimer(name string, ctx context.Context, ticker *time.Ticker, bot *bot.
 		select {
 		case <-ctx.Done():
 			return
-		case <-ticker.C:
+		case _, ok := <-ticker.C:
+			if !ok {
+				return
+			}
 			run(name, bot, handle)
 		}
 	}

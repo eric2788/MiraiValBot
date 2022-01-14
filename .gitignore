@@ -1,6 +1,6 @@
 /.idea/
-application.yaml
-device.json
-/data/
-/logs/
+**application.yaml**
+**device.json**
+**/data/**
+**/logs/**
 session.token
