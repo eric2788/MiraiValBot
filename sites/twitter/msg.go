@@ -37,7 +37,6 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 
 	// 媒體
 	if data.ExtendedEntities != nil && data.ExtendedEntities.Media != nil {
-		msg.Append(qq.NextLn())
 		media := *data.ExtendedEntities.Media
 		for _, m := range media {
 			switch m.Type {
