@@ -10,7 +10,7 @@ func FormatSeconds(ts int64) string {
 }
 
 func ParseISOStr(iso string) (time.Time, error) {
-	return time.Parse("2006-01-02T15:04:05-0700", iso)
+	return time.Parse("2006-01-02T15:04:05Z07", iso)
 }
 
 func FormatMillis(ts int64) string {

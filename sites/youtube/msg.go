@@ -31,7 +31,7 @@ func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []string, fi
 		}
 
 		t, err := datetime.ParseISOStr(info.Info.PublishTime)
-		if err != nil {
+		if err == nil {
 			msg.Append(qq.NewTextfLn("%s: %s", startTime, datetime.FormatMillis(t.UnixMilli())))
 		} else {
 			logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)
@@ -40,7 +40,7 @@ func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []string, fi
 
 		msg.Append(qq.NewTextfLn("%s: %s", roomLink, GetYTLink(info)))
 
-		if info.Info.Cover != nil {
+		if info.Info.Cover != nil && *info.Info.Cover != "" {
 			cover := *info.Info.Cover
 			img, err := qq.NewImageByUrl(cover)
 			if err != nil {
@@ -91,7 +91,7 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 
 		var publishTime string
 		t, err := datetime.ParseISOStr(info.Info.PublishTime)
-		if err != nil {
+		if err == nil {
 			publishTime = datetime.FormatMillis(t.UnixMilli())
 		} else {
 			logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)

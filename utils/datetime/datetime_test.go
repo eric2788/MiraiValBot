@@ -20,3 +20,12 @@ func TestDuration(t *testing.T) {
 
 	assert.Equal(t, 5, Duration(before, after).Second())
 }
+
+func TestParseISO(t *testing.T) {
+	iso := "2021-09-01T13:24:29Z"
+	date, err := ParseISOStr(iso)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "2021-09-01 21:24:29", FormatMillis(date.UnixMilli()))
+}
