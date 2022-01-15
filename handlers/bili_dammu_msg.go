@@ -42,7 +42,7 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg.Append(qq.NewTextfLn("%s 在 %s 的直播间发送了一则消息", uname, data.LiveInfo.Name))
 	msg.Append(qq.NewTextfLn("弹幕: %s", danmu))
 
-	return withRisky(msg)
+	return withBilibiliRisky(msg)
 }
 
 func biliSpaceLink(uid int64) string {
