@@ -7,18 +7,40 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
-func CreateQQMessage(desc string, info *LiveInfo, image bool, roomTitle string, fields map[string]string) *message.SendingMessage {
+func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []string, fields ...string) *message.SendingMessage {
+
+	blocks := []string{"标题", "开始时间", "直播间"}
+
+	for i, field := range fields {
+		if i == len(blocks) {
+			break
+		}
+
+		blocks[i] = field
+	}
+
+	title, startTime, roomLink := blocks[0], blocks[1], blocks[2]
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextLn(desc))
 
 	if info.Info != nil {
 
-		for field, value := range fields {
-			msg.Append(qq.NewTextfLn("%s: %s", field, value))
+		if !noTitle {
+			msg.Append(qq.NewTextfLn("%s: %s", title, info.Info.Title))
 		}
 
-		if info.Info.Cover != nil && image {
+		t, err := datetime.ParseISOStr(info.Info.PublishTime)
+		if err != nil {
+			msg.Append(qq.NewTextfLn("%s: %s", startTime, datetime.FormatMillis(t.UnixMilli())))
+		} else {
+			logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)
+			msg.Append(qq.NewTextfLn("%s: %s", startTime, info.Info.PublishTime)) // 使用原本的 string
+		}
+
+		msg.Append(qq.NewTextfLn("%s: %s", roomLink, GetYTLink(info)))
+
+		if info.Info.Cover != nil {
 			cover := *info.Info.Cover
 			img, err := qq.NewImageByUrl(cover)
 			if err != nil {
@@ -29,7 +51,15 @@ func CreateQQMessage(desc string, info *LiveInfo, image bool, roomTitle string, 
 		}
 
 	} else {
-		msg.Append(qq.NewTextf("%s: %s", roomTitle, GetYTLink(info)))
+		msg.Append(qq.NewTextf("%s: %s", roomLink, GetYTLink(info)))
+	}
+
+	// 随机文字
+	if len(alt) > 0 {
+		msg.Append(qq.NextLn())
+		for _, a := range alt {
+			msg.Append(qq.NewTextLn(a))
+		}
 	}
 
 	return msg

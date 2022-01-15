@@ -5,8 +5,8 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/youtube"
-	"github.com/eric2788/MiraiValBot/utils/datetime"
 	"github.com/eric2788/MiraiValBot/utils/qq"
+	"strings"
 )
 
 func HandleLiveEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
@@ -23,36 +23,41 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 	titles := []string{"标题", "开始时间", "直播间"}
 
 	for i, block := range blocks {
+		if i == len(titles) {
+			break
+		}
 		titles[i] = block
 	}
 
 	go qq.SendRiskyMessage(5, 10, func(try int) error {
-		fields := make(map[string]string)
-		image := true
-		if info.Info != nil { // 防止 NPE
+		alt := make([]string, 0)
+		noTitle := false
 
-			if try < 1 { // 風控一次，沒有標題
-				fields[titles[0]] = info.Info.Title
-			}
+		// 风控时尝试加随机文字看看会不会减低？
 
-			if try < 2 { // 風控兩次，沒有開始時間
-				t, err := datetime.ParseISOStr(info.Info.PublishTime)
-				if err != nil {
-					fields[titles[1]] = datetime.FormatMillis(t.UnixMilli())
-				} else {
-					logger.Warnf("解析時間文字 %s 時出現錯誤: %v", info.Info.PublishTime, err)
-					fields[titles[1]] = info.Info.PublishTime // 使用原本的 string
-				}
-			}
-
-			if try < 3 { // 風控三次，沒有圖片
-				image = false
-			}
-
-			fields[titles[2]] = fmt.Sprintf("https://youtu.be/%s", info.Info.Id)
-
+		if try >= 1 {
+			alt = append(alt, fmt.Sprintf("[此油管广播已被风控 %d 次]", try))
 		}
-		msg := youtube.CreateQQMessage(desc, info, image, titles[2], fields)
+
+		if try >= 2 {
+			alt = append(alt, fmt.Sprintf("你好谢谢小笼包再见"))
+		}
+
+		if try >= 3 {
+			alt = append(alt, fmt.Sprintf("看看啊！这谁直播了额!"))
+		}
+
+		// 风控第四次没有标题
+		if try >= 4 {
+			alt = append(alt, fmt.Sprintf("什么油管直播居然被风控了四次这么爽？？你标题没了"))
+			noTitle = true
+		}
+
+		if try > 0 {
+			logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
+		}
+
+		msg := youtube.CreateQQMessage(desc, info, noTitle, alt, titles...)
 		return qq.SendGroupMessage(msg)
 	})
 
