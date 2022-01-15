@@ -70,11 +70,13 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 	blocks := []string{
 		"开始时间",
 		"标题",
-		"描述",
 		"直播间",
 	}
 
 	for i, f := range fields {
+		if i == len(blocks) {
+			break
+		}
 		blocks[i] = f
 	}
 
@@ -100,23 +102,18 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 
 		dm.Fields = append(dm.Fields,
 			&discordgo.MessageEmbedField{
-				Name:   blocks[0],
-				Value:  info.Info.Title,
-				Inline: true,
-			}, &discordgo.MessageEmbedField{
-				Name:   blocks[1],
-				Value:  info.Info.Description,
-				Inline: true,
-			}, &discordgo.MessageEmbedField{
-				Name:  blocks[2],
+				Name:  blocks[0],
 				Value: publishTime,
 			}, &discordgo.MessageEmbedField{
-				Name:  blocks[3],
+				Name:  blocks[1],
+				Value: info.Info.Title,
+			}, &discordgo.MessageEmbedField{
+				Name:  blocks[2],
 				Value: GetYTLink(info),
 			})
 	} else {
 		dm.Fields = append(dm.Fields, &discordgo.MessageEmbedField{
-			Name:  blocks[3],
+			Name:  blocks[2],
 			Value: GetYTLink(info),
 		})
 	}
