@@ -13,6 +13,25 @@ func SendNewsEmbed(embed *discordgo.MessageEmbed) {
 	SendEmbed(config.NewsChannel, embed)
 }
 
+func SendNewsEmbedDouble(first, next *discordgo.MessageEmbed) {
+	RunSafe(func(session *discordgo.Session) (err error) {
+		news := strconv.FormatInt(config.NewsChannel, 10)
+		msg, err := session.ChannelMessageSendEmbed(news, first)
+		if err != nil {
+			return
+		}
+		_, err = session.ChannelMessageSendComplex(news, &discordgo.MessageSend{
+			Reference: &discordgo.MessageReference{
+				MessageID: msg.ID,
+				ChannelID: msg.ChannelID,
+				GuildID:   msg.GuildID,
+			},
+			Embed: next,
+		})
+		return
+	})
+}
+
 func SendNewsTxt(txt string) {
 	SendText(config.NewsChannel, txt)
 }

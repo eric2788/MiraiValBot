@@ -3,6 +3,7 @@ package bilibili
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -55,4 +56,24 @@ func TestMarshalMap(t *testing.T) {
 	}
 
 	fmt.Println(string(b))
+}
+
+type AAA struct {
+	Text string
+	A    int
+}
+
+var a = &AAA{
+	Text: "abc",
+	A:    123,
+}
+
+func TestPtrFunc(t *testing.T) {
+	assert.Equal(t, "abc", a.Text)
+	assignText(a)
+	assert.Equal(t, "xyz", a.Text)
+}
+
+func assignText(a *AAA) {
+	a.Text = "xyz"
 }

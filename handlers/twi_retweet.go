@@ -37,26 +37,24 @@ func HandleReTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 func handleRetweetDiscord(data *twitter.TweetStreamData, withText bool) {
 
-	msg := &discordgo.MessageEmbed{
+	first := &discordgo.MessageEmbed{
 		Description: fmt.Sprintf("%s 分享了一则推文", data.User.Name),
 		Fields:      []*discordgo.MessageEmbedField{},
 	}
 
 	if withText {
-		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+		first.Fields = append(first.Fields, &discordgo.MessageEmbedField{
 			Name:  "附文",
-			Value: twitter.TextWithoutTCLink(data.Text),
+			Value: data.Text,
 		})
 	}
-
-	discord.SendNewsEmbed(msg)
 
 	if data.RetweetedStatus != nil {
 		retweetedDiscordMessage := &discordgo.MessageEmbed{
 			Description: data.Text,
 		}
 		twitter.AddEntitiesByDiscord(retweetedDiscordMessage, data.RetweetedStatus)
-		discord.SendNewsEmbed(retweetedDiscordMessage)
+		discord.SendNewsEmbedDouble(first, retweetedDiscordMessage)
 	}
 
 }

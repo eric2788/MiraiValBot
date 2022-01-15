@@ -10,12 +10,12 @@ import (
 // CreateMessage 短視頻要單獨發送，否則無法發送原文
 func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...string) (*message.SendingMessage, []*message.ShortVideoElement) {
 
+	extraUrls := ExtractExtraLinks(data)
+
 	videos := make([]*message.ShortVideoElement, 0)
 
-	noLinkText := TextWithoutTCLink(data.Text)
-
 	// 内文
-	msg.Append(qq.NewTextLn(noLinkText))
+	msg.Append(qq.NewTextLn(data.Text))
 
 	if len(alt) > 0 {
 		msg.Append(qq.NextLn())
@@ -26,12 +26,12 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 		}
 	}
 
-	// 連結
-	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
+	// 額外連結
+	if len(extraUrls) > 0 {
 		msg.Append(qq.NextLn())
 		msg.Append(qq.NewTextLn("链接"))
-		for _, url := range data.Entities.Urls {
-			msg.Append(qq.NewTextfLn("- %s", url.ExpandedUrl))
+		for _, url := range extraUrls {
+			msg.Append(qq.NewTextfLn("- %s", url))
 		}
 	}
 
