@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/utils/datetime"
 	"github.com/eric2788/MiraiValBot/utils/qq"
 	"math/rand"
 	"time"
@@ -20,6 +21,28 @@ func randomMember(args []string, source *command.MessageSource) error {
 
 	chosen := members[rand.Intn(len(members))]
 	reply := message.NewSendingMessage().Append(message.NewAt(chosen.Uin))
+	return qq.SendGroupMessage(reply)
+}
+
+func randomMessage(args []string, source *command.MessageSource) error {
+
+	msg, err := qq.GetRandomGroupMessage(source.Message.GroupCode)
+	if err != nil {
+		return err
+	}
+
+	reply := message.NewSendingMessage()
+	var nick string
+	if msg.Sender.CardName == "" {
+		nick = msg.Sender.Nickname
+	} else {
+		nick = msg.Sender.CardName
+	}
+	reply.Append(qq.NewTextfLn("%s 在 %s 说过: ", nick, datetime.FormatSeconds(int64(msg.Time))))
+	for _, element := range msg.Elements {
+		reply.Append(element)
+	}
+
 	return qq.SendGroupMessage(reply)
 }
 
@@ -65,11 +88,13 @@ func randomEssence(args []string, source *command.MessageSource) error {
 var (
 	randomEssenceCommand = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
 	randomMemberCommand  = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
+	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage)
 )
 
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
 	randomMemberCommand,
 	randomEssenceCommand,
+	randomMessageCommand,
 )
 
 func init() {

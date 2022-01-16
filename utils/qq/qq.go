@@ -8,6 +8,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/redis"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -133,6 +134,24 @@ func FindOtherGroupMember(members []*client.GroupMemberInfo, uid int64) *client.
 
 var GroupKey = func(groupCode int64, key string) string { return fmt.Sprintf("qq:group_%d:%s", groupCode, key) }
 var toPrivateKey = func(uid int64, key string) string { return fmt.Sprintf("qq:private_%d:%s", uid, key) }
+
+func GetRandomGroupMessage(gp int64) (*message.GroupMessage, error) {
+	var lastMessageSeq int64
+	if gp == ValGroupInfo.Uin {
+		lastMessageSeq = ValGroupInfo.Read(func(info *client.GroupInfo) interface{} {
+			return info.LastMsgSeq
+		}).(int64)
+	} else {
+		info, err := bot.Instance.GetGroupInfo(gp)
+		if err != nil {
+			return nil, err
+		}
+		lastMessageSeq = info.LastMsgSeq
+	}
+	rand.Seed(time.Now().UnixMicro())
+	id := rand.Int63n(lastMessageSeq + 1)
+	return GetGroupMessage(gp, id)
+}
 
 func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
 

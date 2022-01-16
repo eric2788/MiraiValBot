@@ -8,7 +8,7 @@ import (
 )
 
 // CreateMessage 短視頻要單獨發送，否則無法發送原文
-func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...string) (*message.SendingMessage, []*message.ShortVideoElement) {
+func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*message.TextElement) (*message.SendingMessage, []*message.ShortVideoElement) {
 
 	extraUrls := ExtractExtraLinks(data)
 
@@ -21,8 +21,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...st
 		msg.Append(qq.NextLn())
 
 		// 額外的中文字來減低風控機率
-		for _, altStr := range alt {
-			msg.Append(qq.NewTextLn(altStr))
+		for _, txt := range alt {
+			msg.Append(txt)
 		}
 	}
 

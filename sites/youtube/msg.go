@@ -7,7 +7,7 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
-func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []string, fields ...string) *message.SendingMessage {
+func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []*message.TextElement, fields ...string) *message.SendingMessage {
 
 	blocks := []string{"标题", "开始时间", "直播间"}
 
@@ -58,7 +58,7 @@ func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []string, fi
 	if len(alt) > 0 {
 		msg.Append(qq.NextLn())
 		for _, a := range alt {
-			msg.Append(qq.NewTextLn(a))
+			msg.Append(a)
 		}
 	}
 

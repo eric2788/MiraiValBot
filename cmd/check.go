@@ -22,7 +22,6 @@ func check(args []string, source *command.MessageSource) error {
 				msg.Append(qq.NewTextfLn("禁言结束时间: %s", datetime.FromSeconds(member.ShutUpTimestamp)))
 			}
 			msg.Append(qq.NewTextfLn("显示名称: %s", member.DisplayName()))
-			msg.Append(qq.NewTextfLn("卡片名称: %s", member.CardName))
 			msg.Append(qq.NewTextfLn("性别: %s", genderName(member.Gender)))
 			msg.Append(qq.NewTextfLn("加入日期: %s", datetime.FormatSeconds(member.JoinTime)))
 			msg.Append(qq.NewTextfLn("权限: %s", permissionName(member.Permission)))
