@@ -8,7 +8,6 @@ import (
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
 	"github.com/eric2788/MiraiValBot/utils/qq"
-	"strings"
 )
 
 func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
@@ -29,47 +28,6 @@ func HandleLive(bot *bot.Bot, data *bilibili.LiveData) error {
 		}
 	}
 	return withBilibiliRisky(msg)
-}
-
-func withBilibiliRisky(msg *message.SendingMessage) (err error) {
-	go qq.SendRiskyMessage(5, 10, func(try int) error {
-		clone := message.NewSendingMessage()
-		for _, element := range msg.Elements {
-			clone.Append(element)
-		}
-
-		alt := make([]string, 0)
-
-		// 风控时尝试加随机文字看看会不会减低？
-
-		if try >= 1 {
-			alt = append(alt, fmt.Sprintf("[此广播已被风控 %d 次]", try))
-		}
-
-		if try >= 2 {
-			alt = append(alt, fmt.Sprintf("你好谢谢小笼包再见"))
-		}
-
-		if try >= 3 {
-			alt = append(alt, fmt.Sprintf("卧槽，这个直播真牛逼!"))
-		}
-
-		if try >= 4 {
-			alt = append(alt, fmt.Sprintf("哟，风控四次了，这直播是个啥啊？"))
-		}
-
-		if len(alt) > 0 {
-			logger.Warnf("为被风控的推文新增如下的内容: %s", strings.Join(alt, "\n"))
-			clone.Append(qq.NextLn())
-			for _, al := range alt {
-				clone.Append(qq.NewTextLn(al))
-			}
-		}
-
-		return qq.SendGroupMessage(clone)
-
-	})
-	return
 }
 
 func handleLiveDiscord(data *bilibili.LiveData) {

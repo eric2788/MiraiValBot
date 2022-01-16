@@ -40,7 +40,7 @@ func HandleTweetReply(bot *bot.Bot, data *twitter.TweetStreamData) error {
 
 // withRisky error must be nil
 func withRisky(msg *message.SendingMessage) (err error) {
-	go qq.SendRiskyMessage(5, 10, func(try int) error {
+	go qq.SendRiskyMessage(5, 60, func(try int) error {
 		return qq.SendGroupMessage(msg)
 	})
 	return
