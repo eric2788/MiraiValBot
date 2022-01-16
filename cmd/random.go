@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/utils/datetime"
@@ -29,6 +30,8 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	msg, err := qq.GetRandomGroupMessage(source.Message.GroupCode)
 	if err != nil {
 		return err
+	} else if msg == nil {
+		return fmt.Errorf("随机消息为空")
 	}
 
 	reply := message.NewSendingMessage()

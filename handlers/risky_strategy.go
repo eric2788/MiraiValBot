@@ -28,9 +28,11 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 		if err == nil {
 
-			for _, element := range random.Elements {
-				if txt, ok := element.(*message.TextElement); ok {
-					extras = append(extras, txt)
+			if random != nil {
+				for _, element := range random.Elements {
+					if txt, ok := element.(*message.TextElement); ok {
+						extras = append(extras, txt)
+					}
 				}
 			}
 
@@ -53,6 +55,8 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 			}
 
 		} else { // 随机消息获取失败
+
+			logger.Warnf("获取随机消息时出现错误: %v, 将改为发送风控次数", err)
 
 			// 则发送风控次数?
 			extras = append(extras, qq.NewTextf("此广播已被风控 %d 次 QAQ!!", try))

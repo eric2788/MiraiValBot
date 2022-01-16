@@ -136,20 +136,12 @@ var GroupKey = func(groupCode int64, key string) string { return fmt.Sprintf("qq
 var toPrivateKey = func(uid int64, key string) string { return fmt.Sprintf("qq:private_%d:%s", uid, key) }
 
 func GetRandomGroupMessage(gp int64) (*message.GroupMessage, error) {
-	var lastMessageSeq int64
-	if gp == ValGroupInfo.Uin {
-		lastMessageSeq = ValGroupInfo.Read(func(info *client.GroupInfo) interface{} {
-			return info.LastMsgSeq
-		}).(int64)
-	} else {
-		info, err := bot.Instance.GetGroupInfo(gp)
-		if err != nil {
-			return nil, err
-		}
-		lastMessageSeq = info.LastMsgSeq
+	info, err := bot.Instance.GetGroupInfo(gp)
+	if err != nil {
+		return nil, err
 	}
 	rand.Seed(time.Now().UnixMicro())
-	id := rand.Int63n(lastMessageSeq + 1)
+	id := rand.Int63n(info.LastMsgSeq)
 	return GetGroupMessage(gp, id)
 }
 
@@ -168,6 +160,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	msgList, err := bot.Instance.GetGroupMessages(groupCode, seq, seq+1)
 
 	if err != nil {
+		logger.Warnf("尝试获取群 %d 的群消息 (%d) 时出现错误: %v", groupCode, seq, err)
 		return nil, err
 	}
 	if len(msgList) > 0 {
