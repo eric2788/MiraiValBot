@@ -1,7 +1,6 @@
 package datetime
 
 import (
-	"math"
 	"time"
 )
 
@@ -17,8 +16,13 @@ func FormatMillis(ts int64) string {
 	return time.UnixMilli(ts).Format("2006-01-02 15:04:05")
 }
 
-func Duration(before, after int64) time.Time {
-	return FromSeconds(int64(math.Abs(float64(after - before))))
+func Duration(before, after int64) time.Duration {
+	first, second := FromSeconds(before), FromSeconds(after)
+	if first.After(second) {
+		return first.Sub(second)
+	} else {
+		return second.Sub(first)
+	}
 }
 
 func FromSeconds(seconds int64) time.Time {

@@ -26,7 +26,8 @@ func EssenceTask(bot *bot.Bot) (err error) {
 	} else {
 		duration := datetime.Duration((*setting).LastChecked, time.Now().Unix())
 
-		if duration.Day() < 1 {
+		// 檢測間隔少於一天
+		if duration.Hours() < 24 {
 			return
 		}
 
@@ -71,15 +72,10 @@ func EssenceTask(bot *bot.Bot) (err error) {
 		msg.Append(qq.NewTextfLn("%s 设置了一则由 %s 所发送的消息为群精华消息: ", essence.AddDigestNick, essence.SenderNick))
 		essenceMsg, msgErr := qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.MessageID))
 
-		if essenceMsg != nil && len(essenceMsg.Elements) == 0 {
-			logger.Warnf("群精華消息元素為空？嘗試透過 Internal Message ID 獲取")
-			essenceMsg, msgErr = qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.InternalMessageID))
-		}
-
 		if msgErr != nil || essenceMsg == nil {
 			msg.Append(qq.NewTextf("获取消息失败: %v", msgErr))
 		} else if len(essenceMsg.Elements) == 0 {
-			msg.Append(qq.NewTextf("获取消息失败: 消息为空"))
+			msg.Append(qq.NewTextf("获取消息 %d 失败: 消息为空", essence.MessageID))
 		} else {
 			for _, element := range essenceMsg.Elements {
 				// 不要回復元素
