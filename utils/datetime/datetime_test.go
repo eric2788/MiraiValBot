@@ -8,17 +8,15 @@ import (
 
 func TestDuration(t *testing.T) {
 
-	before := time.Now().Unix()
+	before := time.Now().Unix() - 86400
 
 	t.Logf("before: %d\n", before)
-
-	<-time.After(time.Second * 5)
 
 	after := time.Now().Unix()
 
 	t.Logf("after: %d\n", after)
 
-	assert.Equal(t, 5, Duration(before, after).Second())
+	assert.Equal(t, time.Duration(24), Duration(before, after)/time.Hour)
 }
 
 func TestParseISO(t *testing.T) {
