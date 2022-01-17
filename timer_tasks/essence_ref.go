@@ -76,6 +76,10 @@ func EssenceTask(bot *bot.Bot) (err error) {
 			msg.Append(qq.NewTextf("获取消息失败: 消息为空"))
 		} else {
 			for _, element := range essenceMsg.Elements {
+				// 不要回復元素
+				if _, ok := element.(*message.ReplyElement); ok {
+					continue
+				}
 				msg.Append(element)
 			}
 		}
