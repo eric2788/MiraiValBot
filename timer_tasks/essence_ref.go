@@ -72,6 +72,8 @@ func EssenceTask(bot *bot.Bot) (err error) {
 		essenceMsg, msgErr := qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.MessageID))
 		if msgErr != nil || essenceMsg == nil {
 			msg.Append(qq.NewTextf("获取消息失败: %v", msgErr))
+		} else if len(essenceMsg.Elements) == 0 {
+			msg.Append(qq.NewTextf("获取消息失败: 消息为空"))
 		} else {
 			for _, element := range essenceMsg.Elements {
 				msg.Append(element)
