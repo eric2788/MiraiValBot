@@ -43,6 +43,10 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	}
 	reply.Append(qq.NewTextfLn("%s 在 %s 说过: ", nick, datetime.FormatSeconds(int64(msg.Time))))
 	for _, element := range msg.Elements {
+		// 不要回復元素
+		if _, ok := element.(*message.ReplyElement); ok {
+			continue
+		}
 		reply.Append(element)
 	}
 

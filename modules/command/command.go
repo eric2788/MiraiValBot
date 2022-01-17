@@ -45,7 +45,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 		}()
 
-		admin := member.Permission >= client.Administrator
+		admin := member.Permission <= client.Administrator
 		response, err := InvokeCommand(content, admin, source)
 
 		if err != nil {

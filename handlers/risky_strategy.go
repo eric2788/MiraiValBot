@@ -43,6 +43,10 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 				sendFirst := message.NewSendingMessage()
 				for _, element := range random.Elements {
+					// 不要回復元素
+					if _, ok := element.(*message.ReplyElement); ok {
+						continue
+					}
 					sendFirst.Append(element)
 				}
 				_ = qq.SendGroupMessage(sendFirst)
