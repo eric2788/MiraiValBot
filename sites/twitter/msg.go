@@ -48,6 +48,9 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 				} else {
 					msg.Append(img)
 				}
+			// Gif 圖片
+			case "animated_gif":
+				fallthrough
 			// 視頻
 			case "video":
 				videoInfo := m.VideoInfo
@@ -110,6 +113,8 @@ func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, data *TweetStreamData) {
 				msg.Image = &discordgo.MessageEmbedImage{
 					URL: m.MediaUrlHttps,
 				}
+			case "animated_gif":
+				fallthrough
 			case "video":
 				for _, variant := range m.VideoInfo.Variants {
 					if variant.ContentType == "video/mp4" {
@@ -127,6 +132,8 @@ func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, data *TweetStreamData) {
 				switch m.Type {
 				case "photo":
 					photoUrls = append(photoUrls, m.MediaUrlHttps)
+				case "animated_gif":
+					fallthrough
 				case "video":
 					for _, variant := range m.VideoInfo.Variants {
 						if variant.ContentType == "video/mp4" {

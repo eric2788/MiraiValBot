@@ -15,6 +15,15 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	room := data.LiveInfo.RoomId
 
 	info := data.Content["info"].([]interface{})
+
+	{
+		base := info[0].([]interface{})
+		if base[9].(float64) != 0 {
+			// 抽獎/紅包彈幕
+			return nil
+		}
+	}
+
 	userInfo := info[2].([]interface{})
 
 	danmu := info[1].(string)
