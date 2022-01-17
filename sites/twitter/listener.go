@@ -77,7 +77,7 @@ func GetUserInfo(user string) (*ExistUserResp, error) {
 
 	var existUserResp = &ExistUserResp{}
 
-	if err := request.Get(file.ApplicationYaml.Val.TwitterLookUpUrl, existUserResp); err != nil {
+	if err := request.Get(fmt.Sprintf("%s/%s", file.ApplicationYaml.Val.TwitterLookUpUrl, user), existUserResp); err != nil {
 		if httpError, ok := err.(*request.HttpError); ok {
 
 			var errorResp = &ErrorResp{}
