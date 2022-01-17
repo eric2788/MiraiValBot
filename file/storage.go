@@ -30,6 +30,7 @@ var defaultStorageData = storageData{
 		Verbose:       false,
 		YearlyCheck:   true,
 		LastChecked:   0,
+		MsgSeqAfter:   0,
 	},
 	Listening: &listening{
 		Bilibili: []int64{},

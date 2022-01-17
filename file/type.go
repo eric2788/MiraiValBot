@@ -27,6 +27,7 @@ type (
 		Verbose       bool  `json:"verbose"`
 		YearlyCheck   bool  `json:"yearlyCheck"`
 		LastChecked   int64 `json:"lastChecked"`
+		MsgSeqAfter   int64 `json:"msgSeqAfter"`
 	}
 )
 
@@ -34,28 +35,29 @@ type (
 
 type (
 	StorageData struct {
-		Answers   map[string]bool   `json:"answers"`
-		Responses map[string]string `json:"responses"`
-		Bilibili  *BilibiliSettings `json:"bilibili"`
-		Setting   *Setting          `json:"setting"`
-		Listening *Listening        `json:"listening"`
+		Answers   map[string]bool
+		Responses map[string]string
+		Bilibili  *BilibiliSettings
+		Setting   *Setting
+		Listening *Listening
 	}
 
 	BilibiliSettings struct {
-		HighLightedUsers *set.Int64Set `json:"highLightedUsers"`
+		HighLightedUsers *set.Int64Set
 	}
 
 	Listening struct {
-		Bilibili *set.Int64Set  `json:"bilibili"`
-		Youtube  *set.StringSet `json:"youtube"`
-		Twitter  *set.StringSet `json:"twitter"`
+		Bilibili *set.Int64Set
+		Youtube  *set.StringSet
+		Twitter  *set.StringSet
 	}
 
 	Setting struct {
-		VerboseDelete bool  `json:"verboseDelete"`
-		Verbose       bool  `json:"verbose"`
-		YearlyCheck   bool  `json:"yearlyCheck"`
-		LastChecked   int64 `json:"lastChecked"`
+		VerboseDelete bool
+		Verbose       bool
+		YearlyCheck   bool
+		LastChecked   int64
+		MsgSeqAfter   int64
 	}
 )
 
@@ -71,6 +73,7 @@ func (s *StorageData) toRealStorageData() *storageData {
 			Verbose:       s.Setting.Verbose,
 			YearlyCheck:   s.Setting.YearlyCheck,
 			LastChecked:   s.Setting.LastChecked,
+			MsgSeqAfter:   s.Setting.MsgSeqAfter,
 		},
 		Listening: &listening{
 			Bilibili: s.Listening.Bilibili.ToArr(),
@@ -91,6 +94,7 @@ func (s *StorageData) parse(sd *storageData) {
 		Verbose:       sd.Setting.Verbose,
 		YearlyCheck:   sd.Setting.YearlyCheck,
 		LastChecked:   sd.Setting.LastChecked,
+		MsgSeqAfter:   sd.Setting.MsgSeqAfter,
 	}
 	s.Listening = &Listening{
 		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),

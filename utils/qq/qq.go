@@ -141,7 +141,8 @@ func GetRandomGroupMessage(gp int64) (*message.GroupMessage, error) {
 		return nil, err
 	}
 	rand.Seed(time.Now().UnixMicro())
-	id := rand.Int63n(info.LastMsgSeq)
+	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
+	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter
 	return GetGroupMessage(gp, id)
 }
 
@@ -161,6 +162,17 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 
 	if err != nil {
 		logger.Warnf("尝试获取群 %d 的群消息 (%d) 时出现错误: %v", groupCode, seq, err)
+
+		// get msg error: 104 <= 消息不存在
+		// 即 機器人加群前的消息，需要略過
+		if strings.Contains(err.Error(), "104") {
+			file.UpdateStorage(func() {
+				if file.DataStorage.Setting.MsgSeqAfter < seq {
+					file.DataStorage.Setting.MsgSeqAfter = seq
+					logger.Warnf("已調整機器人消息獲取最低範圍為 %v", seq)
+				}
+			})
+		}
 		return nil, err
 	}
 	if len(msgList) > 0 {
