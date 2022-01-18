@@ -21,6 +21,7 @@
 - 高亮用户弹幕/进入直播间/发送SC的通知 (可指令设置)
 - 油管开播/预定直播/结束的通知 (可指令设置)
 - 推特发文/转发推文/回复推文的通知 (可指令设置)
+- 以上通知同步发送到 Discord 特定频道
 - 防风控广播重发机制
 
 ## 有关广播通知
@@ -68,6 +69,10 @@
 ![stats](assets/stats.png)
 
 ![img.png](assets/portainer.png)
+
+## Docker 部署
+
+[docker.io](https://hub.docker.com/r/eric1008818/mirai-val-bot)
 
 ## 未来规划
 
