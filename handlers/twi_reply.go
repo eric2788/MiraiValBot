@@ -10,7 +10,7 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
-func HandleTweetReply(bot *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
 
 	discordMsg := &discordgo.MessageEmbed{
 		Description: fmt.Sprintf("[%s](%s) 回复了 [%s](%s) 的一则推文", data.User.Name, twitter.GetUserLink(data.User.ScreenName), *data.InReplyToScreenName, twitter.GetUserLink(*data.InReplyToScreenName)),

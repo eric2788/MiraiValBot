@@ -30,8 +30,15 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 			if random != nil {
 				for _, element := range random.Elements {
-					if txt, ok := element.(*message.TextElement); ok {
-						extras = append(extras, txt)
+					switch e := element.(type) {
+					case *message.TextElement:
+						extras = append(extras, e)
+					case *message.AtElement:
+						extras = append(extras, message.NewText(e.Display))
+					case *message.FaceElement:
+						extras = append(extras, message.NewText(e.Name))
+					default:
+						break
 					}
 				}
 			}

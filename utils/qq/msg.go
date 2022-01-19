@@ -46,7 +46,7 @@ func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, e
 		return groupVoiceElement, nil
 	}
 
-	data, err := getTTS(text)
+	data, err := getTts(text)
 
 	if err != nil {
 		return nil, err
@@ -57,25 +57,39 @@ func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, e
 		redisError := redis.Store(key, voice)
 		if redisError != nil {
 			logger.Warnf("Redis 儲存 群組語音消息 時出現錯誤: %v", redisError)
+		} else {
+			logger.Infof("Redis 儲存 群組語音消息 成功。")
 		}
 	}
 	return
 }
 
-func getTTS(text string) (data []byte, err error) {
+func getTts(text string) (data []byte, err error) {
 	key := fmt.Sprintf("qq:tts:%x", md5.Sum([]byte(text)))
 
 	data, notExist, err := redis.GetBytes(key)
-	if err == nil || !notExist {
-		return
+
+	// 非不存在的情況下出現錯誤
+	if err != nil && !notExist {
+		logger.Warnf("嘗試從 Redis 獲取 TTS 時出現錯誤: %v", err)
+		return nil, err
+	} else if err == nil { // 找到記錄
+		return data, nil
 	}
+
 	data, err = bot.Instance.GetTts(text)
+
 	if err == nil {
 		redisError := redis.StoreBytes(key, data, redis.Permanent)
 		if redisError != nil {
 			logger.Warnf("Redis 儲存 TTS 時出現錯誤: %v", redisError)
+		} else {
+			logger.Infof("Redis 儲存 TTS 成功。")
 		}
+	} else {
+		logger.Warnf("QQ 獲取 TTS 時出現錯誤: %v", err)
 	}
+
 	return
 }
 
@@ -91,7 +105,7 @@ func NewTtsWithPrivate(uid int64, text string) (voice *message.PrivateVoiceEleme
 		return privateVoiceElement, nil
 	}
 
-	data, err := getTTS(text)
+	data, err := getTts(text)
 
 	if err != nil {
 		return nil, err

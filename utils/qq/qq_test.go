@@ -21,6 +21,19 @@ func TestParseFromPersistence(t *testing.T) {
 	fmt.Printf("%+v", *gpMsg)
 }
 
+func TestSwitch(t *testing.T) {
+	for i := 0; i <= 3; i++ {
+		switch i {
+		case 1:
+			fmt.Println("1")
+		case 3:
+			fmt.Println("3")
+		default:
+			break
+		}
+	}
+}
+
 func TestDuration(t *testing.T) {
 
 	var sec time.Duration = 10
