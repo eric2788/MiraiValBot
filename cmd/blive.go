@@ -37,7 +37,7 @@ func bUnCare(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 
 	if bilibili.RemoveHighlightUser(uid) {
-		reply.Append(qq.NewTextf("新增高亮用户 %d 成功。", uid))
+		reply.Append(qq.NewTextf("刪除高亮用户 %d 成功。", uid))
 	} else {
 		reply.Append(qq.NewTextf("高亮用户 %d 不存在", uid))
 	}
