@@ -56,6 +56,10 @@ func InitValGroupInfo(bot *bot.Bot) {
 	ValGroupInfo = ginfo
 
 	logger.Infof("以指定 %s (%d) 为 瓦群。(共 %d 個成員)", ValGroupInfo.Name, ValGroupInfo.Uin, len(ValGroupInfo.Members))
+
+	if err := botSaid.TakeFromRedis(); err != nil {
+		logger.Warnf("嘗試從 Redis 獲取機器人聊天記錄時出現錯誤: %v", err)
+	}
 }
 
 func RefreshGroupInfo() {
@@ -94,7 +98,6 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 			content.Texts = append(content.Texts, e.Content)
 		case *message.AtElement:
 			content.At = append(content.At, e.Target)
-			content.Texts = append(content.Texts, e.Display)
 		case *message.FaceElement:
 			content.Faces = append(content.Faces, e.Name)
 		case *message.GroupImageElement:
@@ -140,9 +143,17 @@ func GetRandomGroupMessage(gp int64) (*message.GroupMessage, error) {
 	if err != nil {
 		return nil, err
 	}
+	return getRandomGroupMessageWithInfo(gp, info)
+}
+
+func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.GroupMessage, error) {
 	rand.Seed(time.Now().UnixMicro())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
 	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter
+	if botSaid.Contains(id) {
+		// 略過機器人訊息
+		return getRandomGroupMessageWithInfo(gp, info)
+	}
 	return GetGroupMessage(gp, id)
 }
 
@@ -177,6 +188,13 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	}
 	if len(msgList) > 0 {
 		msg := msgList[0]
+		if msg.Sender.Uin == bot.Instance.Uin {
+			// 不要機器人自己發過的訊息
+			logger.Infof("獲取的隨機群訊息為機器人訊息，正在重新獲取...")
+			botSaid.Add(msg.Id)
+			<-time.After(time.Second) // 緩衝
+			return GetRandomGroupMessage(groupCode)
+		}
 		persistGroupMsg.Parse(msg)
 		err = redis.Store(key, persistGroupMsg)
 		if err != nil {

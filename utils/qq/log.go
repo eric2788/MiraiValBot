@@ -5,6 +5,8 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
+	"github.com/eric2788/MiraiValBot/modules/timer"
+	"time"
 )
 
 type log struct {
@@ -47,9 +49,19 @@ func (l *log) HookEvent(bot *bot.Bot) {
 
 	bot.OnSelfGroupMessage(func(cli *client.QQClient, msg *message.GroupMessage) {
 		logger.Infof("向群 %s (%d) 發送消息: %s", msg.GroupName, msg.GroupCode, msg.ToString())
+
+		// 新增說過的訊息
+		if msg.GroupCode == ValGroupInfo.Uin {
+			botSaid.Add(msg.Id)
+		}
+
 	})
 }
 
 func init() {
 	eventhook.HookLifeCycle(&log{})
+	timer.RegisterTimer("qq.save_bot_said", time.Minute, func(bot *bot.Bot) (err error) {
+		botSaid.SaveToRedis()
+		return
+	})
 }
