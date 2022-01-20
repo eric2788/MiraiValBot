@@ -30,7 +30,7 @@ func tTerminate(args []string, source *command.MessageSource) error {
 	screenId := args[0]
 	reply := qq.CreateReply(source.Message)
 
-	result, err := twitter.StartListen(screenId)
+	result, err := twitter.StopListen(screenId)
 
 	if err != nil {
 		reply.Append(qq.NewTextf("中止监听时出现错误: %v", err))
