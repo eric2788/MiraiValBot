@@ -1,6 +1,7 @@
 package bilibili
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/file"
@@ -12,6 +13,24 @@ type RoomInfo struct {
 	Code    int    `json:"code"`
 	Msg     string `json:"msg"`
 	Message string `json:"message"`
+
+	Data interface{} `json:"data"`
+}
+
+type RoomInfoData struct {
+	RoomId    int64  `json:"room_id"`
+	Uid       int64  `json:"uid"`
+	ShortId   int32  `json:"short_id"`
+	Title     string `json:"title"`
+	UserCover string `json:"user_cover"`
+}
+
+func (d *RoomInfoData) Parse(data map[string]interface{}) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, d)
 }
 
 const Host = "https://api.live.bilibili.com/room/v1/Room/get_info"
@@ -27,7 +46,16 @@ func StartListen(room int64) (bool, error) {
 	if info, err := GetRoomInfo(room); err != nil {
 		return false, err
 	} else if info.Code != 0 {
-		return false, fmt.Errorf("房間不存在")
+		return false, fmt.Errorf(info.Msg)
+	} else {
+		// 轉換短號為房間號
+		data := &RoomInfoData{}
+		if m, ok := info.Data.(map[string]interface{}); ok {
+			if err := data.Parse(m); err != nil {
+				return false, err
+			}
+			room = data.RoomId
+		}
 	}
 
 	file.UpdateStorage(func() {
