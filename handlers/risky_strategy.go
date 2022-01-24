@@ -26,6 +26,12 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 		random, err := qq.GetRandomGroupMessage(qq.ValGroupInfo.Uin)
 
+		if try > 2 { // 發送多一則隨機消息
+			for _, element := range getRandomMessageByTry(1) { // 使用 1 確保不無限套娃
+				extras = append(extras, element)
+			}
+		}
+
 		if err == nil {
 
 			if random != nil {
