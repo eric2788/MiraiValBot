@@ -63,7 +63,8 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 					sendFirst.Append(element)
 				}
 				_ = qq.SendGroupMessage(sendFirst)
-				<-time.After(time.Second * 5) // 发送完等待五秒
+				<-time.After(time.Second * 5)     // 发送完等待五秒
+				return getRandomMessageByTry(try) // 再獲取一則隨機消息
 
 			} else {
 
