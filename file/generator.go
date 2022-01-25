@@ -46,7 +46,7 @@ var defaultConfig = Configuration{
 	},
 	Val: ValConfig{
 		GroupId:          123456789,
-		TwitterLookUpUrl: "http://172.17.0.1:8989",
+		TwitterLookUpUrl: "http://172.17.0.1:8989/twitter/userExist",
 	},
 	Redis: RedisConfig{
 		Host:     "172.17.0.1",

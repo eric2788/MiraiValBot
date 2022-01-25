@@ -23,9 +23,8 @@ type ExistUserResp struct {
 }
 
 type ProfileData struct {
-	Id       int64  `json:"id"`
-	Name     string `json:"name"`
-	Username string `json:"username"`
+	Id         int64  `json:"id"`
+	ScreenName string `json:"screen_name"`
 }
 
 type ErrorResp struct {
