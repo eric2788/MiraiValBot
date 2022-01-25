@@ -23,7 +23,7 @@ type ExistUserResp struct {
 }
 
 type ProfileData struct {
-	Id         int64  `json:"id"`
+	Id         string `json:"id"`
 	ScreenName string `json:"screen_name"`
 }
 
