@@ -136,7 +136,7 @@ func (t TweetStreamData) IsRetweetWithText() bool {
 }
 
 func (t TweetStreamData) IsReply() bool {
-	return t.InReplyToScreenName != nil
+	return t.InReplyToScreenName != nil && *t.InReplyToScreenName != ""
 }
 
 func (t TweetStreamData) GetCommand() string {
