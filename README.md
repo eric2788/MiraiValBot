@@ -14,7 +14,8 @@
 - 基于 `XX是XXX吗？` 的格式随机回答是非题 (可指令设置或基于 Seed 生成)
 - 自定义回应(可指令设置)
 - 显示撤回的消息(可指令设置开关)
-- 随机 @群成员，随机抽一则群精华消息显示，随机群消息
+- 随机 @群成员，随机抽一则群精华消息显示，随机抽一则群消息显示
+- 透过 @机器人 並说点东西，将会随机发送一则群消息作为回复
 - 显示上个月/上年度的今天所设置的群精华消息 (鞭尸用) (可指令设置月还是年)
 - 查成分指令(群成员的资料)
 - B站开播通知 (可指令设置)
@@ -28,12 +29,7 @@
 
 本机器人的所有通知是基于 Redis PubSub 进行的，因此如果没有负责 publish 的 爬虫服务器的话，本机器人的广播功能基本形同虚设。
 
-目前负责爬虫的服务器如下
-- blive-redis-server (负责B站相关广播)
-- twitter-redis-server (负责推特相关广播)
-- youtube-live-redis-server (负责油管相关广播)
-
-以上爬虫都是开源，可在我的 repo 找到
+负责爬虫的服务器为 [PlatformsCrawler](https://github.com/eric2788/platformscrawler)
 
 ### 油管广播内容
 
@@ -64,7 +60,7 @@
 
 ## 性能
 
-`RaspberryPI 4B 8GB linux/arm64/v8`
+`RaspberryPi 4B 8GB linux/arm64/v8`
 
 ![stats](assets/stats.png)
 
@@ -74,8 +70,5 @@
 
 [docker.io](https://hub.docker.com/r/eric1008818/mirai-val-bot)
 
-## 未来规划
-
-- [ ] 使用 `go` 语言重写所有爬虫并合为一体 (模块化管理)
 
 
