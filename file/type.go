@@ -8,12 +8,17 @@ type (
 		Answers   map[string]bool   `json:"answers"`
 		Responses map[string]string `json:"responses"`
 		Bilibili  *bilibiliSettings `json:"bilibili"`
+		Twitter   *twitterSettings  `json:"twitter"`
 		Setting   *setting          `json:"setting"`
 		Listening *listening        `json:"listening"`
 	}
 
 	bilibiliSettings struct {
 		HighLightedUsers []int64 `json:"highLightedUsers"`
+	}
+
+	twitterSettings struct {
+		ShowReply bool `json:"showReply"`
 	}
 
 	listening struct {
@@ -38,12 +43,17 @@ type (
 		Answers   map[string]bool
 		Responses map[string]string
 		Bilibili  *BilibiliSettings
+		Twitter   *TwitterSettings
 		Setting   *Setting
 		Listening *Listening
 	}
 
 	BilibiliSettings struct {
 		HighLightedUsers *set.Int64Set
+	}
+
+	TwitterSettings struct {
+		ShowReply bool
 	}
 
 	Listening struct {
@@ -68,6 +78,9 @@ func (s *StorageData) toRealStorageData() *storageData {
 		Bilibili: &bilibiliSettings{
 			HighLightedUsers: s.Bilibili.HighLightedUsers.ToArr(),
 		},
+		Twitter: &twitterSettings{
+			ShowReply: s.Twitter.ShowReply,
+		},
 		Setting: &setting{
 			VerboseDelete: s.Setting.VerboseDelete,
 			Verbose:       s.Setting.Verbose,
@@ -88,6 +101,9 @@ func (s *StorageData) parse(sd *storageData) {
 	s.Responses = sd.Responses
 	s.Bilibili = &BilibiliSettings{
 		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
+	}
+	s.Twitter = &TwitterSettings{
+		ShowReply: sd.Twitter.ShowReply,
 	}
 	s.Setting = &Setting{
 		VerboseDelete: sd.Setting.VerboseDelete,

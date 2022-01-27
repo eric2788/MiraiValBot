@@ -25,6 +25,9 @@ var defaultStorageData = storageData{
 	Bilibili: &bilibiliSettings{
 		HighLightedUsers: []int64{},
 	},
+	Twitter: &twitterSettings{
+		ShowReply: true,
+	},
 	Setting: &setting{
 		VerboseDelete: false,
 		Verbose:       false,

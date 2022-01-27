@@ -6,11 +6,17 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/discord"
+	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
 func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
+
+	// 设置了不推送推文回复
+	if !file.DataStorage.Twitter.ShowReply {
+		return nil
+	}
 
 	discordMsg := &discordgo.MessageEmbed{
 		Description: fmt.Sprintf("[%s](%s) 回复了 [%s](%s) 的一则推文", data.User.Name, twitter.GetUserLink(data.User.ScreenName), *data.InReplyToScreenName, twitter.GetUserLink(*data.InReplyToScreenName)),

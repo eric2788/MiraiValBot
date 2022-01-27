@@ -32,20 +32,18 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 			}
 		}
 
-		if err == nil {
+		if err == nil && random != nil {
 
-			if random != nil {
-				for _, element := range random.Elements {
-					switch e := element.(type) {
-					case *message.TextElement:
-						extras = append(extras, e)
-					case *message.AtElement:
-						extras = append(extras, message.NewText(e.Display))
-					case *message.FaceElement:
-						extras = append(extras, message.NewText(e.Name))
-					default:
-						break
-					}
+			for _, element := range random.Elements {
+				switch e := element.(type) {
+				case *message.TextElement:
+					extras = append(extras, e)
+				case *message.AtElement:
+					extras = append(extras, message.NewText(e.Display))
+				case *message.FaceElement:
+					extras = append(extras, message.NewText(e.Name))
+				default:
+					break
 				}
 			}
 
@@ -80,7 +78,11 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 		} else { // 随机消息获取失败
 
-			logger.Warnf("获取随机消息时出现错误: %v, 将改为发送风控次数", err)
+			if err != nil {
+				logger.Warnf("获取随机消息时出现错误: %v, 将改为发送风控次数", err)
+			} else if random == nil {
+				logger.Warnf("获取随机消息时出现错误: 訊息為 nil , 将改为发送风控次数")
+			}
 
 			// 则发送风控次数?
 			extras = append(extras, qq.NewTextf("此广播已被风控 %d 次 QAQ!!", try))

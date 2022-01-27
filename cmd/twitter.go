@@ -26,6 +26,18 @@ func tListen(args []string, source *command.MessageSource) error {
 
 }
 
+func tshowReply(args []string, source *command.MessageSource) error {
+
+	file.UpdateStorage(func() {
+		file.DataStorage.Twitter.ShowReply = !file.DataStorage.Twitter.ShowReply
+	})
+
+	reply := qq.CreateReply(source.Message)
+	reply.Append(qq.NewTextf("已成功设置推送推文回复为: %v", file.DataStorage.Twitter.ShowReply))
+
+	return qq.SendGroupMessage(reply)
+}
+
 func tTerminate(args []string, source *command.MessageSource) error {
 	screenId := args[0]
 	reply := qq.CreateReply(source.Message)
@@ -60,12 +72,14 @@ var (
 	tListenCommand    = command.NewNode([]string{"listen", "监听"}, "启动监听用户", true, tListen, "<用户ID>")
 	tTerminateCommand = command.NewNode([]string{"terminate", "中止", "中止监听"}, "中止监听用户", true, tTerminate, "<用户ID>")
 	tListeningCommand = command.NewNode([]string{"listening", "正在监听", "监听列表"}, "获取监听列表", false, tListening)
+	tShowReplyCommand = command.NewNode([]string{"showReply", "推送回复", "推送推文回复"}, "切换推文回复推送", true, tshowReply)
 )
 
 var twitterCommand = command.NewParent([]string{"twitter", "推特"}, "推特指令",
 	tListenCommand,
 	tTerminateCommand,
 	tListeningCommand,
+	tShowReplyCommand,
 )
 
 func init() {
