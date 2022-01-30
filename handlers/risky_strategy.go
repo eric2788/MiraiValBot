@@ -2,9 +2,9 @@ package handlers
 
 import (
 	"github.com/Mrs4s/MiraiGo/message"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
 	"github.com/eric2788/MiraiValBot/sites/youtube"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 	if try > 0 {
 
-		random, err := qq.GetRandomGroupMessage(qq.ValGroupInfo.Uin)
+		random, err := qq2.GetRandomGroupMessage(qq2.ValGroupInfo.Uin)
 
 		if try > 2 { // 發送多一則隨機消息
 			for _, element := range getRandomMessageByTry(1) { // 使用 1 確保不無限套娃
@@ -66,7 +66,7 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 
 					sendFirst.Append(element)
 				}
-				_ = qq.SendGroupMessage(sendFirst)
+				_ = qq2.SendGroupMessage(sendFirst)
 				<-time.After(time.Second * 5)     // 发送完等待五秒
 				return getRandomMessageByTry(try) // 再獲取一則隨機消息
 
@@ -85,7 +85,7 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 			}
 
 			// 则发送风控次数?
-			extras = append(extras, qq.NewTextf("此广播已被风控 %d 次 QAQ!!", try))
+			extras = append(extras, qq2.NewTextf("此广播已被风控 %d 次 QAQ!!", try))
 
 		}
 
@@ -95,20 +95,20 @@ func getRandomMessageByTry(try int) []*message.TextElement {
 }
 
 func withBilibiliRisky(msg *message.SendingMessage) (err error) {
-	go qq.SendRiskyMessage(5, 60, func(try int) error {
+	go qq2.SendRiskyMessage(5, 60, func(try int) error {
 
 		clone := cloneMessage(msg)
 
 		alt := getRandomMessageByTry(try)
 
 		if len(alt) > 0 {
-			clone.Append(qq.NextLn())
+			clone.Append(qq2.NextLn())
 			for _, element := range alt {
 				clone.Append(element)
 			}
 		}
 
-		return qq.SendGroupMessage(clone)
+		return qq2.SendGroupMessage(clone)
 
 	})
 	return
@@ -116,7 +116,7 @@ func withBilibiliRisky(msg *message.SendingMessage) (err error) {
 
 func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
 
-	go qq.SendRiskyMessage(5, 60, func(try int) error {
+	go qq2.SendRiskyMessage(5, 60, func(try int) error {
 
 		clone := cloneMessage(originalMsg)
 
@@ -125,12 +125,12 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 		msg, videos := twitter.CreateMessage(clone, data, alt...)
 
 		// 先發送推文內容
-		if err := qq.SendGroupMessage(msg); err != nil {
+		if err := qq2.SendGroupMessage(msg); err != nil {
 			return err
 		}
 		// 後發送視頻訊息
 		for _, video := range videos {
-			if err := qq.SendGroupMessage(message.NewSendingMessage().Append(video)); err != nil {
+			if err := qq2.SendGroupMessage(message.NewSendingMessage().Append(video)); err != nil {
 				return err
 			}
 		}
@@ -151,7 +151,7 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 		titles[i] = block
 	}
 
-	go qq.SendRiskyMessage(5, 60, func(try int) error {
+	go qq2.SendRiskyMessage(5, 60, func(try int) error {
 
 		noTitle := false
 
@@ -163,7 +163,7 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 		}
 
 		msg := youtube.CreateQQMessage(desc, info, noTitle, alt, titles...)
-		return qq.SendGroupMessage(msg)
+		return qq2.SendGroupMessage(msg)
 	})
 
 	return

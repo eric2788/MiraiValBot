@@ -5,7 +5,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/utils/array"
+	"github.com/eric2788/common-utils/array"
 )
 
 type AtResponse struct {

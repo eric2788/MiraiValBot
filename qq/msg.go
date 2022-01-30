@@ -7,7 +7,7 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/redis"
-	"github.com/eric2788/MiraiValBot/utils/request"
+	"github.com/eric2788/common-utils/request"
 )
 
 func NewTextf(msg string, arg ...interface{}) *message.TextElement {

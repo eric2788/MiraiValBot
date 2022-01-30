@@ -4,14 +4,21 @@ WORKDIR /app
 
 COPY . .
 
+# install timzone data
+RUN apk add --no-cache tzdata
+
 RUN go build -o /go/bin/valbot
 
 FROM alpine:latest
 
+# copy timezone info from builder
+COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /go/bin/valbot /valbot
 RUN chmod +x /valbot
 
 EXPOSE 8080
+
+ENV TZ=Asia/Hong_Kong
 
 WORKDIR /app
 

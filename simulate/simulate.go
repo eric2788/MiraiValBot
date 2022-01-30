@@ -5,7 +5,7 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/eric2788/MiraiValBot/file"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"

@@ -3,7 +3,7 @@ package file
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/eric2788/MiraiValBot/utils/set"
+	"github.com/eric2788/common-utils/set"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

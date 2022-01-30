@@ -2,7 +2,7 @@ package broadcaster
 
 import (
 	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/utils/set"
+	"github.com/eric2788/common-utils/set"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 	"runtime/debug"

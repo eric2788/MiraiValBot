@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	"github.com/eric2788/MiraiValBot/qq"
 	"strings"
 )
 

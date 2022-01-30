@@ -7,7 +7,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
 	"github.com/go-redis/redis/v8"
 	"strings"
 )
@@ -66,17 +66,17 @@ func (l *liveRoomStatusHandler) HandleMessage(bot *bot.Bot, rd *redis.Message) {
 
 	msg := message.NewSendingMessage()
 	if err := status.GetError(); err != "" {
-		msg.Append(qq.NewTextf("【%s】%s 初始化监听时出现错误: %s", status.Platform, status.GetRoom(), err))
+		msg.Append(qq2.NewTextf("【%s】%s 初始化监听时出现错误: %s", status.Platform, status.GetRoom(), err))
 	} else {
 		txt, ok := translation[status.Status]
 		if !ok {
 			txt = status.Status
 		}
-		msg.Append(qq.NewTextf("【%s】%s %s", status.Platform, status.GetRoom(), txt))
+		msg.Append(qq2.NewTextf("【%s】%s %s", status.Platform, status.GetRoom(), txt))
 	}
 
-	go qq.SendRiskyMessage(5, 5, func(try int) error {
-		return qq.SendGroupMessage(msg)
+	go qq2.SendRiskyMessage(5, 5, func(try int) error {
+		return qq2.SendGroupMessage(msg)
 	})
 }
 

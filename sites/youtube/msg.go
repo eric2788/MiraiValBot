@@ -3,8 +3,8 @@ package youtube
 import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
-	"github.com/eric2788/MiraiValBot/utils/datetime"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	"github.com/eric2788/MiraiValBot/qq"
+	"github.com/eric2788/common-utils/datetime"
 )
 
 func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []*message.TextElement, fields ...string) *message.SendingMessage {

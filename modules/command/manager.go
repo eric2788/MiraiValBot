@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/utils/array"
+	"github.com/eric2788/common-utils/array"
 	"strings"
 )
 

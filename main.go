@@ -8,8 +8,8 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/simulate"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 	"os"
 	"os/signal"
 

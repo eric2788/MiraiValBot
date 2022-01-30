@@ -6,7 +6,7 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/utils/request"
+	"github.com/eric2788/common-utils/request"
 	"strings"
 )
 

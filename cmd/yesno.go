@@ -5,13 +5,13 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/modules/response"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
 )
 
 func setYesNo(args []string, source *command.MessageSource) error {
 	question, ans := args[0], args[1] == "true"
 
-	reply := qq.CreateReply(source.Message)
+	reply := qq2.CreateReply(source.Message)
 
 	if !response.YesNoPattern.MatchString(question) {
 		reply.Append(message.NewText("不是一个有效的问题"))
@@ -19,16 +19,16 @@ func setYesNo(args []string, source *command.MessageSource) error {
 		file.UpdateStorage(func() {
 			file.DataStorage.Answers[question] = ans
 		})
-		reply.Append(qq.NewTextf("已成功设置 %s 的答案为 %v", question, ans))
+		reply.Append(qq2.NewTextf("已成功设置 %s 的答案为 %v", question, ans))
 	}
 
-	return qq.SendGroupMessage(reply)
+	return qq2.SendGroupMessage(reply)
 }
 
 func removeYesNo(args []string, source *command.MessageSource) error {
 	question := args[0]
 
-	reply := qq.CreateReply(source.Message)
+	reply := qq2.CreateReply(source.Message)
 
 	if _, ok := file.DataStorage.Answers[question]; !ok {
 		reply.Append(message.NewText("找不到此问题"))
@@ -36,21 +36,21 @@ func removeYesNo(args []string, source *command.MessageSource) error {
 		file.UpdateStorage(func() {
 			delete(file.DataStorage.Answers, question)
 		})
-		reply.Append(qq.NewTextf("已成功移除 %s 的答案", question))
+		reply.Append(qq2.NewTextf("已成功移除 %s 的答案", question))
 	}
 
-	return qq.SendGroupMessage(reply)
+	return qq2.SendGroupMessage(reply)
 }
 
 func checkYesNo(args []string, source *command.MessageSource) error {
-	reply := qq.CreateReply(source.Message)
+	reply := qq2.CreateReply(source.Message)
 	reply.Append(message.NewText("问题列表: "))
 
 	for question, ans := range file.DataStorage.Answers {
-		reply.Append(qq.NewTextf("%s = %v\n", question, ans))
+		reply.Append(qq2.NewTextf("%s = %v\n", question, ans))
 	}
 
-	return qq.SendGroupMessage(reply)
+	return qq2.SendGroupMessage(reply)
 }
 
 var (

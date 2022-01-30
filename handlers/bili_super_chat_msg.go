@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
 func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {

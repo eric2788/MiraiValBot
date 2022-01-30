@@ -2,7 +2,7 @@ package qq
 
 import (
 	"github.com/eric2788/MiraiValBot/redis"
-	"github.com/eric2788/MiraiValBot/utils/set"
+	"github.com/eric2788/common-utils/set"
 )
 
 var botSaid = &BotSaidHistory{

@@ -6,8 +6,8 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/discord"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/sites/twitter"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
 func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {

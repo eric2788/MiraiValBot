@@ -4,30 +4,30 @@ import (
 	"fmt"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/utils/datetime"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
+	"github.com/eric2788/common-utils/datetime"
 	"math/rand"
 	"time"
 )
 
 func randomMember(args []string, source *command.MessageSource) error {
 	rand.Seed(time.Now().UnixMicro())
-	members := qq.ValGroupInfo.Members
+	members := qq2.ValGroupInfo.Members
 
 	if len(members) == 0 {
-		reply := qq.CreateReply(source.Message).Append(message.NewText("群成员列表为空。"))
-		_ = qq.SendGroupMessage(reply)
+		reply := qq2.CreateReply(source.Message).Append(message.NewText("群成员列表为空。"))
+		_ = qq2.SendGroupMessage(reply)
 		return nil
 	}
 
 	chosen := members[rand.Intn(len(members))]
 	reply := message.NewSendingMessage().Append(message.NewAt(chosen.Uin))
-	return qq.SendGroupMessage(reply)
+	return qq2.SendGroupMessage(reply)
 }
 
 func randomMessage(args []string, source *command.MessageSource) error {
 
-	msg, err := qq.GetRandomGroupMessage(source.Message.GroupCode)
+	msg, err := qq2.GetRandomGroupMessage(source.Message.GroupCode)
 	if err != nil {
 		return err
 	} else if msg == nil {
@@ -41,7 +41,7 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	} else {
 		nick = msg.Sender.CardName
 	}
-	reply.Append(qq.NewTextfLn("%s 在 %s 说过: ", nick, datetime.FormatSeconds(int64(msg.Time))))
+	reply.Append(qq2.NewTextfLn("%s 在 %s 说过: ", nick, datetime.FormatSeconds(int64(msg.Time))))
 	for _, element := range msg.Elements {
 		switch element.(type) {
 		case *message.ReplyElement:
@@ -54,7 +54,7 @@ func randomMessage(args []string, source *command.MessageSource) error {
 		reply.Append(element)
 	}
 
-	return qq.SendGroupMessage(reply)
+	return qq2.SendGroupMessage(reply)
 }
 
 func randomEssence(args []string, source *command.MessageSource) error {
@@ -69,15 +69,15 @@ func randomEssence(args []string, source *command.MessageSource) error {
 	}
 
 	if len(gpDist) == 0 {
-		reply := qq.CreateReply(source.Message).Append(message.NewText("群精华消息列表为空。"))
-		_ = qq.SendGroupMessage(reply)
+		reply := qq2.CreateReply(source.Message).Append(message.NewText("群精华消息列表为空。"))
+		_ = qq2.SendGroupMessage(reply)
 		return nil
 	}
 
 	chosen := gpDist[rand.Intn(len(gpDist))]
 
 	seq := int64(chosen.MessageID)
-	essence, err := qq.GetGroupMessage(source.Message.GroupCode, seq)
+	essence, err := qq2.GetGroupMessage(source.Message.GroupCode, seq)
 
 	if err != nil {
 		logger.Warnf("获取群精华消息失败: %+v", chosen)
@@ -93,7 +93,7 @@ func randomEssence(args []string, source *command.MessageSource) error {
 		msg.Append(message.NewText("没有群精华消息"))
 	}
 
-	return qq.SendGroupMessage(msg)
+	return qq2.SendGroupMessage(msg)
 }
 
 var (

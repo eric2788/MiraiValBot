@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
 	"strings"
 )
 
@@ -20,13 +20,13 @@ func voice(args []string, source *command.MessageSource) error {
 		}
 	}()
 
-	voiceElement, err := qq.NewTts(content)
+	voiceElement, err := qq2.NewTts(content)
 
 	if err != nil {
 		return err
 	}
 
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
+	return qq2.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
 }
 
 var voiceCommand = command.NewNode([]string{"voice", "speak", "语音"}, "语音指令", false, voice, "<讯息>")

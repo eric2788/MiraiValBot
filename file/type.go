@@ -1,6 +1,6 @@
 package file
 
-import "github.com/eric2788/MiraiValBot/utils/set"
+import "github.com/eric2788/common-utils/set"
 
 // Real Type
 type (

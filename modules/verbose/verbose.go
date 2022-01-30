@@ -8,8 +8,8 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/redis"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 	"sync"
 )
 
@@ -60,23 +60,23 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
 		var who string
 
-		if member := qq.FindGroupMember(event.OperatorUin); member != nil {
+		if member := qq2.FindGroupMember(event.OperatorUin); member != nil {
 			who = member.Nickname
 		} else {
 			who = fmt.Sprintf("%v", event.OperatorUin)
 		}
 
 		msg := message.NewSendingMessage()
-		msg.Append(qq.NewTextfLn("%s 所撤回的消息: ", who))
-		m, err := qq.GetGroupMessage(event.GroupCode, int64(event.MessageId))
+		msg.Append(qq2.NewTextfLn("%s 所撤回的消息: ", who))
+		m, err := qq2.GetGroupMessage(event.GroupCode, int64(event.MessageId))
 		if err != nil || m == nil {
-			msg.Append(qq.NewTextf("获取消息失败: %v", err))
+			msg.Append(qq2.NewTextf("获取消息失败: %v", err))
 		} else {
 			for _, element := range m.Elements {
 				msg.Append(element)
 			}
 		}
-		_ = qq.SendGroupMessage(msg)
+		_ = qq2.SendGroupMessage(msg)
 	})
 
 	qqBot.OnGroupMessage(func(c *client.QQClient, gm *message.GroupMessage) {
@@ -85,8 +85,8 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 			return
 		}
 
-		key := qq.GroupKey(gm.GroupCode, fmt.Sprintf("msg:%d", gm.Id))
-		persist := &qq.PersistentGroupMessage{}
+		key := qq2.GroupKey(gm.GroupCode, fmt.Sprintf("msg:%d", gm.Id))
+		persist := &qq2.PersistentGroupMessage{}
 		persist.Parse(gm)
 
 		if err := redis.StoreTemp(key, persist); err != nil {

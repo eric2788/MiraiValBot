@@ -9,7 +9,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	"github.com/eric2788/MiraiValBot/qq"
 	"math/rand"
 	"regexp"
 	"strings"

@@ -6,8 +6,8 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/timer"
-	"github.com/eric2788/MiraiValBot/utils/datetime"
-	"github.com/eric2788/MiraiValBot/utils/qq"
+	qq2 "github.com/eric2788/MiraiValBot/qq"
+	"github.com/eric2788/common-utils/datetime"
 	"time"
 )
 
@@ -39,7 +39,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 
 	logger.Infof("正在檢查 %s 的今天有無群精華消息被設置...", tellTime())
 
-	essences, err := bot.GetGroupEssenceMsgList(qq.ValGroupInfo.Uin)
+	essences, err := bot.GetGroupEssenceMsgList(qq2.ValGroupInfo.Uin)
 
 	if err != nil {
 		return
@@ -64,18 +64,18 @@ func EssenceTask(bot *bot.Bot) (err error) {
 	}
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextf("%s 的今天，共有 %d 则群精华消息被设置", tellTime(), len(todayEssences)))
-	_ = qq.SendGroupMessage(msg)
+	msg.Append(qq2.NewTextf("%s 的今天，共有 %d 则群精华消息被设置", tellTime(), len(todayEssences)))
+	_ = qq2.SendGroupMessage(msg)
 
 	for _, essence := range todayEssences {
 		msg = message.NewSendingMessage()
-		msg.Append(qq.NewTextfLn("%s 设置了一则由 %s 所发送的消息为群精华消息: ", essence.AddDigestNick, essence.SenderNick))
-		essenceMsg, msgErr := qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.MessageID))
+		msg.Append(qq2.NewTextfLn("%s 设置了一则由 %s 所发送的消息为群精华消息: ", essence.AddDigestNick, essence.SenderNick))
+		essenceMsg, msgErr := qq2.GetGroupMessage(qq2.ValGroupInfo.Uin, int64(essence.MessageID))
 
 		if msgErr != nil || essenceMsg == nil {
-			msg.Append(qq.NewTextf("获取消息失败: %v", msgErr))
+			msg.Append(qq2.NewTextf("获取消息失败: %v", msgErr))
 		} else if len(essenceMsg.Elements) == 0 {
-			msg.Append(qq.NewTextf("获取消息 %d 失败: 消息为空", essence.MessageID))
+			msg.Append(qq2.NewTextf("获取消息 %d 失败: 消息为空", essence.MessageID))
 		} else {
 			for _, element := range essenceMsg.Elements {
 				// 不要回復元素
@@ -85,7 +85,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 				msg.Append(element)
 			}
 		}
-		_ = qq.SendGroupMessage(msg)
+		_ = qq2.SendGroupMessage(msg)
 	}
 
 	return

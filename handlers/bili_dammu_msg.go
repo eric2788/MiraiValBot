@@ -6,8 +6,8 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/discord"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
-	"github.com/eric2788/MiraiValBot/utils/qq"
 )
 
 func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
