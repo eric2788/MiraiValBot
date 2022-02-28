@@ -32,7 +32,7 @@ func Log(msg string, arg ...interface{}) {
 	}
 	line := msg
 	if len(arg) > 0 {
-		line = fmt.Sprintf(msg, arg)
+		line = fmt.Sprintf(msg, arg...)
 	}
 	logger.Infof("發送 Discord Log 訊息 => %s\n", line)
 	_, err := client.ChannelMessageSend(strconv.FormatInt(config.LogChannel, 10), line)
