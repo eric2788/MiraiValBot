@@ -2,7 +2,6 @@ package twitter
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -29,17 +28,10 @@ func TestPtrStruct(t *testing.T) {
 	if err := json.Unmarshal([]byte(testPtrStr), testPtr); err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(*testPtr.A)
-
 	assert.Nil(t, testPtr.A.C)
-
 	testPtr = &TestPtr{}
 	if err := json.Unmarshal([]byte(testPtrStr2), testPtr); err != nil {
 		t.Fatal(err)
 	}
-
-	fmt.Println(*testPtr)
-
 	assert.Nil(t, testPtr.A)
 }

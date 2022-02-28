@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestPanic(t *testing.T) {
+func ATestPanic(t *testing.T) {
 	invoke("A")
 	invoke("B")
 	invoke("C")

@@ -2,7 +2,6 @@ package bilibili
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -38,24 +37,12 @@ func TestParseMap(t *testing.T) {
 				if err := json.Unmarshal([]byte(s), &p); err != nil {
 					t.Fatal(err)
 				} else {
-					fmt.Printf("%+v", p)
+					assert.Equal(t, p.Age, 15)
+					assert.Equal(t, p.Name, "Lam")
 				}
 			}
 		}
 	}
-}
-
-func TestMarshalMap(t *testing.T) {
-	a := map[string]interface{}{
-		"a": 1,
-		"b": "str",
-	}
-	b, err := json.Marshal(a)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	fmt.Println(string(b))
 }
 
 type AAA struct {

@@ -9,6 +9,7 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/redis"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 )
@@ -212,4 +213,26 @@ func IsMuted(uid int64) bool {
 		return false
 	}
 	return member.ShutUpTimestamp > time.Now().Unix()
+}
+
+// reLogin - 參考了 Sora233/Mirai-Template 中的重連方式
+func reLogin(qBot *bot.Bot) error {
+	if qBot.Online.Load() {
+		return nil
+	}
+	logger.Info("嘗試使用緩存會話登錄...")
+	token, err := os.ReadFile("./session.token")
+	if err == nil {
+		err = qBot.TokenLogin(token)
+		if err == nil {
+			return nil
+		}
+	}
+	logger.Warnf("緩存會話登錄失敗: %v", err)
+	logger.Info("將嘗試使用普通登錄。")
+	err = bot.CommonLogin()
+	if err == nil {
+		bot.SaveToken()
+	}
+	return err
 }

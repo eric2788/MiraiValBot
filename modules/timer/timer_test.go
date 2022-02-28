@@ -9,20 +9,20 @@ import (
 	"time"
 )
 
-func TestContextCancel(t *testing.T) {
+func ContextCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() {
 		<-ctx.Done()
-		fmt.Println("Done A")
+		fmt.Println("done A")
 	}()
 
 	go func() {
 		<-ctx.Done()
-		fmt.Println("Done B")
+		fmt.Println("done B")
 	}()
 
-	<-time.After(time.Second * 5)
+	<-time.After(time.Second * 2)
 	cancel()
 }
 
@@ -36,7 +36,7 @@ func assignBool(b *bool) {
 	*b = false
 }
 
-func TestTicker(t *testing.T) {
+func ATestTicker(t *testing.T) {
 
 	ctx, cancel := context.WithCancel(context.Background())
 

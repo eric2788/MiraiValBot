@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func BenchmarkChannel(b *testing.B) {
+func ABenchmarkChannel(b *testing.B) {
 
 	channel := make(chan int, 1024)
 
