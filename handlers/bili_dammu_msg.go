@@ -35,19 +35,17 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	//debug only
 	logger.Debugf("從房間 %d 收到來自 %s (%d) 的彈幕: %s\n", room, uname, uid, danmu)
 
-	go discord.SendNewsEmbed(&discordgo.MessageEmbed{
-		Description: fmt.Sprintf("[%s](%s) 在 [%s](%s) 的直播间发送了一则讯息: ", uname, biliSpaceLink(uid), biliRoomLink(room), data.LiveInfo.Name),
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "弹幕",
-				Value: danmu,
-			},
-		},
-	})
+	// discord fields
+	fields := make([]*discordgo.MessageEmbedField, 0)
 
+	// qq messages
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在 %s 的直播间发送了一则消息", uname, data.LiveInfo.Name))
+
+	// is stamp
 	if obj, ok := base[13].(map[string]interface{}); ok {
+
+		// qq
 		stamp, err := qq.NewImageByUrl(obj["url"].(string))
 		if err != nil {
 			logger.Errorf("轉換發送圖片失敗: %s, 將改為發送彈幕", err)
@@ -58,9 +56,36 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 			msg.Append(qq.NewTextLn("表情包: "))
 			msg.Append(stamp)
 		}
+
+		// discord
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:   "表情包",
+			Value:  "[表情包](" + obj["url"].(string) + ")",
+			Inline: false,
+		})
+
 	} else {
+
+		// qq
 		msg.Append(qq.NewTextfLn("弹幕: %s", danmu))
+
+		// discord
+		fields = append(fields, &discordgo.MessageEmbedField{
+			Name:  "表情包",
+			Value: danmu,
+		})
+
 	}
+
+	go discord.SendNewsEmbed(&discordgo.MessageEmbed{
+		Description: fmt.Sprintf("[%s](%s) 在 [%s](%s) 的直播间发送了一则讯息: ", uname, biliSpaceLink(uid), data.LiveInfo.Name, biliRoomLink(room)),
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "弹幕",
+				Value: danmu,
+			},
+		},
+	})
 
 	return withBilibiliRisky(msg)
 }

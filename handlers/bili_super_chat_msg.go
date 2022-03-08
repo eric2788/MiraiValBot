@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/bwmarrin/discordgo"
+	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/sites/bilibili"
 )
@@ -29,6 +31,26 @@ func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg.Append(qq.NewTextfLn("在 %s 的直播间收到来自 %s 的醒目留言", data.LiveInfo.Name, superchat.UserInfo.UName))
 	msg.Append(qq.NewTextfLn("￥ %d", superchat.Price))
 	msg.Append(qq.NewTextf("「%s」", superchat.Message))
+
+	go discord.SendNewsEmbed(&discordgo.MessageEmbed{
+		Description: fmt.Sprintf(
+			"在 [%s](%s) 的直播间收到来自 [%s](%s) 的醒目留言 ",
+			data.LiveInfo.Name,
+			biliRoomLink(data.LiveInfo.RoomId),
+			superchat.UserInfo.UName,
+			biliSpaceLink(superchat.UID),
+		),
+		Fields: []*discordgo.MessageEmbedField{
+			{
+				Name:  "￥",
+				Value: fmt.Sprintf("%v", superchat.Price),
+			},
+			{
+				Name:  "内容",
+				Value: superchat.Message,
+			},
+		},
+	})
 
 	return withBilibiliRisky(msg)
 }
