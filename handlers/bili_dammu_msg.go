@@ -55,6 +55,7 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 		} else {
 			//stamp.Height = int32(obj["height"].(float64))
 			//stamp.Width = int32(obj["width"].(float64))
+			msg.Append(qq.NewTextLn("表情包: "))
 			msg.Append(stamp)
 		}
 	} else {
