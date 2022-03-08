@@ -16,12 +16,10 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 
 	info := data.Content["info"].([]interface{})
 
-	{
-		base := info[0].([]interface{})
-		if base[9].(float64) != 0 {
-			// 抽獎/紅包彈幕
-			return nil
-		}
+	base := info[0].([]interface{})
+	if base[9].(float64) != 0 {
+		// 抽獎/紅包彈幕
+		return nil
 	}
 
 	userInfo := info[2].([]interface{})
@@ -49,7 +47,19 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在 %s 的直播间发送了一则消息", uname, data.LiveInfo.Name))
-	msg.Append(qq.NewTextfLn("弹幕: %s", danmu))
+	if obj, ok := base[13].(map[string]interface{}); ok {
+		stamp, err := qq.NewImageByUrl(obj["url"].(string))
+		if err != nil {
+			logger.Errorf("轉換發送圖片失敗: %s, 將改為發送彈幕", err)
+			msg.Append(qq.NewTextfLn("表情包: [%s]", danmu))
+		} else {
+			//stamp.Height = int32(obj["height"].(float64))
+			//stamp.Width = int32(obj["width"].(float64))
+			msg.Append(stamp)
+		}
+	} else {
+		msg.Append(qq.NewTextfLn("弹幕: %s", danmu))
+	}
 
 	return withBilibiliRisky(msg)
 }
