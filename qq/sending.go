@@ -128,13 +128,12 @@ func SendGroupTempMessage(gp int64, uid int64, msg *message.SendingMessage) (err
 	return
 }
 
-// SendRiskyMessage 发送风控几率大的消息並实行重试机制
-func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
+func retry(maxTry int, seconds int64, do func(int) error, catch func(error) error, stillRiskFunc func()) {
 	try, stillRisky := 0, true
 	for try < maxTry {
-		if err := f(try); err != nil {
-			if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
-				logger.Warnf("发送消息出现风控，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
+		if err := do(try); err != nil {
+			if catch(err) != nil {
+				logger.Warnf("執行重試操作時出现風控，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
 				<-time.After(time.Second * time.Duration(seconds))
 				try += 1
 			} else {
@@ -147,6 +146,21 @@ func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
 		}
 	}
 	if stillRisky {
-		logger.Errorf("消息尝试执行 %d 次后依然被风控，放弃执行。", try)
+		logger.Errorf("尝试执行 %d 次后依然有錯誤，放弃执行。", try)
+		if stillRiskFunc != nil {
+			stillRiskFunc()
+		}
 	}
+}
+
+// SendRiskyMessage 发送风控几率大的消息並实行重试机制
+func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
+	retry(maxTry, seconds, f, func(err error) error {
+		if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
+			logger.Warnf("发送消息時出現風控")
+			return err
+		} else {
+			return nil
+		}
+	}, nil)
 }

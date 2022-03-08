@@ -21,9 +21,14 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 		logger.Warn("bot 已離線: ", e.Message)
 		logger.Warn("將嘗試重新登入...")
 		// 參考了 Sora233/DDBOT 中的重連方式
-		if err := reLogin(qBot); err != nil {
-			logger.Fatalf("重新登入出現錯誤: %v, 將自動退出。", err)
-		}
+		go retry(3, 60, func(try int) error {
+			return reLogin(qBot)
+		}, func(err error) error {
+			logger.Warnf("重新登入時出現錯誤: %v", err)
+			return err
+		}, func() {
+			logger.Fatalf("重試多次後依然無法登入，將強制退出程式。")
+		})
 	})
 
 	qBot.OnGroupMessage(func(cli *client.QQClient, msg *message.GroupMessage) {
