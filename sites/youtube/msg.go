@@ -111,6 +111,13 @@ func CreateDiscordMessage(desc string, info *LiveInfo, fields ...string) *discor
 				Name:  blocks[2],
 				Value: GetYTLink(info),
 			})
+
+		if info.Info.Cover != nil && *info.Info.Cover != "" {
+			cover := *info.Info.Cover
+			dm.Image = &discordgo.MessageEmbedImage{
+				URL: cover,
+			}
+		}
 	} else {
 		dm.Fields = append(dm.Fields, &discordgo.MessageEmbedField{
 			Name:  blocks[2],
