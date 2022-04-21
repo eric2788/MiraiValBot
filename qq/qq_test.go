@@ -2,7 +2,6 @@ package qq
 
 import (
 	"encoding/json"
-	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -19,32 +18,4 @@ func TestParseFromPersistence(t *testing.T) {
 	gpMsg := persist.ToGroupMessage()
 	assert.Equal(t, (*gpMsg).GroupCode, persist.GroupCode)
 	assert.Equal(t, (*gpMsg).Sender.Uin, persist.Sender.Uin)
-}
-
-func aTestConvertArrToSet(t *testing.T) {
-
-	key := GroupKey(ValGroupInfo.Uin, "bot_self_msg")
-
-	redis.Init()
-	defer redis.Close()
-	botSaidArr := make([]int64, 0)
-
-	if exist, err := redis.Get(key, &botSaidArr); err != nil {
-		t.Fatal(err)
-	} else if !exist {
-		t.Logf("not found key: %s", key)
-		return
-	}
-
-	if err := redis.Delete(key); err != nil {
-		t.Fatal(err)
-	}
-
-	for _, id := range botSaidArr {
-		if err := redis.SetAdd(key, id); err != nil {
-			t.Logf("set add error: %s", err)
-		} else {
-			t.Logf("set add success: %d", id)
-		}
-	}
 }
