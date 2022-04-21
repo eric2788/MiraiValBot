@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	qq2 "github.com/eric2788/MiraiValBot/qq"
@@ -62,6 +63,24 @@ func randomEssence(args []string, source *command.MessageSource) error {
 	rand.Seed(time.Now().UnixMicro())
 
 	gpDist, err := source.Client.GetGroupEssenceMsgList(source.Message.GroupCode)
+
+	// why empty ? not sure but let's try other method
+	if len(gpDist) == 0 {
+		logger.Warnf("群消息為空，正在使用第 2 種方式獲取")
+		gpDist, err = source.Client.GetGroupEssenceMsgList(qq2.ValGroupInfo.Uin)
+	}
+
+	// why empty ? not sure but let's try other method
+	if len(gpDist) == 0 {
+		logger.Warnf("群消息為空，正在使用第 3 種方式獲取")
+		gpDist, err = bot.Instance.GetGroupEssenceMsgList(source.Message.GroupCode)
+	}
+
+	// why empty ? not sure but let's try other method
+	if len(gpDist) == 0 {
+		logger.Warnf("群消息為空，正在使用第 4 種方式獲取")
+		gpDist, err = bot.Instance.GetGroupEssenceMsgList(qq2.ValGroupInfo.Uin)
+	}
 
 	if err != nil {
 		logger.Warnf("获取群精华消息列表失败: %v", source.Message.GroupCode)

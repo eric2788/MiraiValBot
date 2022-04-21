@@ -43,8 +43,11 @@ func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, e
 	if ok, err := redis.Get(key, groupVoiceElement); err != nil {
 		return nil, err
 	} else if ok {
+		logger.Infof("在redis 發現 「%v」 的 voiceElement 緩存， 將使用緩存", text)
 		return groupVoiceElement, nil
 	}
+
+	logger.Infof("從 redis 找不到 voiceElement (%s), 將使用QQ上傳", key)
 
 	data, err := getTts(text)
 
@@ -74,8 +77,11 @@ func getTts(text string) (data []byte, err error) {
 		logger.Warnf("嘗試從 Redis 獲取 TTS 時出現錯誤: %v", err)
 		return nil, err
 	} else if err == nil { // 找到記錄
+		logger.Infof("在redis 發現 「%v」 的 bytes 語音緩存， 將使用緩存", text)
 		return data, nil
 	}
+
+	logger.Infof("redis 中找不到 TTS (%s), 將使用QQ上傳", key)
 
 	data, err = bot.Instance.GetTts(text)
 

@@ -16,6 +16,7 @@ func voice(args []string, source *command.MessageSource) error {
 
 	defer func() {
 		if r := recover(); r != nil {
+			logger.Errorf("panic when converting %v to tts: %v", content, r)
 			err = errors.New("tts 转换失败")
 		}
 	}()
@@ -23,8 +24,11 @@ func voice(args []string, source *command.MessageSource) error {
 	voiceElement, err := qq2.NewTts(content)
 
 	if err != nil {
+		logger.Errorf("tts 转换失败: %v", err)
 		return err
 	}
+
+	logger.Infof("嘗試發送voiceElement: %v", content)
 
 	return qq2.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
 }

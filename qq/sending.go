@@ -35,7 +35,7 @@ func SendGroupMessage(msg *message.SendingMessage) error {
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			err = fmt.Errorf(fmt.Sprintf("致命错误 => %v from %s", recovered, debug.Stack()))
+			err = fmt.Errorf("致命错误 => %v from %s", recovered, debug.Stack())
 		}
 		if err != nil {
 			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)

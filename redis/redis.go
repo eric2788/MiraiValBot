@@ -76,6 +76,22 @@ func GetBytes(key string) ([]byte, bool, error) {
 	return b, err == rgo.Nil, err
 }
 
+func SetAdd(key string, value interface{}) error {
+	return rdb.SAdd(ctx, key, value).Err()
+}
+
+func SetRemove(key string, value interface{}) error {
+	return rdb.SRem(ctx, key, value).Err()
+}
+
+func SetContains(key string, value interface{}) (bool, error) {
+	return rdb.SIsMember(ctx, key, value).Result()
+}
+
+func Delete(key string) error {
+	return rdb.Del(ctx, key).Err()
+}
+
 func Get(key string, arg interface{}) (bool, error) {
 	b, notExist, err := GetBytes(key)
 	if notExist {

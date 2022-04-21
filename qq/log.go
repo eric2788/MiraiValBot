@@ -5,8 +5,6 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/modules/timer"
-	"time"
 )
 
 type log struct {
@@ -21,7 +19,7 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 		logger.Warn("bot 已離線: ", e.Message)
 		logger.Warn("將嘗試重新登入...")
 		// 參考了 Sora233/DDBOT 中的重連方式
-		go retry(3, 60, func(try int) error {
+		go retry(10, 60, func(try int) error {
 			return reLogin(qBot)
 		}, func(err error) error {
 			logger.Warnf("重新登入時出現錯誤: %v", err)
@@ -70,8 +68,4 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 
 func init() {
 	eventhook.HookLifeCycle(&log{})
-	timer.RegisterTimer("qq.save_bot_said", time.Minute, func(bot *bot.Bot) (err error) {
-		botSaid.SaveToRedis()
-		return
-	})
 }

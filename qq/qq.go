@@ -57,10 +57,6 @@ func InitValGroupInfo(bot *bot.Bot) {
 	ValGroupInfo = ginfo
 
 	logger.Infof("以指定 %s (%d) 为 瓦群。(共 %d 個成員)", ValGroupInfo.Name, ValGroupInfo.Uin, len(ValGroupInfo.Members))
-
-	if err := botSaid.TakeFromRedis(); err != nil {
-		logger.Warnf("嘗試從 Redis 獲取機器人聊天記錄時出現錯誤: %v", err)
-	}
 }
 
 func RefreshGroupInfo() {
