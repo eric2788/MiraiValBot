@@ -8,7 +8,27 @@ import (
 )
 
 func say(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(message.NewText(strings.Join(args, " "))))
+
+	elements := source.Message.Elements
+
+	textElements := qq.NewTextLn(strings.Join(args, " "))
+
+	msg := message.NewSendingMessage()
+	msg.Append(textElements)
+
+	// find all possible elements to add
+	for _, element := range elements {
+		switch e := element.(type) {
+		case *message.AtElement:
+			msg.Append(e)
+		case *message.FaceElement:
+			msg.Append(e)
+		case *message.GroupImageElement:
+			msg.Append(e)
+		}
+	}
+
+	return qq.SendGroupMessage(msg)
 }
 
 var sayCommand = command.NewNode([]string{"say", "说话", "说"}, "说话指令", false, say, "<讯息>")

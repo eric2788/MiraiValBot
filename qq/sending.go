@@ -133,7 +133,7 @@ func retry(maxTry int, seconds int64, do func(int) error, catch func(error) erro
 	for try < maxTry {
 		if err := do(try); err != nil {
 			if catch(err) != nil {
-				logger.Warnf("執行重試操作時出现風控，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
+				logger.Warnf("執行重試操作時出现錯誤，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
 				<-time.After(time.Second * time.Duration(seconds))
 				try += 1
 			} else {
@@ -157,7 +157,7 @@ func retry(maxTry int, seconds int64, do func(int) error, catch func(error) erro
 func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
 	retry(maxTry, seconds, f, func(err error) error {
 		if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
-			logger.Warnf("发送消息時出現風控")
+			logger.Warnf("嘗試发送消息時出現風控: %v", err)
 			return err
 		} else {
 			return nil

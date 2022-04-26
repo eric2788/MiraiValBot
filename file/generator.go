@@ -33,10 +33,11 @@ type RedisConfig struct {
 }
 
 type DiscordConfig struct {
-	Token       string `yaml:"token"`
-	Guild       int64  `yaml:"guild"`
-	LogChannel  int64  `yaml:"logChannel"`
-	NewsChannel int64  `yaml:"newsChannel"`
+	Token            string `yaml:"token"`
+	Guild            int64  `yaml:"guild"`
+	LogChannel       int64  `yaml:"logChannel"`
+	NewsChannel      int64  `yaml:"newsChannel"`
+	CrossPlatChannel int64  `yaml:"crossPlatChannel"`
 }
 
 var defaultConfig = Configuration{

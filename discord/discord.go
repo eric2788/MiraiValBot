@@ -22,6 +22,8 @@ func Start() {
 		return
 	}
 	client = discord
+
+	go StartChatListen() // 啟動跨平台聊天
 	Log("Discord 機器人已成功啟動。")
 }
 
