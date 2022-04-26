@@ -50,7 +50,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	logger.Debugf("圖片: %v", strings.Join(imgs, ",\n"))
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("[Discord] %v: %v", author, text))
+	msg.Append(qq.NewTextLn("[來自Discord]"))
+	msg.Append(qq.NewTextfLn("%v: %v", author, text))
 	for _, img := range imgs {
 		imgElement, err := qq.NewImageByUrl(img)
 		if err != nil {

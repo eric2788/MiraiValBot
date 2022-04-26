@@ -180,3 +180,14 @@ func showHelpLine(parents []string, node Node) string {
 	}
 	return fmt.Sprintf("%s - %s", line, node.Description)
 }
+
+func ExtractPrefix(line string) string {
+	content := make([]string, 0)
+	for _, words := range strings.Split(line, " ") {
+		if strings.HasPrefix(words, Prefix) {
+			continue
+		}
+		content = append(content, words)
+	}
+	return strings.Join(content, " ")
+}

@@ -14,11 +14,13 @@ func sendToDiscord(args []string, source *command.MessageSource) error {
 
 	sender := source.Message.Sender
 	content := qq.ParseMsgContent(source.Message.Elements)
-	text := strings.Join(args, " ")
+	realTexts := command.ExtractPrefix(strings.Join(content.Texts, " "))
 
 	embed := &discordgo.MessageEmbed{
-		Title:       "有从 QQ 传来的新消息",
-		Description: text,
+		Description: realTexts,
+		Footer: &discordgo.MessageEmbedFooter{
+			Text: "来自QQ",
+		},
 		Author: &discordgo.MessageEmbedAuthor{
 			Name:    sender.Nickname,
 			IconURL: fmt.Sprintf("https://q.qlogo.cn/g?b=qq&s=640&nk=%v", sender.Uin),

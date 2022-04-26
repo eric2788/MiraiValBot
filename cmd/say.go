@@ -4,17 +4,12 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/qq"
-	"strings"
 )
 
 func say(args []string, source *command.MessageSource) error {
 
 	elements := source.Message.Elements
-
-	textElements := qq.NewTextLn(strings.Join(args, " "))
-
 	msg := message.NewSendingMessage()
-	msg.Append(textElements)
 
 	// find all possible elements to add
 	for _, element := range elements {
@@ -25,6 +20,9 @@ func say(args []string, source *command.MessageSource) error {
 			msg.Append(e)
 		case *message.GroupImageElement:
 			msg.Append(e)
+		case *message.TextElement:
+			content := command.ExtractPrefix(e.Content)
+			msg.Append(message.NewText(content))
 		}
 	}
 
