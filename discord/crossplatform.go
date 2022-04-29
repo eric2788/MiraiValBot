@@ -34,8 +34,8 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var author string
-	if m.Member.Nick == m.Author.Username {
-		author = m.Member.Nick
+	if m.Member.Nick == "" {
+		author = m.Author.Username
 	} else {
 		author = fmt.Sprintf("%v (%v)", m.Member.Nick, m.Author.Username)
 	}
