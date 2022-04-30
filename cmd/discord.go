@@ -22,7 +22,7 @@ func sendToDiscord(args []string, source *command.MessageSource) error {
 			Text: "来自QQ",
 		},
 		Author: &discordgo.MessageEmbedAuthor{
-			Name:    sender.Nickname,
+			Name:    sender.DisplayName(),
 			IconURL: fmt.Sprintf("https://q.qlogo.cn/g?b=qq&s=640&nk=%v", sender.Uin),
 		},
 	}
