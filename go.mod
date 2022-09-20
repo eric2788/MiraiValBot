@@ -6,10 +6,10 @@ require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20211228141737-6b3a7548aa4e
 	github.com/Mrs4s/MiraiGo v0.0.0-20211228140953-ab72f3dc28da
 	github.com/bwmarrin/discordgo v0.23.2
-	github.com/eric2788/common-utils v0.0.0-20220130115833-cd722ec34cb3
+	github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
