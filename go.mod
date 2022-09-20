@@ -17,6 +17,7 @@ require (
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f // indirect
 	github.com/RomiChan/protobuf v0.0.0-20211223055824-048df49a8956 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/corpix/uarand v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
