@@ -96,6 +96,9 @@ func GetRoomInfo(room int64) (*RoomInfo, error) {
 	var info = &RoomInfo{}
 	if err := request.Get(fmt.Sprintf("%s?room_id=%d", Host, room), info); err != nil {
 		return nil, err
+	} else if info.Code == -401 {
+		logger.Warnf("請求處於非法訪問，正在更換 User-Agent 並重新請求...")
+		return GetRoomInfo(room)
 	}
 
 	roomInfoCache[room] = info
