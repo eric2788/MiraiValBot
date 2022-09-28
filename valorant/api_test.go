@@ -39,3 +39,56 @@ func TestGetMatchDetails(t *testing.T) {
 	assert.Equal(t, "Unrated", data.MetaData.Mode)
 	assert.Equal(t, "7a85de9a-4032-61a9-61d8-f4aa2b4a84b6", data.MetaData.SeasonId)
 }
+
+func TestGetGameStatus(t *testing.T) {
+	status, err := GetGameStatus(AsiaSpecific)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "ap", status.Region)
+	assert.Equal(t, 200, status.Status)
+}
+
+func TestGetLocalizedContent(t *testing.T) {
+	localization, err := GetLocalizedContent()
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, 15, len(localization.LocalizeItems))
+}
+
+func TestGetMMRHistories(t *testing.T) {
+	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "勝たんしかrinrin", mmrHistories.Name)
+	assert.Equal(t, "JP1", mmrHistories.Tag)
+}
+
+func TestGetMMRDetailsV1(t *testing.T) {
+	mmrDetails, err := GetMMRDetailsV1("勝たんしかrinrin", "JP1", AsiaSpecific)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
+	assert.Equal(t, "JP1", mmrDetails.Tag)
+}
+
+func TestGetMMRDetailsV2(t *testing.T) {
+	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
+	assert.Equal(t, "JP1", mmrDetails.Tag)
+}
+
+func TestGetMMRDetailsBySeason(t *testing.T) {
+	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", AllowedSeasons.ToArr()[0], AsiaSpecific)
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
+	assert.Equal(t, "JP1", mmrDetails.Tag)
+}

@@ -135,14 +135,27 @@ func GetLocalizedContent() (*Localization, error) {
 	return localization, err
 }
 
-func GetGameStatus(region Region) (*GameStatus, error) {
-	resp, err := getRequest(fmt.Sprintf("%v/status/%s", V1, region))
+func GetLocalizedContentByLocale(locale string) (*Localization, error) {
+	resp, err := getRequest(fmt.Sprintf("%v/content?locale=%s", V1, locale))
 	if err != nil {
 		return nil, err
 	}
-	gameStatus := &GameStatus{}
-	err = resp.ParseData(gameStatus)
-	return gameStatus, err
+	localization := &Localization{}
+	err = resp.ParseData(localization)
+	return localization, err
+}
+
+func GetGameStatus(region Region) (*StatusResp, error) {
+	var data = &StatusResp{}
+	err := getRequestCustom(fmt.Sprintf("%v/status/%s", V1, region), data)
+	if err != nil {
+		return nil, err
+	} else if len(data.Errors) > 0 {
+		return nil, &ApiError{data.Errors}
+	} else if data.Status != 200 {
+		return nil, errors.New(fmt.Sprintf("status code %v", data.Status))
+	}
+	return data, err
 }
 
 func GetMMRHistories(name, tag string, region Region) (*PlayerInfoResp, error) {
@@ -178,12 +191,12 @@ func GetMMRDetailsV2(name, tag string, region Region) (*MMRV2Details, error) {
 	return mmrDetails, err
 }
 
-func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV1Details, error) {
-	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V1, region, name, tag, filter))
+func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV2SeasonDetails, error) {
+	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V2, region, name, tag, filter))
 	if err != nil {
 		return nil, err
 	}
-	mmrDetails := &MMRV1Details{}
+	mmrDetails := &MMRV2SeasonDetails{}
 	err = resp.ParseData(mmrDetails)
 	return mmrDetails, err
 }

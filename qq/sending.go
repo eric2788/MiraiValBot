@@ -164,3 +164,104 @@ func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
 		}
 	}, nil)
 }
+
+func SendWithRandomRiskyStrategy(msg *message.SendingMessage) (err error) {
+	go SendRiskyMessage(5, 60, func(try int) error {
+		clone := CloneMessage(msg)
+		alt := GetRandomMessageByTry(try)
+		if len(alt) > 0 {
+			clone.Append(NextLn())
+			for _, element := range alt {
+				clone.Append(element)
+			}
+		}
+		return SendGroupMessage(clone)
+	})
+	return
+}
+
+func CloneMessage(msg *message.SendingMessage) *message.SendingMessage {
+	clone := message.NewSendingMessage()
+	for _, element := range msg.Elements {
+		clone.Append(element)
+	}
+	return clone
+}
+
+func GetRandomMessageByTry(try int) []*message.TextElement {
+
+	extras := make([]*message.TextElement, 0)
+
+	// 新增随机发过的群消息
+
+	if try > 0 {
+
+		random, err := GetRandomGroupMessage(ValGroupInfo.Uin)
+
+		if try > 2 { // 發送多一則隨機消息
+			for _, element := range GetRandomMessageByTry(1) { // 使用 1 確保不無限套娃
+				extras = append(extras, element)
+			}
+		}
+
+		if err == nil && random != nil {
+
+			for _, element := range random.Elements {
+				switch e := element.(type) {
+				case *message.TextElement:
+					extras = append(extras, e)
+				case *message.AtElement:
+					extras = append(extras, message.NewText(e.Display))
+				case *message.FaceElement:
+					extras = append(extras, message.NewText(e.Name))
+				default:
+					break
+				}
+			}
+
+			// 随机消息没有文本
+			if len(extras) == 0 {
+
+				logger.Warnf("为被风控的广播插入一条新消息再发送: %s", random.ToString())
+
+				sendFirst := message.NewSendingMessage()
+				for _, element := range random.Elements {
+
+					switch element.(type) {
+					case *message.ReplyElement:
+						continue
+					case *message.ForwardElement:
+						continue
+					default:
+						break
+					}
+
+					sendFirst.Append(element)
+				}
+				_ = SendGroupMessage(sendFirst)
+				<-time.After(time.Second * 5)     // 发送完等待五秒
+				return GetRandomMessageByTry(try) // 再獲取一則隨機消息
+
+			} else {
+
+				logger.Warnf("为被风控的广播新增如下的内容: %s", random.ToString())
+
+			}
+
+		} else { // 随机消息获取失败
+
+			if err != nil {
+				logger.Warnf("获取随机消息时出现错误: %v, 将改为发送风控次数", err)
+			} else if random == nil {
+				logger.Warnf("获取随机消息时出现错误: 訊息為 nil , 将改为发送风控次数")
+			}
+
+			// 则发送风控次数?
+			extras = append(extras, NewTextf("此广播已被风控 %d 次 QAQ!!", try))
+
+		}
+
+	}
+
+	return extras
+}

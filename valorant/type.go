@@ -30,6 +30,12 @@ type (
 		Data []MMRData `json:"data"`
 	}
 
+	StatusResp struct {
+		Resp
+		Region string     `json:"region"`
+		Data   GameStatus `json:"data"`
+	}
+
 	AccountDetails struct {
 		PUuid         string            `json:"puuid"`
 		Region        string            `json:"region"`
@@ -229,7 +235,7 @@ type (
 		ArchiveAt string `json:"archive_at"`
 		Updates   []struct {
 			CreatedAt        string        `json:"created_at"`
-			ArchiveAt        string        `json:"archive_at"`
+			UpdatedAt        string        `json:"updated_at"`
 			Publish          bool          `json:"publish"`
 			Id               int           `json:"id"`
 			Translations     []I18NContent `json:"translations"`
@@ -272,6 +278,19 @@ type (
 		Old  bool   `json:"old"`
 	}
 
+	MMRV2SeasonDetails struct {
+		Error            string `json:"error"`
+		Wins             int    `json:"wins"`
+		NumberOfGames    int    `json:"number_of_games"`
+		FinalRank        int    `json:"final_rank"`
+		FinalRankPatched string `json:"final_rank_patched"`
+		ActRankWins      []struct {
+			PatchedTier string `json:"patched_tier"`
+			Tier        int    `json:"tier"`
+		} `json:"act_rank_wins"`
+		Old bool `json:"old"`
+	}
+
 	// MMRV2Details only for non filter
 	MMRV2Details struct {
 		Name  string `json:"name"`
@@ -284,18 +303,7 @@ type (
 			Old                  bool `json:"old"`
 		} `json:"current_data"`
 
-		BySeason map[string]struct {
-			Error            string `json:"error"`
-			Wins             int    `json:"wins"`
-			NumberOfGames    int    `json:"number_of_games"`
-			FinalRank        int    `json:"final_rank"`
-			FinalRankPatched string `json:"final_rank_patched"`
-			ActRankWins      []struct {
-				PatchedTier string `json:"patched_tier"`
-				Tier        int    `json:"tier"`
-			} `json:"act_rank_wins"`
-			Old bool `json:"old"`
-		} `json:"by_season"`
+		BySeason map[string]MMRV2SeasonDetails `json:"by_season"`
 	}
 )
 
