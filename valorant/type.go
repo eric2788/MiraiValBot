@@ -23,6 +23,13 @@ type (
 		Errors []Error     `json:"errors"`
 	}
 
+	PlayerInfoResp struct {
+		Resp
+		Name string    `json:"name"`
+		Tag  string    `json:"tag"`
+		Data []MMRData `json:"data"`
+	}
+
 	AccountDetails struct {
 		PUuid         string            `json:"puuid"`
 		Region        string            `json:"region"`
@@ -48,7 +55,7 @@ type (
 
 	MatchData struct {
 		MetaData MatchMetaData             `json:"metadata"`
-		Players  []MatchPlayer             `json:"players"`
+		Players  map[string][]MatchPlayer  `json:"players"`
 		Teams    map[string]MatchTeamStats `json:"teams"`
 		Rounds   []MatchRound              `json:"rounds"`
 	}
@@ -77,7 +84,7 @@ type (
 		Level              int              `json:"level"`
 		Character          string           `json:"character"`
 		CurrentTier        int              `json:"currenttier"`
-		CurrentTierPatched int              `json:"currenttier_patched"`
+		CurrentTierPatched string           `json:"currenttier_patched"`
 		PlayerCard         string           `json:"player_card"`
 		PlayerTitle        string           `json:"player_title"`
 		PartyId            string           `json:"party_id"`
@@ -241,10 +248,63 @@ type (
 		Content string `json:"content"`
 		Locale  string `json:"locale"`
 	}
+
+	MMRDataBase struct {
+		CurrentTier         int               `json:"currenttier"`
+		CurrentTierPatched  string            `json:"currenttier_patched"`
+		Images              map[string]string `json:"images"`
+		RankingInTier       int               `json:"ranking_in_tier"`
+		MMRChangeToLastGame int               `json:"mmr_change_to_last_game"`
+		Elo                 int               `json:"elo"`
+	}
+
+	MMRData struct {
+		MMRDataBase
+		Date    string `json:"date"`
+		DateRaw int64  `json:"date_raw"`
+	}
+
+	// MMRV1Details can include filter
+	MMRV1Details struct {
+		MMRDataBase
+		Name string `json:"name"`
+		Tag  string `json:"tag"`
+		Old  bool   `json:"old"`
+	}
+
+	// MMRV2Details only for non filter
+	MMRV2Details struct {
+		Name  string `json:"name"`
+		Tag   string `json:"tag"`
+		PUuid string `json:"puuid"`
+
+		CurrentData struct {
+			MMRDataBase
+			GamesNeededForRating int  `json:"games_needed_for_rating"`
+			Old                  bool `json:"old"`
+		} `json:"current_data"`
+
+		BySeason map[string]struct {
+			Error            string `json:"error"`
+			Wins             int    `json:"wins"`
+			NumberOfGames    int    `json:"number_of_games"`
+			FinalRank        int    `json:"final_rank"`
+			FinalRankPatched string `json:"final_rank_patched"`
+			ActRankWins      []struct {
+				PatchedTier string `json:"patched_tier"`
+				Tier        int    `json:"tier"`
+			} `json:"act_rank_wins"`
+			Old bool `json:"old"`
+		} `json:"by_season"`
+	}
 )
 
 func (resp *Resp) ParseData(t interface{}) error {
-	return json.Unmarshal(resp.Data.([]byte), t)
+	b, err := json.Marshal(resp.Data)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, t)
 }
 
 func (err *ApiError) Error() string {
