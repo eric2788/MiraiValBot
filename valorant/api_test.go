@@ -1,6 +1,7 @@
 package valorant
 
 import (
+	"github.com/eric2788/common-utils/request"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -43,6 +44,10 @@ func TestGetMatchDetails(t *testing.T) {
 func TestGetGameStatus(t *testing.T) {
 	status, err := GetGameStatus(AsiaSpecific)
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
 	assert.Equal(t, "ap", status.Region)
@@ -52,14 +57,22 @@ func TestGetGameStatus(t *testing.T) {
 func TestGetLocalizedContent(t *testing.T) {
 	localization, err := GetLocalizedContent()
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
-	assert.Equal(t, 15, len(localization.LocalizeItems))
+	assert.Equal(t, 16, len(localization))
 }
 
 func TestGetMMRHistories(t *testing.T) {
 	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrHistories.Name)
@@ -69,6 +82,10 @@ func TestGetMMRHistories(t *testing.T) {
 func TestGetMMRDetailsV1(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV1("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
@@ -78,6 +95,10 @@ func TestGetMMRDetailsV1(t *testing.T) {
 func TestGetMMRDetailsV2(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
@@ -87,6 +108,10 @@ func TestGetMMRDetailsV2(t *testing.T) {
 func TestGetMMRDetailsBySeason(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", "e3a3", AsiaSpecific)
 	if err != nil {
+		// skip timeout
+		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
+			return
+		}
 		t.Fatal(err)
 	}
 	assert.Equal(t, 7, mmrDetails.Wins)

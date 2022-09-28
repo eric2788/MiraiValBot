@@ -47,12 +47,7 @@ type (
 		LastUpdateRaw int64             `json:"last_update_raw"`
 	}
 
-	Localization struct {
-		LocalizeItems
-		Version string `json:"version"`
-	}
-
-	LocalizeItems map[string]LocalizeItem
+	Localization map[string]interface{}
 
 	LocalizeItem struct {
 		Name           string            `json:"name"`
@@ -321,4 +316,14 @@ func (err *ApiError) Error() string {
 		messages[i] = e.Message
 	}
 	return fmt.Sprintf("API Errors: %s", strings.Join(messages, ", "))
+}
+
+func (local Localization) GetLocalizeItem(key string) (*LocalizeItem, error) {
+	b, err := json.Marshal(local[key])
+	if err != nil {
+		return nil, err
+	}
+	var localItem LocalizeItem
+	err = json.Unmarshal(b, &localItem)
+	return &localItem, err
 }

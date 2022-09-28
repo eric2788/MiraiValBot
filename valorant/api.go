@@ -75,8 +75,6 @@ func getRequest(path string) (*Resp, error) {
 		return nil, err
 	} else if len(data.Errors) > 0 {
 		return nil, &ApiError{data.Errors}
-	} else if data.Status != 200 {
-		return nil, errors.New(fmt.Sprintf("status: %v", data.Status))
 	}
 	return &data, nil
 }
@@ -125,29 +123,21 @@ func GetMatchDetails(matchId string) (*MatchData, error) {
 	return matchDetails, err
 }
 
-func GetLocalizedContent() (*Localization, error) {
-	var resp Resp
-	err := getRequestCustom(fmt.Sprintf("%v/content", V1), &resp)
+func GetLocalizedContent() (Localization, error) {
+	var local Localization
+	err := getRequestCustom(fmt.Sprintf("%v/content", V1), &local)
 	if err != nil {
 		return nil, err
-	} else if len(resp.Errors) > 0 {
-		return nil, &ApiError{resp.Errors}
 	}
-	localization := &Localization{}
-	err = resp.ParseData(localization)
-	return localization, err
+	return local, err
 }
 
-func GetLocalizedContentByLocale(locale string) (*Localization, error) {
-	var resp Resp
-	err := getRequestCustom(fmt.Sprintf("%v/content?locale=%s", V1, locale), &resp)
+func GetLocalizedContentByLocale(locale string) (Localization, error) {
+	var localization Localization
+	err := getRequestCustom(fmt.Sprintf("%v/content?locale=%s", V1, locale), &localization)
 	if err != nil {
 		return nil, err
-	} else if len(resp.Errors) > 0 {
-		return nil, &ApiError{resp.Errors}
 	}
-	localization := &Localization{}
-	err = resp.ParseData(localization)
 	return localization, err
 }
 
