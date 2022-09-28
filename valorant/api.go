@@ -129,6 +129,8 @@ func GetLocalizedContent() (*Localization, error) {
 	resp, err := getRequest(fmt.Sprintf("%v/content", V1))
 	if err != nil {
 		return nil, err
+	} else if len(resp.Errors) > 0 {
+		return nil, &ApiError{resp.Errors}
 	}
 	localization := &Localization{}
 	err = resp.ParseData(localization)
@@ -136,7 +138,8 @@ func GetLocalizedContent() (*Localization, error) {
 }
 
 func GetLocalizedContentByLocale(locale string) (*Localization, error) {
-	resp, err := getRequest(fmt.Sprintf("%v/content?locale=%s", V1, locale))
+	var resp Resp
+	err := getRequestCustom(fmt.Sprintf("%v/content?locale=%s", V1, locale), &resp)
 	if err != nil {
 		return nil, err
 	}
