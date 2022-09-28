@@ -85,10 +85,10 @@ func TestGetMMRDetailsV2(t *testing.T) {
 }
 
 func TestGetMMRDetailsBySeason(t *testing.T) {
-	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", AllowedSeasons.ToArr()[0], AsiaSpecific)
+	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", "e3a3", AsiaSpecific)
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
-	assert.Equal(t, "JP1", mmrDetails.Tag)
+	assert.Equal(t, 7, mmrDetails.Wins)
+	assert.Equal(t, 12, mmrDetails.FinalRank)
 }

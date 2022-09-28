@@ -192,6 +192,9 @@ func GetMMRDetailsV2(name, tag string, region Region) (*MMRV2Details, error) {
 }
 
 func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV2SeasonDetails, error) {
+	if !AllowedSeasons.Contains(filter) {
+		return nil, errors.New(fmt.Sprintf("season %v not allowed", filter))
+	}
 	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V2, region, name, tag, filter))
 	if err != nil {
 		return nil, err
