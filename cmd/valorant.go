@@ -197,6 +197,81 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
+	match, err := valorant.GetMatchDetails(args[0])
+	if err != nil {
+		return err
+	}
+	msg := message.NewSendingMessage()
+
+	// 过滤死斗
+	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
+		msg.Append(message.NewText("死斗没有可以查看的对战回合资讯。"))
+		return qq.SendGroupMessage(msg)
+	}
+
+	for i, round := range match.Rounds {
+		msg.Append(qq.NewTextLn("=================="))
+		msg.Append(qq.NewTextfLn("第 %d 回合 (胜者: %s, 胜利类型: %s)", i+1, round.WinningTeam, round.EndType))
+
+		if round.BombPlanted {
+			msg.Append(qq.NewTextfLn("\t安装炸弹:"))
+			msg.Append(qq.NewTextfLn("\t\t安装玩家: %s", round.PlantEvents.PlantedBy.DisplayName))
+			msg.Append(qq.NewTextfLn("\t\t安装队伍: %s", round.PlantEvents.PlantedBy.Team))
+			msg.Append(qq.NewTextfLn("\t\t安装地点: %s", round.PlantEvents.PlantSite))
+		}
+
+		if round.BombDefused {
+			msg.Append(qq.NewTextLn("\t解除炸弹:"))
+			msg.Append(qq.NewTextfLn("\t\t解除玩家: %s", round.DefuseEvents.DefusedBy.DisplayName))
+			msg.Append(qq.NewTextfLn("\t\t解除队伍: %s", round.DefuseEvents.DefusedBy.Team))
+		}
+
+		for _, playerStats := range round.PlayerStats {
+			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的战绩:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
+
+			msg.Append(qq.NewTextfLn("\t\tAFK: %t", playerStats.WasAfk))
+			msg.Append(qq.NewTextfLn("\t\t被惩罚: %t", playerStats.WasPenalized))
+			msg.Append(qq.NewTextfLn("\t\t回合花费: $%d (剩余 $%d)", playerStats.Economy.Spent, playerStats.Economy.Remaining))
+			msg.Append(qq.NewTextfLn("\t\t武器: %s", playerStats.Economy.Weapon.Weapon.Name))
+			msg.Append(qq.NewTextfLn("\t\t装备: %s", playerStats.Economy.Weapon.Armor.Name))
+
+			if playerStats.Damage > 0 {
+				msg.Append(qq.NewTextfLn("\t\t分别伤害:"))
+				for _, damageEvent := range playerStats.DamageEvents {
+					msg.Append(qq.NewTextfLn("\t\t\t%s:", damageEvent.ReceiverDisplayName))
+					msg.Append(qq.NewTextfLn("\t\t\t\t伤害: %d (%.1f%%)", damageEvent.Damage, formatPercentageInt(damageEvent.Damage, playerStats.Damage)))
+					msg.Append(qq.NewTextfLn("\t\t\t\t所在队伍: %s", damageEvent.ReceiverTeam))
+					msg.Append(qq.NewTextfLn("\t\t\t\t伤害分布:"))
+					total := damageEvent.BodyShots + damageEvent.HeadShots + damageEvent.LegShots
+					msg.Append(qq.NewTextfLn("\t\t\t\t\t头部: %d (%.1f%%)", damageEvent.HeadShots, formatPercentageInt(damageEvent.HeadShots, total)))
+					msg.Append(qq.NewTextfLn("\t\t\t\t\t身体: %d (%.1f%%)", damageEvent.BodyShots, formatPercentageInt(damageEvent.BodyShots, total)))
+					msg.Append(qq.NewTextfLn("\t\t\t\t\t腿部: %d (%.1f%%)", damageEvent.LegShots, formatPercentageInt(damageEvent.LegShots, total)))
+				}
+			}
+
+			if playerStats.Kills > 0 {
+				msg.Append(qq.NewTextLn("\t\t分别击杀:"))
+				for _, killEvent := range playerStats.KillsEvents {
+					msg.Append(qq.NewTextfLn("\t\t\t%s:", killEvent.VictimDisplayName))
+					msg.Append(qq.NewTextfLn("\t\t\t\t所在队伍: %s", killEvent.VictimTeam))
+					msg.Append(qq.NewTextfLn("\t\t\t\t击杀使用武器: %s", killEvent.DamageWeaponName))
+					msg.Append(qq.NewTextfLn("\t\t\t\t右键开火: %t", killEvent.SecondaryFireMode))
+
+					assistantArr := make([]string, len(killEvent.Assistants))
+					for i, assistant := range killEvent.Assistants {
+						assistantArr[i] = fmt.Sprintf("%s(%s)", assistant.AssistantDisplayName, assistant.AssistantTeam)
+					}
+
+					if len(assistantArr) > 0 {
+						msg.Append(qq.NewTextfLn("\t\t\t\t助攻者: %s", strings.Join(assistantArr, ", ")))
+					}
+				}
+			}
+		}
+
+		return qq.SendWithRandomRiskyStrategy(msg)
+	}
+
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
 }
 
