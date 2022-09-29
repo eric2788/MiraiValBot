@@ -27,6 +27,5 @@ func TestGetDeathMatchRanking(t *testing.T) {
 
 func TestPercentageDisplay(t *testing.T) {
 	total, a, b := 23, 11, 12
-	t.Logf("A %.1f%% (%d) B %.1f%% (%d)", float64(a)/float64(total)*100, a, float64(b)/float64(total)*100, b)
+	t.Logf("A %.1f%% (%d) B %.1f%% (%d) - %.0f", float64(a)/float64(total)*100, a, float64(b)/float64(total)*100, b, float64(b) / float64(total))
 }
-
