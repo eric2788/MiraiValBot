@@ -41,31 +41,6 @@ func TestGetMatchDetails(t *testing.T) {
 	assert.Equal(t, "7a85de9a-4032-61a9-61d8-f4aa2b4a84b6", data.MetaData.SeasonId)
 }
 
-func TestGetGameStatus(t *testing.T) {
-	status, err := GetGameStatus(AsiaSpecific)
-	if err != nil {
-		// skip timeout
-		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
-			return
-		}
-		t.Fatal(err)
-	}
-	assert.Equal(t, "ap", status.Region)
-	assert.Equal(t, 200, status.Status)
-}
-
-func TestGetLocalizedContent(t *testing.T) {
-	localization, err := GetLocalizedContent()
-	if err != nil {
-		// skip timeout
-		if e, ok := err.(*request.HttpError); ok && e.Code == 408 {
-			return
-		}
-		t.Fatal(err)
-	}
-	assert.Equal(t, 16, len(localization))
-}
-
 func TestGetMMRHistories(t *testing.T) {
 	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
