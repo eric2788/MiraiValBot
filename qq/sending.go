@@ -2,10 +2,11 @@ package qq
 
 import (
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Mrs4s/MiraiGo/message"
 	"runtime/debug"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Mrs4s/MiraiGo/message"
 )
 
 type Reason uint8
@@ -35,7 +36,8 @@ func SendGroupMessage(msg *message.SendingMessage) error {
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
-			err = fmt.Errorf("致命错误 => %v from %s", recovered, debug.Stack())
+			err = fmt.Errorf("致命错误 => %v", recovered)
+			debug.PrintStack()
 		}
 		if err != nil {
 			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)

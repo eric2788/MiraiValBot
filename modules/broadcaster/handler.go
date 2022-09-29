@@ -73,7 +73,8 @@ func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
 	// avoid handle panic
 	defer func() {
 		if err := recover(); err != nil {
-			b.logger.Errorf("處理 %s 指令時出現嚴重錯誤: %v from %v", command, err, debug.Stack())
+			b.logger.Errorf("處理 %s 指令時出現嚴重錯誤: %v", command, err)
+			debug.PrintStack()
 		}
 	}()
 

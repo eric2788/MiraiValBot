@@ -39,7 +39,8 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 			if e := recover(); e != nil {
 				err := fmt.Errorf(fmt.Sprintf("%v", e))
-				logger.Errorf("處理指令 %s 時出現严重錯誤: %v from %v", content, err, debug.Stack())
+				logger.Errorf("處理指令 %s 時出現严重錯誤: %v", content, err)
+				debug.PrintStack()
 				_ = qq2.SendGroupMessageByGroup(msg.GroupCode, qq2.CreateReply(msg).Append(qq2.NewTextf("处理此指令时出现严重错误: %v", err)))
 			}
 

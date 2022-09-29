@@ -110,7 +110,8 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 	defer func() {
 		if err := recover(); err != nil {
 			go func() {
-				logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v, from %v", topic, err, debug.Stack())
+				logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v", topic, err)
+				debug.PrintStack()
 				ifError <- fmt.Errorf("%v", err)
 			}()
 		}
