@@ -110,10 +110,10 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 		// 击中分布
 		total := player.Stats.BodyShots + player.Stats.Headshots + player.Stats.LegShots
-		msg.Append(qq.NewTextfLn("\t击中次数分布: 头 %.1f% (%d) 身 %.1f (%d) 腿 %.1f (%d)",
-			float64(player.Stats.Headshots/total), player.Stats.Headshots,
-			float64(player.Stats.BodyShots/total), player.Stats.BodyShots,
-			float64(player.Stats.LegShots/total), player.Stats.LegShots,
+		msg.Append(qq.NewTextfLn("\t击中次数分布: 头 %.1f%% (%d) 身 %.1f%% (%d) 腿 %.1f%% (%d)",
+			formatPercentageInt(player.Stats.Headshots, total), player.Stats.Headshots,
+			formatPercentageInt(player.Stats.BodyShots, total), player.Stats.BodyShots,
+			formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots,
 		))
 
 		// 行为
@@ -130,11 +130,11 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		for _, times := range player.AbilityCasts {
 			total += times
 		}
-		msg.Append(qq.NewTextfLn("\t技能使用次数分布: C %.1f (%d) Q %.1f (%d) E %.1f (%d) X %.1f (%d)",
-			float64(player.AbilityCasts["c_cast"]/total), player.AbilityCasts["c_cast"],
-			float64(player.AbilityCasts["q_cast"]/total), player.AbilityCasts["q_cast"],
-			float64(player.AbilityCasts["e_cast"]/total), player.AbilityCasts["e_cast"],
-			float64(player.AbilityCasts["x_cast"]/total), player.AbilityCasts["x_cast"],
+		msg.Append(qq.NewTextfLn("\t技能使用次数分布: C %.1f%% (%d) Q %.1f%% (%d) E %.1f%% (%d) X %.1f%% (%d)",
+			formatPercentageInt(player.AbilityCasts["c_cast"], total), player.AbilityCasts["c_cast"],
+			formatPercentageInt(player.AbilityCasts["q_cast"], total), player.AbilityCasts["q_cast"],
+			formatPercentageInt(player.AbilityCasts["e_cast"], total), player.AbilityCasts["e_cast"],
+			formatPercentageInt(player.AbilityCasts["x_cast"], total), player.AbilityCasts["x_cast"],
 		))
 
 		// 经济
@@ -142,9 +142,9 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 		// 伤害
 		totalDamage := player.DamageReceived + player.DamageMade
-		msg.Append(qq.NewTextfLn("\t伤害分布: 总承受 %.1f (%d) 总伤害 %.1f (%d)",
-			float64(player.DamageReceived/totalDamage), player.DamageReceived,
-			float64(player.DamageMade/totalDamage), player.DamageMade,
+		msg.Append(qq.NewTextfLn("\t伤害分布: 总承受 %.1f%% (%d) 总伤害 %.1f%% (%d)",
+			formatPercentage(player.DamageReceived, totalDamage), player.DamageReceived,
+			formatPercentage(player.DamageMade, totalDamage), player.DamageMade,
 		))
 	}
 
@@ -163,7 +163,7 @@ func mmr(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("======== %s 的 MMR 资料 ======="))
+	msg.Append(qq.NewTextfLn("======== %s 的 MMR 资料 =======", args[0]))
 	msg.Append(qq.NewTextfLn("目前段位: %s", mmr.CurrentTierPatched))
 	msg.Append(qq.NewTextfLn("目前段位分数: %d/100", mmr.RankingInTier))
 	msg.Append(qq.NewTextfLn("上一次的分数变更: %d", mmr.MMRChangeToLastGame))
@@ -254,6 +254,14 @@ func formatResult(data valorant.MatchData, name string) string {
 		return fmt.Sprintf("Red %d : %d Blue (用户所在队伍: %s)", red.RoundsWon, blue.RoundsWon, team)
 	}
 	return fmt.Sprintf("(错误: 不支援的模式 %s)", data.MetaData.Mode)
+}
+
+func formatPercentage(part, total int64) float64 {
+	return float64(part) / float64(total) * 100
+}
+
+func formatPercentageInt(part, total int) float64 {
+	return float64(part) / float64(total) * 100
 }
 
 func formatTime(timeStr string) string {
