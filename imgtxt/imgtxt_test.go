@@ -65,7 +65,7 @@ func TestGenerateImage(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f, err := os.Create("test.jpeg")
+	f, err := os.Create("test.png")
 	if err != nil {
 		t.Fatal(err)
 	}
