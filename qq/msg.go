@@ -132,6 +132,10 @@ func NewImageByUrl(url string) (*message.GroupImageElement, error) {
 	return NewImageByUrlWithGroup(ValGroupInfo.Uin, url)
 }
 
+func NewImageByByte(img []byte) (*message.GroupImageElement, error) {
+	return NewImagesByByteWithGroup(ValGroupInfo.Uin, img)
+}
+
 func NewImageByUrlWithPrivate(uid int64, url string) (*message.FriendImageElement, error) {
 	img, err := request.GetBytesByUrl(url)
 	if err != nil {
@@ -153,6 +157,11 @@ func NewImageByUrlWithGroup(gp int64, url string) (*message.GroupImageElement, e
 func NewImagesByByteWithGroup(gp int64, img []byte) (*message.GroupImageElement, error) {
 	reader := bytes.NewReader(img)
 	return bot.Instance.UploadGroupImage(gp, reader)
+}
+
+func NewImagesByByteWithPrivate(uid int64, img []byte) (*message.FriendImageElement, error) {
+	reader := bytes.NewReader(img)
+	return bot.Instance.UploadPrivateImage(uid, reader)
 }
 
 func NewVideoByUrl(url, thumbUrl string) (*message.ShortVideoElement, error) {

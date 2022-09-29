@@ -7,11 +7,10 @@ import (
 	"testing"
 )
 
-
 type Void struct{}
 
 var (
-	void = &Void{}
+	void              = &Void{}
 	allowedStatusCode = map[int]*Void{
 		408: void,
 		403: void,
@@ -27,8 +26,8 @@ func init() {
 func TestGetAccountDetails(t *testing.T) {
 	detail, err := GetAccountDetails("勝たんしかrinrin", "JP1")
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -43,8 +42,8 @@ func TestGetAccountDetails(t *testing.T) {
 func TestGetMatchHistories(t *testing.T) {
 	histories, err := GetMatchHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -56,8 +55,8 @@ func TestGetMatchHistories(t *testing.T) {
 func TestGetMatchDetails(t *testing.T) {
 	data, err := GetMatchDetails("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -72,8 +71,8 @@ func TestGetMatchDetails(t *testing.T) {
 func TestGetMMRHistories(t *testing.T) {
 	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -86,8 +85,8 @@ func TestGetMMRHistories(t *testing.T) {
 func TestGetMMRDetailsV1(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV1("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -101,8 +100,8 @@ func TestGetMMRDetailsV1(t *testing.T) {
 func TestGetMMRDetailsV2(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}
@@ -115,8 +114,8 @@ func TestGetMMRDetailsV2(t *testing.T) {
 func TestGetMMRDetailsBySeason(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", "e3a3", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*request.HttpError); ok{
-			if _, ok := allowedStatusCode[e.Code]; ok{
+		if e, ok := err.(*request.HttpError); ok {
+			if _, ok := allowedStatusCode[e.Code]; ok {
 				return
 			}
 		}

@@ -75,7 +75,9 @@ func status(args []string, source *command.MessageSource) error {
 
 func matches(args []string, source *command.MessageSource) error {
 
-	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战资料...")))
+	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战资料..."))); err != nil {
+		logger.Errorf("發送預備索取消息失敗: %v", err)
+	}
 
 	info, err := valorant.GetAccountInfo(args[0])
 	if err != nil {
@@ -129,7 +131,9 @@ func match(args []string, source *command.MessageSource) error {
 
 func matchPlayers(args []string, source *command.MessageSource) error {
 
-	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家资料...")))
+	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家资料..."))); err != nil {
+		logger.Errorf("發送預備索取消息失敗: %v", err)
+	}
 
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
@@ -199,25 +203,19 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
 	}
 
-	bb, err := msg.GenerateImage()
+	img, err := msg.ToGroupImageElement()
 	if err != nil {
 		return err
 	}
-
-	img, err := qq.NewImagesByByteWithGroup(qq.ValGroupInfo.Uin, bb)
-
-	if err != nil {
-		return err
-	}
-
 	sending := message.NewSendingMessage().Append(img)
-
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
 
-	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合资料...")))
+	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合资料..."))); err != nil {
+		logger.Errorf("發送預備索取消息失敗: %v", err)
+	}
 
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
@@ -295,19 +293,11 @@ func matchRounds(args []string, source *command.MessageSource) error {
 			}
 		}
 
-		bb, err := msg.GenerateImage()
+		img, err := msg.ToGroupImageElement()
 		if err != nil {
 			return err
 		}
-
-		img, err := qq.NewImagesByByteWithGroup(qq.ValGroupInfo.Uin, bb)
-
-		if err != nil {
-			return err
-		}
-
 		sending := message.NewSendingMessage().Append(img)
-
 		return qq.SendWithRandomRiskyStrategy(sending)
 
 	}
