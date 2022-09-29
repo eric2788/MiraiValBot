@@ -2,30 +2,36 @@ package imgtxt
 
 import (
 	"bytes"
-	"github.com/eric2788/MiraiValBot/qq"
-	"image"
-	"io/ioutil"
-	"net/http"
-
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"github.com/hqbobo/text2pic"
+	"image"
+	"io/ioutil"
+	"net/http"
 )
 
-type TextImage struct {
-	prepend *text2pic.TextPicture
-	font    *truetype.Font
-}
+type (
+	TextImage struct {
+		prepend *text2pic.TextPicture
+		font    *truetype.Font
+	}
+
+	Options struct {
+		FontUrl string
+		Width   int
+	}
+)
 
 const (
-	Width       = 1200
-	ownerFont   = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
-	DefaultFont = "https://github.com/bingwen/befit/raw/master/static/resources/%E5%AD%97%E4%BD%93%E5%8C%85/simhei_0.ttf"
+	DefaultWidth = 1200
+	ownerFont    = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
+	DefaultFont  = "https://github.com/bingwen/befit/raw/master/static/resources/%E5%AD%97%E4%BD%93%E5%8C%85/simhei_0.ttf"
 )
 
-func GetDefaultFont() (*truetype.Font, error) {
-	resp, err := http.Get(DefaultFont)
+func GetFontByURL(url string) (*truetype.Font, error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -38,29 +44,30 @@ func GetDefaultFont() (*truetype.Font, error) {
 }
 
 func NewPrependMessage() (*TextImage, error) {
+	return NewPrependMessageWithOptions(nil)
+}
 
-	f, err := GetDefaultFont()
+func NewPrependMessageWithOptions(options *Options) (*TextImage, error) {
+	if options == nil {
+		options = &Options{}
+	}
+	if options.FontUrl == "" {
+		options.FontUrl = DefaultFont
+	}
+	if options.Width == 0 {
+		options.Width = DefaultWidth
+	}
+	f, err := GetFontByURL(options.FontUrl)
 	if err != nil {
 		return nil, err
 	}
-
 	return &TextImage{
 		prepend: text2pic.NewTextPicture(text2pic.Configure{
-			Width:   Width,
+			Width:   options.Width,
 			BgColor: image.White,
 		}),
 		font: f,
 	}, nil
-}
-
-func NewPrependMessageWithFont(f *truetype.Font) *TextImage {
-	return &TextImage{
-		prepend: text2pic.NewTextPicture(text2pic.Configure{
-			Width:   Width,
-			BgColor: image.White,
-		}),
-		font: f,
-	}
 }
 
 func (prepend *TextImage) Append(element *message.TextElement) *TextImage {

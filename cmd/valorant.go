@@ -163,9 +163,11 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("\t\t腿部: %.1f%% (%d次)", formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots))
 
 		// 行为
-		friendlyFire := &valorant.FriendlyFireInfo{}
+		friendlyFire := &valorant.FriendlyFireInfo{FriendlyFire: player.Behaviour.FriendlyFire}
 		if ff, ok := ffInfo[player.PUuid]; ok {
 			friendlyFire = ff
+		} else {
+			logger.Warnf("找不到 %s#%s 的隊友傷害行為資訊。", player.Name, player.Tag)
 		}
 		msg.Append(qq.NewTextLn("\t行为:"))
 		msg.Append(qq.NewTextfLn("\t\tAFK回合次数: %.0f", player.Behaviour.AfkRounds))

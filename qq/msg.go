@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/redis"
