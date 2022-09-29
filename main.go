@@ -35,6 +35,8 @@ import (
 	_ "github.com/eric2788/MiraiValBot/modules/verbose"
 )
 
+// test
+
 func init() {
 	utils.WriteLogToFS()
 }
