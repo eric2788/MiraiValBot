@@ -74,7 +74,7 @@ func status(args []string, source *command.MessageSource) error {
 
 func matches(args []string, source *command.MessageSource) error {
 
-	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取比赛资料...")))
+	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战资料...")))
 
 	info, err := valorant.GetAccountInfo(args[0])
 	if err != nil {
@@ -85,23 +85,23 @@ func matches(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 最近的比赛:", info.Display))
+	msg.Append(qq.NewTextfLn("%s 最近的对战:", info.Display))
 	for _, match := range matches {
 		// empty match id
 		if match.MetaData.MatchId == "" {
 			continue
 		}
 		msg.Append(qq.NewTextLn("===================="))
-		msg.Append(qq.NewTextfLn("比赛ID: %s", match.MetaData.MatchId))
-		msg.Append(qq.NewTextfLn("比赛模式: %s", match.MetaData.Mode))
-		msg.Append(qq.NewTextfLn("比赛开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
-		msg.Append(qq.NewTextfLn("比赛时长: %s", formatDuration(match.MetaData.GameLength)))
-		msg.Append(qq.NewTextfLn("比赛地图: %s", match.MetaData.Map))
+		msg.Append(qq.NewTextfLn("对战ID: %s", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("对战模式: %s", match.MetaData.Mode))
+		msg.Append(qq.NewTextfLn("对战开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
+		msg.Append(qq.NewTextfLn("对战时长: %s", formatDuration(match.MetaData.GameLength)))
+		msg.Append(qq.NewTextfLn("对战地图: %s", match.MetaData.Map))
 		msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
-		msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
-		msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(match, info.PUuid)))
-		msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
-		msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("服务器节点: %s", match.MetaData.Cluster))
+		msg.Append(qq.NewTextfLn("对战结果: %s", formatResult(match, info.PUuid)))
+		msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细对战玩家信息", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细对战回合信息", match.MetaData.MatchId))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -113,16 +113,16 @@ func match(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("比赛ID: %s", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("比赛模式: %s", match.MetaData.Mode))
-	msg.Append(qq.NewTextfLn("比赛开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
-	msg.Append(qq.NewTextfLn("比赛时长: %s", formatDuration(match.MetaData.GameLength)))
-	msg.Append(qq.NewTextfLn("比赛地图: %s", match.MetaData.Map))
+	msg.Append(qq.NewTextfLn("对战ID: %s", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("对战模式: %s", match.MetaData.Mode))
+	msg.Append(qq.NewTextfLn("对战开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
+	msg.Append(qq.NewTextfLn("对战时长: %s", formatDuration(match.MetaData.GameLength)))
+	msg.Append(qq.NewTextfLn("对战地图: %s", match.MetaData.Map))
 	msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
-	msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
-	msg.Append(qq.NewTextfLn("比赛结果: %s", formatResultObjective(match)))
-	msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("服务器节点: %s", match.MetaData.Cluster))
+	msg.Append(qq.NewTextfLn("对战结果: %s", formatResultObjective(match)))
+	msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细对战玩家信息", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细对战回合信息", match.MetaData.MatchId))
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
@@ -157,7 +157,7 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 		// 行为
 		friendlyFire := &valorant.FriendlyFireInfo{}
-		if ff, ok := ffInfo[player.PUuid]; !ok {
+		if ff, ok := ffInfo[player.PUuid]; ok {
 			friendlyFire = ff
 		}
 		msg.Append(qq.NewTextLn("\t行为:"))
@@ -240,10 +240,10 @@ var (
 	infoCommand         = command.NewNode([]string{"info", "资讯"}, "查询玩家账户资讯", false, info, "<名称#Tag>")
 	forceUpdateCommand  = command.NewNode([]string{"update", "更新"}, "强制更新玩家资讯", false, forceUpdate, "<名称#Tag>")
 	statusCommand       = command.NewNode([]string{"status", "状态"}, "查询状态", false, status)
-	matchesCommand      = command.NewNode([]string{"matches", "比赛历史"}, "查询比赛历史", false, matches)
-	matchCommand        = command.NewNode([]string{"match", "比赛"}, "查询比赛详情", false, match, "<比赛ID>")
-	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询比赛玩家资讯", false, matchPlayers, "<比赛ID>")
-	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询比赛回合资讯", false, matchRounds, "<比赛ID>")
+	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
+	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
+	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
+	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
 	mmrCommand          = command.NewNode([]string{"mmr", "段位"}, "查询段位", false, mmr, "<名称#Tag>")
 	mmrHistoriesCommand = command.NewNode([]string{"mmrHistories", "段位历史"}, "查询段位历史", false, mmrHistories, "<名称#Tag>")
 	mmrBySeasonCommand  = command.NewNode([]string{"mmrBySeason", "赛季段位"}, "查询赛季段位", false, mmrBySeason, "<名称#Tag>", "<赛季>")
