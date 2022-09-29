@@ -26,8 +26,8 @@ func info(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("%s 的账户资讯:", fmt.Sprintf("%s#%s", info.Name, info.Tag)))
 	msg.Append(qq.NewTextfLn("用户ID: %s", info.PUuid))
 	msg.Append(qq.NewTextfLn("区域: %s", info.Region))
-	msg.Append(qq.NewTextfLn("等级: %s", info.AccountLevel))
-	msg.Append(qq.NewTextfLn("最新API刷取时间: %s", formatTime(info.LastUpdate)))
+	msg.Append(qq.NewTextfLn("等级: %d", info.AccountLevel))
+	msg.Append(qq.NewTextfLn("最新API刷取时间: %s (%s)", datetime.FormatSeconds(info.LastUpdateRaw), info.LastUpdate))
 	img, err := qq.NewImageByUrl(info.Card["small"])
 	if err != nil {
 		logger.Errorf("无法获取用户卡片: %v", err)
@@ -148,7 +148,6 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		return err
 	}
 	for i, player := range ranking {
-		msg.Append(qq.NewTextLn("=================="))
 		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 
 		// 基本资料
@@ -234,7 +233,6 @@ func matchRounds(args []string, source *command.MessageSource) error {
 	}
 
 	for i, round := range match.Rounds {
-		msg.Append(qq.NewTextLn("=================="))
 		msg.Append(qq.NewTextfLn("第 %d 回合 (胜者: %s, 胜利类型: %s)", i+1, round.WinningTeam, round.EndType))
 
 		if round.BombPlanted {
@@ -313,7 +311,7 @@ func mmr(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("======== %s 的 MMR 资料 =======", args[0]))
+	msg.Append(qq.NewTextfLn("%s 的 MMR 资料:", args[0]))
 	msg.Append(qq.NewTextfLn("目前段位: %s", mmr.CurrentTierPatched))
 	msg.Append(qq.NewTextfLn("目前段位分数: %d/100", mmr.RankingInTier))
 	msg.Append(qq.NewTextfLn("上一次的分数变更: %d", mmr.MMRChangeToLastGame))

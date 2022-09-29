@@ -18,8 +18,13 @@ type TextImage struct {
 	font    *truetype.Font
 }
 
-func GetFontFromOwner() (*truetype.Font, error) {
-	resp, err := http.Get("https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true")
+const (
+	ownerFont       = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
+	ubuntuLightFont = "https://github.com/google/fonts/blob/main/ufl/ubuntu/Ubuntu-Light.ttf?raw=true"
+)
+
+func GetDefaultFont() (*truetype.Font, error) {
+	resp, err := http.Get(ubuntuLightFont)
 	if err != nil {
 		return nil, err
 	}
@@ -33,14 +38,14 @@ func GetFontFromOwner() (*truetype.Font, error) {
 
 func NewPrependMessage() (*TextImage, error) {
 
-	f, err := GetFontFromOwner()
+	f, err := GetDefaultFont()
 	if err != nil {
 		return nil, err
 	}
 
 	return &TextImage{
 		prepend: text2pic.NewTextPicture(text2pic.Configure{
-			Width:   1920,
+			Width:   1000,
 			BgColor: image.White,
 		}),
 		font: f,
