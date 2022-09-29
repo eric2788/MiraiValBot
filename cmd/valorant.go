@@ -58,8 +58,8 @@ func matches(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 		msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
 		msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(match, args[0])))
-		msg.Append(qq.NewTextfLn("输入 /valorant players %s 查看详细玩家信息", match.MetaData.MatchId))
-		msg.Append(qq.NewTextfLn("输入 /valorant rounds %s 查看详细回合信息", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -79,8 +79,8 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 	msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
 	msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(*match, args[0])))
-	msg.Append(qq.NewTextfLn("输入 /valorant players %s 查看详细玩家信息", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("输入 /valorant rounds %s 查看详细回合信息", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
@@ -203,10 +203,12 @@ var (
 	localizeCommand     = command.NewNode([]string{"localize", "本地化"}, "更新i18n内容", true, localize)
 )
 
-var valorantCommand = command.NewParent([]string{"valorant", "valorant", "瓦罗兰", "瓦"}, "valorant指令",
+var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰", "瓦"}, "valorant指令",
 	statusCommand,
 	matchesCommand,
 	matchCommand,
+	matchPlayerscommand,
+	matchRoundsCommand,
 	mmrCommand,
 	mmrHistoriesCommand,
 	mmrBySeasonCommand,
