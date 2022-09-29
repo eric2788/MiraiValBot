@@ -15,7 +15,7 @@ func TestGenerateImage(t *testing.T) {
 	}
 
 	for i := 0; i < 10; i++ {
-		msg.Append(qq.NewTextLn("=================="))
+		msg.Append(qq.NewTextLn("=========這是繁體========="))
 		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1))
 
 		// 基本资料

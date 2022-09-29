@@ -19,12 +19,13 @@ type TextImage struct {
 }
 
 const (
-	ownerFont       = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
-	ubuntuLightFont = "https://github.com/google/fonts/blob/main/ufl/ubuntu/Ubuntu-Light.ttf?raw=true"
+	Width       = 1000
+	ownerFont   = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
+	DefaultFont = "https://github.com/bingwen/befit/raw/master/static/resources/%E5%AD%97%E4%BD%93%E5%8C%85/simhei_0.ttf"
 )
 
 func GetDefaultFont() (*truetype.Font, error) {
-	resp, err := http.Get(ubuntuLightFont)
+	resp, err := http.Get(DefaultFont)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func NewPrependMessage() (*TextImage, error) {
 
 	return &TextImage{
 		prepend: text2pic.NewTextPicture(text2pic.Configure{
-			Width:   1000,
+			Width:   Width,
 			BgColor: image.White,
 		}),
 		font: f,
@@ -55,7 +56,7 @@ func NewPrependMessage() (*TextImage, error) {
 func NewPrependMessageWithFont(f *truetype.Font) *TextImage {
 	return &TextImage{
 		prepend: text2pic.NewTextPicture(text2pic.Configure{
-			Width:   1920,
+			Width:   Width,
 			BgColor: image.White,
 		}),
 		font: f,
@@ -70,7 +71,7 @@ func (prepend *TextImage) Append(element *message.TextElement) *TextImage {
 func (prepend *TextImage) GenerateImage() ([]byte, error) {
 	var b []byte
 	buffer := bytes.NewBuffer(b)
-	err := prepend.prepend.Draw(buffer, text2pic.TypeJpeg)
+	err := prepend.prepend.Draw(buffer, text2pic.TypePng)
 	return buffer.Bytes(), err
 }
 
