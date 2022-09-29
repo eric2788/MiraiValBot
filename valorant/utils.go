@@ -24,7 +24,7 @@ type FriendlyFireInfo struct {
 
 
 func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
-	var infoMap map[string]*FriendlyFireInfo
+	var infoMap = make(map[string]*FriendlyFireInfo)
 
 	getInfo := func(id string) *FriendlyFireInfo{
 		if value, ok := infoMap[id]; ok {
