@@ -424,7 +424,9 @@ func formatResult(data valorant.MatchData, name string) string {
 			player.Stats.Score,
 		)
 	case "unrated":
+		fallthrough
 	case "competitive":
+		fallthrough
 	case "custom game":
 		red := data.Teams["red"]
 		blue := data.Teams["blue"]
