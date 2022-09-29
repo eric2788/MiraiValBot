@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/redis"
@@ -145,6 +146,11 @@ func NewImageByUrlWithGroup(gp int64, url string) (*message.GroupImageElement, e
 	if err != nil {
 		return nil, err
 	}
+	reader := bytes.NewReader(img)
+	return bot.Instance.UploadGroupImage(gp, reader)
+}
+
+func NewImagesByByteWithGroup(gp int64, img []byte) (*message.GroupImageElement, error) {
 	reader := bytes.NewReader(img)
 	return bot.Instance.UploadGroupImage(gp, reader)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/imgtxt"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/valorant"
@@ -128,6 +129,8 @@ func match(args []string, source *command.MessageSource) error {
 
 func matchPlayers(args []string, source *command.MessageSource) error {
 
+	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家资料...")))
+
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
 		return err
@@ -136,7 +139,10 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 	ffInfo := valorant.GetFriendlyFireInfo(match)
 	ranking := valorant.GetMatchRanking(match)
 
-	msg := message.NewSendingMessage()
+	msg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		return err
+	}
 	for i, player := range ranking {
 		msg.Append(qq.NewTextLn("=================="))
 		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
@@ -193,20 +199,40 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	bb, err := msg.GenerateImage()
+	if err != nil {
+		return err
+	}
+
+	img, err := qq.NewImagesByByteWithGroup(qq.ValGroupInfo.Uin, bb)
+
+	if err != nil {
+		return err
+	}
+
+	sending := message.NewSendingMessage().Append(img)
+
+	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
+
+	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合资料...")))
+
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
 		return err
 	}
-	msg := message.NewSendingMessage()
 
 	// 过滤死斗
 	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
-		msg.Append(message.NewText("死斗没有可以查看的对战回合资讯。"))
-		return qq.SendGroupMessage(msg)
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("死斗没有可以查看的对战回合资讯。")))
+	}
+
+	msg, err := imgtxt.NewPrependMessage()
+
+	if err != nil {
+		return err
 	}
 
 	for i, round := range match.Rounds {
@@ -269,7 +295,21 @@ func matchRounds(args []string, source *command.MessageSource) error {
 			}
 		}
 
-		return qq.SendWithRandomRiskyStrategy(msg)
+		bb, err := msg.GenerateImage()
+		if err != nil {
+			return err
+		}
+
+		img, err := qq.NewImagesByByteWithGroup(qq.ValGroupInfo.Uin, bb)
+
+		if err != nil {
+			return err
+		}
+
+		sending := message.NewSendingMessage().Append(img)
+
+		return qq.SendWithRandomRiskyStrategy(sending)
+
 	}
 
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
@@ -367,7 +407,9 @@ func formatResultObjective(data *valorant.MatchData) string {
 			player.Stats.Score,
 		)
 	case "unrated":
+		fallthrough
 	case "competitive":
+		fallthrough
 	case "custom game":
 		red := data.Teams["red"]
 		blue := data.Teams["blue"]
