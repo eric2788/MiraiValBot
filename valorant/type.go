@@ -98,12 +98,9 @@ type (
 		} `json:"assets"`
 
 		Behaviour struct {
-			AfkRounds    int `json:"afk_rounds"`
-			FriendlyFire struct {
-				Incoming int `json:"incoming"`
-				Outgoing int `json:"outgoing"`
-			} `json:"friendly_fire"`
-			RoundInSpawn int `json:"round_in_spawn"`
+			AfkRounds    float64      `json:"afk_rounds"`
+			FriendlyFire FriendlyFire `json:"friendly_fire"`
+			RoundInSpawn int          `json:"round_in_spawn"`
 		} `json:"behaviour"`
 
 		Platform struct {
@@ -133,6 +130,11 @@ type (
 
 		DamageMade     int64 `json:"damage_made"`
 		DamageReceived int64 `json:"damage_received"`
+	}
+
+	FriendlyFire struct {
+		Incoming int `json:"incoming"`
+		Outgoing int `json:"outgoing"`
 	}
 
 	EconomyInfo struct {

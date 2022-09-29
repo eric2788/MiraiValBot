@@ -7,6 +7,92 @@ import (
 	"strings"
 )
 
+var uuidCache = make(map[string]*AccountInfo)
+
+type AccountInfo struct {
+	Name string
+	Tag string
+	PUuid string
+	Display string
+}
+
+type FriendlyFireInfo struct {
+	FriendlyFire
+	Deaths int
+	Kills int
+}
+
+
+func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
+	var infoMap map[string]*FriendlyFireInfo
+
+	getInfo := func(id string) *FriendlyFireInfo{
+		if value, ok := infoMap[id]; ok {
+			return value
+		}else{
+			info := &FriendlyFireInfo{}
+			infoMap[id] = info
+			return info
+		}
+	}
+
+	for _, round := range data.Rounds {
+		for _, playerStats := range round.PlayerStats {
+
+			info := getInfo(playerStats.PlayerPUuid)
+
+			for _, damageEvent := range playerStats.DamageEvents {
+
+				victimInfo := getInfo(damageEvent.ReceiverPUuid)
+				
+				// friendly fire damage!
+				if damageEvent.ReceiverTeam == playerStats.PlayerTeam {
+					info.Outgoing += damageEvent.Damage
+					victimInfo.Incoming += damageEvent.Damage
+				}
+
+			}
+
+			for _, killEvent := range playerStats.KillsEvents {
+
+				victimInfo := getInfo(killEvent.KillerPUuid)
+
+				// friendly kill!
+				if killEvent.VictimTeam == playerStats.PlayerTeam {
+					info.Kills += 1
+					victimInfo.Deaths += 1
+				}
+			}
+		}
+	}
+
+	return infoMap
+}
+
+func GetAccountInfo(id string) (*AccountInfo, error) {
+	name, tag, err := ParseNameTag(id)
+	if err != nil {
+		return nil, err
+	}
+	if cache, ok := uuidCache[fmt.Sprintf("%s#%s", name, tag)]; ok {
+		return cache, nil
+	} else {
+		details, err := GetAccountDetails(name, tag)
+		if err != nil{
+			return nil, err
+		}
+		info := &AccountInfo{
+			Name: details.Name,
+			Tag: details.Tag,
+			PUuid: details.PUuid,
+			Display: fmt.Sprintf("%s#%s", details.Name, details.Tag),
+		}
+		uuidCache[fmt.Sprintf("%s#%s", name, tag)] = info
+		return info, nil
+	}
+}
+
+
 func GetDeathMatchRanking(data *MatchData) []MatchPlayer {
 	players := data.Players["all_players"]
 	sort.Slice(players, func(i, j int) bool {

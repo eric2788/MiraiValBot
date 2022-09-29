@@ -34,16 +34,19 @@ func status(args []string, source *command.MessageSource) error {
 }
 
 func matches(args []string, source *command.MessageSource) error {
-	name, tag, err := valorant.ParseNameTag(args[0])
+
+	qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取比赛资料...")))
+
+	info, err := valorant.GetAccountInfo(args[0])
 	if err != nil {
 		return err
 	}
-	matches, err := valorant.GetMatchHistories(name, tag, valorant.AsiaSpecific)
+	matches, err := valorant.GetMatchHistories(info.Name, info.Tag, valorant.AsiaSpecific)
 	if err != nil {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 最近的比赛:", args[0]))
+	msg.Append(qq.NewTextfLn("%s 最近的比赛:", info.Display))
 	for _, match := range matches {
 		// empty match id
 		if match.MetaData.MatchId == "" {
@@ -57,7 +60,7 @@ func matches(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("比赛地图: %s", match.MetaData.Map))
 		msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 		msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
-		msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(match, args[0])))
+		msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(match, info.PUuid)))
 		msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
 		msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
 	}
@@ -78,7 +81,7 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("比赛地图: %s", match.MetaData.Map))
 	msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 	msg.Append(qq.NewTextfLn("服务器: %s", match.MetaData.Cluster))
-	msg.Append(qq.NewTextfLn("比赛结果: %s", formatResult(*match, args[0])))
+	msg.Append(qq.NewTextfLn("比赛结果: %s", formatResultObjective(match)))
 	msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细玩家信息", match.MetaData.MatchId))
 	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细回合信息", match.MetaData.MatchId))
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -91,61 +94,64 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		return err
 	}
 
+	ffInfo := valorant.GetFriendlyFireInfo(match)
 	ranking := valorant.GetMatchRanking(match)
 
 	msg := message.NewSendingMessage()
 	for i, player := range ranking {
+		msg.Append(qq.NewTextLn("=================="))
+		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 
 		// 基本资料
-		msg.Append(qq.NewTextfLn("%d. %s (K: %d, D: %d, A: %d, 分数: %d, 使用角色: %s, 所在队伍: %s)",
-			i+1,
-			fmt.Sprintf("%s#%s", player.Name, player.Tag),
-			player.Stats.Kills,
-			player.Stats.Deaths,
-			player.Stats.Assists,
-			player.Stats.Score,
-			player.Character,
-			player.Team,
-		))
+		msg.Append(qq.NewTextLn("\t基本资料:"))
+		msg.Append(qq.NewTextfLn("\t\tKDA: %d | %d | %d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
+		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
+		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
+		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
 
 		// 击中分布
 		total := player.Stats.BodyShots + player.Stats.Headshots + player.Stats.LegShots
-		msg.Append(qq.NewTextfLn("\t击中次数分布: 头 %.1f%% (%d) 身 %.1f%% (%d) 腿 %.1f%% (%d)",
-			formatPercentageInt(player.Stats.Headshots, total), player.Stats.Headshots,
-			formatPercentageInt(player.Stats.BodyShots, total), player.Stats.BodyShots,
-			formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots,
-		))
+		msg.Append(qq.NewTextLn("\t击中次数分布"))
+		msg.Append(qq.NewTextfLn("\t\t头部: %.1f%% (%d次)", formatPercentageInt(player.Stats.Headshots, total), player.Stats.Headshots))
+		msg.Append(qq.NewTextfLn("\t\t身体: %.1f%% (%d次)", formatPercentageInt(player.Stats.BodyShots, total), player.Stats.BodyShots))
+		msg.Append(qq.NewTextfLn("\t\t腿部: %.1f%% (%d次)", formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots))
 
 		// 行为
-		msg.Append(qq.NewTextfLn("\t行为: AFK回合次数 %d, 误击队友伤害 %d, 被误击队友伤害 %d, 拆包次数 %d, 装包次数 %d",
-			player.Behaviour.AfkRounds,
-			player.Behaviour.FriendlyFire.Outgoing,
-			player.Behaviour.FriendlyFire.Incoming,
-			valorant.GetDefuseCount(match, args[0]),
-			valorant.GetPlantCount(match, args[0]),
-		))
+		friendlyFire := &valorant.FriendlyFireInfo{}
+		if ff, ok := ffInfo[player.PUuid]; !ok {
+			friendlyFire = ff
+		}
+		msg.Append(qq.NewTextLn("\t行为:"))
+		msg.Append(qq.NewTextfLn("\t\tAFK回合次数: %.0f", player.Behaviour.AfkRounds))
+		msg.Append(qq.NewTextfLn("\t\t误击队友伤害: %d", friendlyFire.Outgoing))
+		msg.Append(qq.NewTextfLn("\t\t误杀队友次数: %d", friendlyFire.Kills))
+		msg.Append(qq.NewTextfLn("\t\t被误击队友伤害: %d", friendlyFire.Incoming))
+		msg.Append(qq.NewTextfLn("\t\t被误杀队友次数: %d", friendlyFire.Deaths))
+		msg.Append(qq.NewTextfLn("\t\t拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
+		msg.Append(qq.NewTextfLn("\t\t装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
 
 		//技能使用
 		total = 0
 		for _, times := range player.AbilityCasts {
 			total += times
 		}
-		msg.Append(qq.NewTextfLn("\t技能使用次数分布: C %.1f%% (%d) Q %.1f%% (%d) E %.1f%% (%d) X %.1f%% (%d)",
-			formatPercentageInt(player.AbilityCasts["c_cast"], total), player.AbilityCasts["c_cast"],
-			formatPercentageInt(player.AbilityCasts["q_cast"], total), player.AbilityCasts["q_cast"],
-			formatPercentageInt(player.AbilityCasts["e_cast"], total), player.AbilityCasts["e_cast"],
-			formatPercentageInt(player.AbilityCasts["x_cast"], total), player.AbilityCasts["x_cast"],
-		))
+
+		msg.Append(qq.NewTextLn("\t技能使用次数分布:"))
+		msg.Append(qq.NewTextfLn("\t\t技能 Q: %d次 (%.1f%%)", player.AbilityCasts["q_cast"], formatPercentageInt(player.AbilityCasts["q_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 E: %d次 (%.1f%%)", player.AbilityCasts["e_cast"], formatPercentageInt(player.AbilityCasts["e_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 C: %d次 (%.1f%%)", player.AbilityCasts["c_cast"], formatPercentageInt(player.AbilityCasts["c_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 X: %d次 (%.1f%%)", player.AbilityCasts["x_cast"], formatPercentageInt(player.AbilityCasts["x_cast"], total)))
 
 		// 经济
-		msg.Append(qq.NewTextfLn("\t经济: 总支出 $%d, 平均支出 $%d", player.Economy.Spent.OverAll, player.Economy.Spent.Average))
+		msg.Append(qq.NewTextLn("\t经济:"))
+		msg.Append(qq.NewTextfLn("\t\t总支出 $%d", player.Economy.Spent.OverAll))
+		msg.Append(qq.NewTextfLn("\t\t平均支出 $%d", player.Economy.Spent.Average))
 
 		// 伤害
 		totalDamage := player.DamageReceived + player.DamageMade
-		msg.Append(qq.NewTextfLn("\t伤害分布: 总承受 %.1f%% (%d) 总伤害 %.1f%% (%d)",
-			formatPercentage(player.DamageReceived, totalDamage), player.DamageReceived,
-			formatPercentage(player.DamageMade, totalDamage), player.DamageMade,
-		))
+		msg.Append(qq.NewTextLn("\t伤害分布:"))
+		msg.Append(qq.NewTextfLn("\t\t总承受 %d (%.1f%%)", player.DamageReceived, formatPercentage(player.DamageReceived, totalDamage)))
+		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -224,6 +230,33 @@ func init() {
 //            Util Functions
 //
 // ===================================
+
+func formatResultObjective(data *valorant.MatchData) string {
+	mode := strings.ToLower(data.MetaData.Mode)
+
+	switch mode {
+	case "deathmatch":
+		ranking := valorant.GetDeathMatchRanking(data)
+		if len(ranking) == 0 {
+			return "没有名次"
+		}
+		player := ranking[0]
+		return fmt.Sprintf("胜出者: %s (K %d | D %d | A %d, 分数: %d)",
+			fmt.Sprintf("%s#%s", player.Name, player.Tag),
+			player.Stats.Kills,
+			player.Stats.Deaths,
+			player.Stats.Assists,
+			player.Stats.Score,
+		)
+	case "unrated":
+	case "competitive":
+	case "custom game":
+		red := data.Teams["red"]
+		blue := data.Teams["blue"]
+		return fmt.Sprintf("Red %d : %d Blue", red.RoundsWon, blue.RoundsWon)
+	}
+	return fmt.Sprintf("(错误: 不支援的模式 %s)", data.MetaData.Mode)
+}
 
 func formatResult(data valorant.MatchData, name string) string {
 	mode := strings.ToLower(data.MetaData.Mode)
