@@ -90,6 +90,7 @@ func TestGetMMRDetailsV1(t *testing.T) {
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
 	assert.Equal(t, "JP1", mmrDetails.Tag)
+	assert.NotEmpty(t, mmrDetails.CurrentTierPatched)
 }
 
 func TestGetMMRDetailsV2(t *testing.T) {

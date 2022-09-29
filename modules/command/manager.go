@@ -176,7 +176,7 @@ func showHelpLine(parents []string, node Node) string {
 	}
 	line += node.Command
 	for _, placeholder := range filterNecessary(node.Placeholders) {
-		line += placeholder + " "
+		line += " " + placeholder
 	}
 	return fmt.Sprintf("%s - %s", line, node.Description)
 }

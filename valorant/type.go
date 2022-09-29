@@ -59,6 +59,7 @@ type (
 		Players  map[string][]MatchPlayer  `json:"players"`
 		Teams    map[string]MatchTeamStats `json:"teams"`
 		Rounds   []MatchRound              `json:"rounds"`
+		Kills    []KillEvent               `json:"kills"`
 	}
 
 	MatchMetaData struct {
@@ -136,7 +137,7 @@ type (
 
 	EconomyInfo struct {
 		OverAll int64 `json:"overall"`
-		Overage int64 `json:"overage"`
+		Average int64 `json:"average"`
 	}
 
 	MatchTeamStats struct {
@@ -169,12 +170,12 @@ type (
 	MatchPlayerStats struct {
 		AbilityCasts map[string]int `json:"ability_casts"`
 		TeamPlayer
-		DamageEvents []interface{} `json:"damage_events"`
+		DamageEvents []DamageEvent `json:"damage_events"`
 		Damage       int           `json:"damage"`
 		BodyShots    int           `json:"bodyshots"`
 		Headshots    int           `json:"headshots"`
 		LegShots     int           `json:"legshots"`
-		KillsEvents  []interface{} `json:"kills_events"`
+		KillsEvents  []KillEvent   `json:"kills_events"`
 		Kills        int           `json:"kills"`
 		Score        int           `json:"score"`
 		Economy      struct {
@@ -189,6 +190,40 @@ type (
 		WasAfk        bool `json:"was_afk"`
 		WasPenalized  bool `json:"was_penalized"`
 		StayedInSpawn bool `json:"stayed_in_spawn"`
+	}
+
+	DamageEvent struct {
+		ReceiverPUuid       string `json:"receiver_puuid"`
+		ReceiverDisplayName string `json:"receiver_display_name"`
+		ReceiverTeam        string `json:"receiver_team"`
+		BodyShots           int    `json:"bodyshots"`
+		Damage              int    `json:"damage"`
+		HeadShots           int    `json:"headshots"`
+		LegShots            int    `json:"legshots"`
+	}
+
+	KillEvent struct {
+		KillTimeInRound       int64             `json:"kill_time_in_round"`
+		KillTimeInMatch       int64             `json:"kill_time_in_match"`
+		KillerPUuid           string            `json:"killer_puuid"`
+		KillerDisplayName     string            `json:"killer_display_name"`
+		KillerTeam            string            `json:"killer_team"`
+		VictimPUuid           string            `json:"victim_puuid"`
+		VictimDisplayName     string            `json:"victim_display_name"`
+		VictimTeam            string            `json:"victim_team"`
+		VictimDeathLocation   Location          `json:"victim_death_location"`
+		DamageWeaponId        string            `json:"damage_weapon_id"`
+		DamageWeaponName      string            `json:"damage_weapon_name"`
+		DamageWeaponAssets    map[string]string `json:"damage_weapon_assets"`
+		SecondaryFireMode     bool              `json:"secondary_fire_mode"`
+		PlayerLocationsOnKill []PlayerLocation  `json:"player_locations_on_kill"`
+		Assistants            []Assistant       `json:"assistants"`
+	}
+
+	Assistant struct {
+		AssistantPUuid       string `json:"assistant_puuid"`
+		AssistantDisplayName string `json:"assistant_display_name"`
+		AssistantTeam        string `json:"assistant_team"`
 	}
 
 	Equipment struct {
@@ -252,7 +287,7 @@ type (
 
 	MMRDataBase struct {
 		CurrentTier         int               `json:"currenttier"`
-		CurrentTierPatched  string            `json:"currenttier_patched"`
+		CurrentTierPatched  string            `json:"currenttierpatched"`
 		Images              map[string]string `json:"images"`
 		RankingInTier       int               `json:"ranking_in_tier"`
 		MMRChangeToLastGame int               `json:"mmr_change_to_last_game"`
