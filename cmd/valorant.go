@@ -131,7 +131,7 @@ func match(args []string, source *command.MessageSource) error {
 
 func matchPlayers(args []string, source *command.MessageSource) error {
 
-	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家资料..."))); err != nil {
+	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家的资料.."))); err != nil {
 		logger.Errorf("發送預備索取消息失敗: %v", err)
 	}
 
@@ -212,7 +212,7 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 func matchRounds(args []string, source *command.MessageSource) error {
 
-	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合资料..."))); err != nil {
+	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合的资料.."))); err != nil {
 		logger.Errorf("發送預備索取消息失敗: %v", err)
 	}
 

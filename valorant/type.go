@@ -8,6 +8,7 @@ import (
 
 type (
 	ApiError struct {
+		Status int
 		Errors []Error
 	}
 
@@ -101,7 +102,7 @@ type (
 			AfkRounds    float64      `json:"afk_rounds"`
 			FriendlyFire FriendlyFire `json:"friendly_fire"`
 			RoundInSpawn int          `json:"round_in_spawn"`
-		} `json:"behaviour"`
+		} `json:"behavior"`
 
 		Platform struct {
 			Type string `json:"type"`
@@ -350,9 +351,9 @@ func (resp *Resp) ParseData(t interface{}) error {
 func (err *ApiError) Error() string {
 	messages := make([]string, len(err.Errors))
 	for i, e := range err.Errors {
-		messages[i] = e.Message
+		messages[i] = fmt.Sprintf("%s(%d): %s", e.Message, e.Code, e.Details)
 	}
-	return fmt.Sprintf("API Errors: %s", strings.Join(messages, ", "))
+	return fmt.Sprintf("API Errors(%d): %s", err.Status, strings.Join(messages, ", "))
 }
 
 func (local Localization) GetLocalizeItem(key string) (*LocalizeItem, error) {

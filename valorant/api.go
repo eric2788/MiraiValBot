@@ -74,7 +74,10 @@ func getRequest(path string) (*Resp, error) {
 	if err != nil {
 		return nil, err
 	} else if len(data.Errors) > 0 {
-		return nil, &ApiError{data.Errors}
+		return nil, &ApiError{
+			Status: data.Status,
+			Errors: data.Errors,
+		}
 	}
 	return &data, nil
 }
@@ -87,6 +90,11 @@ func getRequestCustom(path string, response interface{}) error {
 	}
 	res, err := doRequest(req)
 	if err != nil {
+		if httpErr, ok := err.(*request.HttpError); ok {
+			if err := request.Read(httpErr.Response, response); err == nil {
+				return nil
+			}
+		}
 		return err
 	}
 	logger.Debugf("response status for %v: %v", BaseUrl+path, res.Status)
@@ -152,7 +160,7 @@ func GetGameStatus(region Region) (*StatusResp, error) {
 	if err != nil {
 		return nil, err
 	} else if len(data.Errors) > 0 {
-		return nil, &ApiError{data.Errors}
+		return nil, &ApiError{data.Status, data.Errors}
 	} else if data.Status != 200 {
 		return nil, errors.New(fmt.Sprintf("status code %v", data.Status))
 	}
@@ -165,7 +173,7 @@ func GetMMRHistories(name, tag string, region Region) (*PlayerInfoResp, error) {
 	if err != nil {
 		return nil, err
 	} else if len(data.Errors) > 0 {
-		return nil, &ApiError{data.Errors}
+		return nil, &ApiError{data.Status, data.Errors}
 	} else if data.Status != 200 {
 		return nil, errors.New(fmt.Sprintf("status code %v", data.Status))
 	}

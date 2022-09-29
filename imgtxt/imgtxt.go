@@ -71,7 +71,7 @@ func (prepend *TextImage) Append(element *message.TextElement) *TextImage {
 func (prepend *TextImage) GenerateImage() ([]byte, error) {
 	var b []byte
 	buffer := bytes.NewBuffer(b)
-	err := prepend.prepend.Draw(buffer, text2pic.TypePng)
+	err := prepend.prepend.Draw(buffer, text2pic.TypeJpeg)
 	return buffer.Bytes(), err
 }
 

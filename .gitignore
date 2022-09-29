@@ -4,3 +4,5 @@
 **/data/**
 **/logs/**
 session.token
+**/imgtxt/*.jpeg
+**/file/*.yaml
