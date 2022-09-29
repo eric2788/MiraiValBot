@@ -19,7 +19,7 @@ type TextImage struct {
 }
 
 const (
-	Width       = 1000
+	Width       = 1200
 	ownerFont   = "https://github.com/hqbobo/text2pic/blob/master/example/FZHTJW.TTF?raw=true"
 	DefaultFont = "https://github.com/bingwen/befit/raw/master/static/resources/%E5%AD%97%E4%BD%93%E5%8C%85/simhei_0.ttf"
 )
@@ -64,7 +64,7 @@ func NewPrependMessageWithFont(f *truetype.Font) *TextImage {
 }
 
 func (prepend *TextImage) Append(element *message.TextElement) *TextImage {
-	prepend.prepend.AddTextLine(element.Content, 12, prepend.font, text2pic.ColorBlack, text2pic.Padding{})
+	prepend.prepend.AddTextLine(element.Content, 10, prepend.font, text2pic.ColorBlack, text2pic.Padding{})
 	return prepend
 }
 

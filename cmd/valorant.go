@@ -271,7 +271,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 				}
 			}
 
-			if playerStats.Kills > 0 {
+			if len(playerStats.KillsEvents) > 0 {
 				msg.Append(qq.NewTextLn("\t\t分别击杀:"))
 				for _, killEvent := range playerStats.KillsEvents {
 					msg.Append(qq.NewTextfLn("\t\t\t%s:", killEvent.VictimDisplayName))
@@ -290,17 +290,14 @@ func matchRounds(args []string, source *command.MessageSource) error {
 				}
 			}
 		}
-
-		img, err := msg.ToGroupImageElement()
-		if err != nil {
-			return err
-		}
-		sending := message.NewSendingMessage().Append(img)
-		return qq.SendWithRandomRiskyStrategy(sending)
-
 	}
 
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+	img, err := msg.ToGroupImageElement()
+	if err != nil {
+		return err
+	}
+	sending := message.NewSendingMessage().Append(img)
+	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
 // mmr get MMRV1Details
