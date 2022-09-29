@@ -12,6 +12,45 @@ import (
 	"github.com/eric2788/common-utils/datetime"
 )
 
+func info(args []string, source *command.MessageSource) error {
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+	info, err := valorant.GetAccountDetails(name, tag)
+	if err != nil {
+		return err
+	}
+	msg := qq.CreateReply(source.Message)
+	msg.Append(qq.NewTextfLn("%s 的账户资讯:", fmt.Sprintf("%s#%s", info.Name, info.Tag)))
+	msg.Append(qq.NewTextfLn("用户ID: %s", info.PUuid))
+	msg.Append(qq.NewTextfLn("区域: %s", info.Region))
+	msg.Append(qq.NewTextfLn("等级: %s", info.AccountLevel))
+	msg.Append(qq.NewTextfLn("最新API刷取时间: %s", formatTime(info.LastUpdate)))
+	img, err := qq.NewImageByUrl(info.Card["small"])
+	if err != nil {
+		logger.Errorf("无法获取用户卡片: %v", err)
+	} else {
+		msg.Append(img)
+	}
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
+func forceUpdate(args []string, source *command.MessageSource) error {
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+	msg := qq.CreateReply(source.Message)
+	if err := valorant.UpdateAccountDetails(name, tag); err == nil {
+		msg.Append(qq.NewTextf("强制更新用户资讯成功。"))
+	} else {
+		msg.Append(qq.NewTextf("强制更新用户资讯失败: %v", err))
+	}
+
+	return qq.SendGroupMessage(msg)
+}
+
 func status(args []string, source *command.MessageSource) error {
 	status, err := valorant.GetGameStatus(valorant.AsiaSpecific)
 	if err != nil {
@@ -198,6 +237,8 @@ func localize(args []string, source *command.MessageSource) error {
 }
 
 var (
+	infoCommand         = command.NewNode([]string{"info", "资讯"}, "查询玩家账户资讯", false, info, "<名称#Tag>")
+	forceUpdateCommand  = command.NewNode([]string{"update", "更新"}, "强制更新玩家资讯", false, forceUpdate, "<名称#Tag>")
 	statusCommand       = command.NewNode([]string{"status", "状态"}, "查询状态", false, status)
 	matchesCommand      = command.NewNode([]string{"matches", "比赛历史"}, "查询比赛历史", false, matches)
 	matchCommand        = command.NewNode([]string{"match", "比赛"}, "查询比赛详情", false, match, "<比赛ID>")
@@ -210,6 +251,8 @@ var (
 )
 
 var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰", "瓦"}, "valorant指令",
+	infoCommand,
+	forceUpdateCommand,
 	statusCommand,
 	matchesCommand,
 	matchCommand,

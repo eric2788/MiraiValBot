@@ -93,6 +93,11 @@ func getRequestCustom(path string, response interface{}) error {
 	return request.Read(res, response)
 }
 
+func UpdateAccountDetails(name, tag string) error {
+	_, err := getRequest(fmt.Sprintf("%v/account/%s/%s?force=true", V1, name, tag))
+	return err
+}
+
 func GetAccountDetails(name, tag string) (*AccountDetails, error) {
 	resp, err := getRequest(fmt.Sprintf("%v/account/%s/%s", V1, name, tag))
 	if err != nil {
