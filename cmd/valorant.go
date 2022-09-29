@@ -163,7 +163,7 @@ func mmr(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("======== %s 的 MMR 资料 ======="))
+	msg.Append(qq.NewTextfLn("======== %s 的 MMR 资料 =======", args[0]))
 	msg.Append(qq.NewTextfLn("目前段位: %s", mmr.CurrentTierPatched))
 	msg.Append(qq.NewTextfLn("目前段位分数: %d/100", mmr.RankingInTier))
 	msg.Append(qq.NewTextfLn("上一次的分数变更: %d", mmr.MMRChangeToLastGame))
