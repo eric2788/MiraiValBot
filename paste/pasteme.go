@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	BaseURL = "https://pasteme.cn"
+	PasteMeBaseURL = "https://pasteme.cn"
 )
 
 var (
@@ -44,7 +44,7 @@ func createCookieJar() http.CookieJar {
 	return jar
 }
 
-func CreatePaste(lang, content string) (string, error) {
+func CreatePasteMe(lang, content string) (string, error) {
 
 	userAgent := uarand.GetRandom()
 	if err := browseMainPage(userAgent); err != nil {
@@ -66,7 +66,7 @@ func CreatePaste(lang, content string) (string, error) {
 		return "", err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, BaseURL+"/api/v3/paste", bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, PasteMeBaseURL+"/api/v3/paste", bytes.NewReader(body))
 
 	if err != nil {
 		return "", err
@@ -75,10 +75,10 @@ func CreatePaste(lang, content string) (string, error) {
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", "application/json")
 
-	if url, err := url.Parse(BaseURL); err == nil && url != nil {
+	if url, err := url.Parse(PasteMeBaseURL); err == nil && url != nil {
 		logger.Debugf("cookies of api client: %+v", client.Jar.Cookies(url))
 	} else {
-		logger.Debugf("Error while parsing url %s: %s", BaseURL, err)
+		logger.Debugf("Error while parsing url %s: %s", PasteMeBaseURL, err)
 	}
 
 	res, err := client.Do(req)
@@ -96,7 +96,7 @@ func CreatePaste(lang, content string) (string, error) {
 	if res.StatusCode == 201 {
 		var resp Resp
 		err = json.Unmarshal(b, &resp)
-		return resp.Key, err
+		return fmt.Sprintf("%s#%s", PasteMeBaseURL, resp.Key), err
 	} else {
 		var errResp ErrResp
 		if err = json.Unmarshal(b, &errResp); err == nil {
@@ -126,9 +126,9 @@ func getCookiesFromPage(userAgent, url string) error {
 // to get cookie
 func browseMainPage(userAgent string) error {
 	urls := []string{
-		BaseURL,
-		BaseURL + "/api/v3/?method=beat",
-		BaseURL + "/?encode=text",
+		PasteMeBaseURL,
+		PasteMeBaseURL + "/api/v3/?method=beat",
+		PasteMeBaseURL + "/?encode=text",
 	}
 
 	for _, url := range urls {

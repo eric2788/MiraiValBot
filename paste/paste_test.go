@@ -1,6 +1,7 @@
 package paste
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -9,12 +10,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func init(){
+func init() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
-func TestCreatePaste(t *testing.T) {
-
+func generateTestMessage() *message.SendingMessage {
 	msg := message.NewSendingMessage()
 
 	for i := 0; i < 10; i++ {
@@ -63,12 +63,35 @@ func TestCreatePaste(t *testing.T) {
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)"))
 
 	}
+	return msg
+}
 
+func TestCreatePasteMe(t *testing.T) {
+
+	msg := generateTestMessage()
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "")
 
-	key, err := CreatePaste("plain", content)	
+	url, err := CreatePasteMe("plain", content)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("https://pasteme.cn#%s", key)
+	t.Logf(url)
+}
+
+func TestCreatePasteBin(t *testing.T) {
+	msg := generateTestMessage()
+	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "")
+
+	if os.Getenv("PASTEBIN_API_KEY") == "" {
+		t.Logf("API key is not set, skipped the test.")
+		return
+	}
+
+	url, err := CreatePasteBin("test-message", content, "yaml")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(url)
 }

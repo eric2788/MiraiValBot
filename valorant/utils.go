@@ -51,7 +51,7 @@ func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 
 			}
 
-			for _, killEvent := range playerStats.KillsEvents {
+			for _, killEvent := range playerStats.KillEvents {
 
 				victimInfo := getInfo(killEvent.KillerPUuid)
 

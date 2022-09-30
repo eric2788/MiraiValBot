@@ -178,17 +178,15 @@ type (
 		BodyShots    int           `json:"bodyshots"`
 		Headshots    int           `json:"headshots"`
 		LegShots     int           `json:"legshots"`
-		KillsEvents  []KillEvent   `json:"kills_events"`
+		KillEvents   []KillEvent   `json:"kill_events"`
 		Kills        int           `json:"kills"`
 		Score        int           `json:"score"`
 		Economy      struct {
-			LoadoutValue int `json:"loadout_value"`
-			Weapon       struct {
-				Weapon Equipment `json:"weapon"`
-				Armor  Equipment `json:"armor"`
-			} `json:"weapon"`
-			Remaining int `json:"remaining"`
-			Spent     int `json:"spent"`
+			LoadoutValue int       `json:"loadout_value"`
+			Weapon       Equipment `json:"weapon"`
+			Armor        Equipment `json:"armor"`
+			Remaining    int       `json:"remaining"`
+			Spent        int       `json:"spent"`
 		} `json:"economy"`
 		WasAfk        bool `json:"was_afk"`
 		WasPenalized  bool `json:"was_penalized"`

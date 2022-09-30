@@ -243,13 +243,13 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		}
 
 		for _, playerStats := range round.PlayerStats {
-			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的战绩:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
+			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的表現:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
 
 			msg.Append(qq.NewTextfLn("\t\tAFK: %t", playerStats.WasAfk))
 			msg.Append(qq.NewTextfLn("\t\t被惩罚: %t", playerStats.WasPenalized))
 			msg.Append(qq.NewTextfLn("\t\t回合花费: $%d (剩余 $%d)", playerStats.Economy.Spent, playerStats.Economy.Remaining))
-			msg.Append(qq.NewTextfLn("\t\t武器: %s", playerStats.Economy.Weapon.Weapon.Name))
-			msg.Append(qq.NewTextfLn("\t\t装备: %s", playerStats.Economy.Weapon.Armor.Name))
+			msg.Append(qq.NewTextfLn("\t\t武器: %s", playerStats.Economy.Weapon.Name))
+			msg.Append(qq.NewTextfLn("\t\t装备: %s", playerStats.Economy.Weapon.Name))
 
 			if playerStats.Damage > 0 {
 				msg.Append(qq.NewTextfLn("\t\t分别伤害:"))
@@ -265,9 +265,9 @@ func matchRounds(args []string, source *command.MessageSource) error {
 				}
 			}
 
-			if len(playerStats.KillsEvents) > 0 {
+			if playerStats.Kills > 0 {
 				msg.Append(qq.NewTextLn("\t\t分别击杀:"))
-				for _, killEvent := range playerStats.KillsEvents {
+				for _, killEvent := range playerStats.KillEvents {
 					msg.Append(qq.NewTextfLn("\t\t\t%s:", killEvent.VictimDisplayName))
 					msg.Append(qq.NewTextfLn("\t\t\t\t所在队伍: %s", killEvent.VictimTeam))
 					msg.Append(qq.NewTextfLn("\t\t\t\t击杀使用武器: %s", killEvent.DamageWeaponName))
@@ -288,15 +288,22 @@ func matchRounds(args []string, source *command.MessageSource) error {
 
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "")
 
-	key, err := paste.CreatePaste("plain", content)
+	pmUrl, err := paste.CreatePasteMe("plain", content)
 	if err != nil {
-		return err
+		pmUrl = fmt.Sprintf("(错误: %v)", err)
 	}
 
-	sending := qq.CreateReply(source.Message).
-		Append(qq.NewTextLn("链接只能使用一次，五分钟后过期。")).
-		Append(qq.NewTextfLn("https://pasteme.cn#%s", key)).
-		Append(qq.NewTextf("如过期，请重新输入指令生成。"))
+	pbUrl, err := paste.CreatePasteBin(fmt.Sprintf("%s 的对战回合资讯", match.MetaData.MatchId), content, "yaml")
+	if err != nil {
+		pbUrl = fmt.Sprintf("(错误: %v)", err)
+	}
+
+
+	sending := qq.CreateReply(source.Message)
+
+	sending.Append(qq.NewTextfLn("PasteMe(国内): %s (五分钟过期 / 阅后即焚)", pmUrl))
+	sending.Append(qq.NewTextfLn("PasteBin(国外): %s (一天后过期)", pbUrl))
+
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
