@@ -2,6 +2,7 @@ package valorant
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
@@ -96,6 +97,12 @@ func getRequestCustom(path string, response interface{}) error {
 				return nil
 			}else{
 				logger.Warnf("cannot parse http error response to Resp: %v, use back http error as error.", err)
+				if b, err := ioutil.ReadAll(httpErr.Response.Body); err == nil {
+					logger.Debugf("response body: %q", b)
+				}else{
+					logger.Debugf("cannot print response body: %v", err)
+				}
+				
 			}
 		}
 		return err
