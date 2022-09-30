@@ -98,7 +98,7 @@ func getRequestCustom(path string, response interface{}) error {
 			}else{
 				logger.Warnf("cannot parse http error response to Resp: %v, use back http error as error.", err)
 				if b, err := ioutil.ReadAll(httpErr.Response.Body); err == nil {
-					logger.Debugf("response body: %q", b)
+					logger.Debugf("response body: %q", string(b))
 				}else{
 					logger.Debugf("cannot print response body: %v", err)
 				}
