@@ -178,7 +178,7 @@ type (
 		BodyShots    int           `json:"bodyshots"`
 		Headshots    int           `json:"headshots"`
 		LegShots     int           `json:"legshots"`
-		KillsEvents  []KillEvent   `json:"kills_events"`
+		KillsEvents  []KillEvent   `json:"kill_events"`
 		Kills        int           `json:"kills"`
 		Score        int           `json:"score"`
 		Economy      struct {

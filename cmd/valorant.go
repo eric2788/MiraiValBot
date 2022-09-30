@@ -243,7 +243,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		}
 
 		for _, playerStats := range round.PlayerStats {
-			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的战绩:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
+			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的表現:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
 
 			msg.Append(qq.NewTextfLn("\t\tAFK: %t", playerStats.WasAfk))
 			msg.Append(qq.NewTextfLn("\t\t被惩罚: %t", playerStats.WasPenalized))
@@ -265,7 +265,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 				}
 			}
 
-			if len(playerStats.KillsEvents) > 0 {
+			if playerStats.Kills > 0 {
 				msg.Append(qq.NewTextLn("\t\t分别击杀:"))
 				for _, killEvent := range playerStats.KillsEvents {
 					msg.Append(qq.NewTextfLn("\t\t\t%s:", killEvent.VictimDisplayName))
