@@ -8,7 +8,7 @@ import (
 
 func cacheMatchHistories(histories []MatchData) {
 	for _, data := range histories {
-		go cacheMatchData(&data)
+		cacheMatchData(&data)
 	}
 }
 
