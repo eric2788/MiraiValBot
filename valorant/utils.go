@@ -43,8 +43,8 @@ func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 
 				victimInfo := getInfo(damageEvent.ReceiverPUuid)
 
-				// friendly fire damage!
-				if damageEvent.ReceiverTeam == playerStats.PlayerTeam {
+				// friendly fire damage! and not himself
+				if damageEvent.ReceiverTeam == playerStats.PlayerTeam && playerStats.PlayerPUuid != damageEvent.ReceiverPUuid {
 					info.Outgoing += damageEvent.Damage
 					victimInfo.Incoming += damageEvent.Damage
 				}
@@ -56,7 +56,7 @@ func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 				victimInfo := getInfo(killEvent.KillerPUuid)
 
 				// friendly kill!
-				if killEvent.VictimTeam == playerStats.PlayerTeam {
+				if killEvent.VictimTeam == playerStats.PlayerTeam && playerStats.PlayerPUuid != killEvent.KillerPUuid {
 					info.Kills += 1
 					victimInfo.Deaths += 1
 				}
