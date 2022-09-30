@@ -288,15 +288,22 @@ func matchRounds(args []string, source *command.MessageSource) error {
 
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "")
 
-	key, err := paste.CreatePaste("plain", content)
+	pmUrl, err := paste.CreatePasteMe("plain", content)
 	if err != nil {
-		return err
+		pmUrl = fmt.Sprintf("(错误: %v)", err)
 	}
 
-	sending := qq.CreateReply(source.Message).
-		Append(qq.NewTextLn("链接只能使用一次，五分钟后过期。")).
-		Append(qq.NewTextfLn("https://pasteme.cn#%s", key)).
-		Append(qq.NewTextf("如过期，请重新输入指令生成。"))
+	pbUrl, err := paste.CreatePasteBin(fmt.Sprintf("%s 的对战回合资讯", match.MetaData.MatchId), content, "yaml")
+	if err != nil {
+		pbUrl = fmt.Sprintf("(错误: %v)", err)
+	}
+
+
+	sending := qq.CreateReply(source.Message)
+
+	sending.Append(qq.NewTextfLn("PasteMe(国内): %s (五分钟过期 / 阅后即焚)", pmUrl))
+	sending.Append(qq.NewTextfLn("PasteBin(国外): %s (一天后过期)", pbUrl))
+
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
