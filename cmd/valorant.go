@@ -8,6 +8,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/imgtxt"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/paste"
 	"github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/valorant"
 	"github.com/eric2788/common-utils/datetime"
@@ -224,11 +225,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("死斗没有可以查看的对战回合资讯。")))
 	}
 
-	msg, err := imgtxt.NewPrependMessage()
-
-	if err != nil {
-		return err
-	}
+	msg := message.NewSendingMessage()
 
 	for i, round := range match.Rounds {
 		msg.Append(qq.NewTextfLn("第 %d 回合 (胜者: %s, 胜利类型: %s)", i+1, round.WinningTeam, round.EndType))
@@ -290,11 +287,14 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		}
 	}
 
-	img, err := msg.ToGroupImageElement()
+	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "")
+
+	key, err := paste.CreatePaste("plain", content)
 	if err != nil {
 		return err
 	}
-	sending := message.NewSendingMessage().Append(img)
+
+	sending := qq.CreateReply(source.Message).Append(qq.NewTextf("https://pasteme.cn#%s", key))
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 

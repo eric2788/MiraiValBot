@@ -37,6 +37,11 @@ func Subscribe(ctx context.Context, topic string) *rgo.PubSub {
 	return rdb.Subscribe(ctx, topic)
 }
 
+func HasKey(key string) (bool, error) {
+	re, err := rdb.Exists(ctx, key).Result()
+	return re == 1, err
+}
+
 func Store(key string, arg interface{}) error {
 	var buffer bytes.Buffer
 	enc := gob.NewEncoder(&buffer)

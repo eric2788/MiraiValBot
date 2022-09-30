@@ -28,6 +28,7 @@ jobs:
           go test -v ./...
   publish_docker:
     needs: [test_program]
+    if: ${{ github.repository_owner == 'eric2788' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

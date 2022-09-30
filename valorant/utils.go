@@ -1,7 +1,6 @@
 package valorant
 
 import (
-	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -10,26 +9,25 @@ import (
 var uuidCache = make(map[string]*AccountInfo)
 
 type AccountInfo struct {
-	Name string
-	Tag string
-	PUuid string
+	Name    string
+	Tag     string
+	PUuid   string
 	Display string
 }
 
 type FriendlyFireInfo struct {
 	FriendlyFire
 	Deaths int
-	Kills int
+	Kills  int
 }
-
 
 func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 	var infoMap = make(map[string]*FriendlyFireInfo)
 
-	getInfo := func(id string) *FriendlyFireInfo{
+	getInfo := func(id string) *FriendlyFireInfo {
 		if value, ok := infoMap[id]; ok {
 			return value
-		}else{
+		} else {
 			info := &FriendlyFireInfo{}
 			infoMap[id] = info
 			return info
@@ -44,7 +42,7 @@ func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 			for _, damageEvent := range playerStats.DamageEvents {
 
 				victimInfo := getInfo(damageEvent.ReceiverPUuid)
-				
+
 				// friendly fire damage!
 				if damageEvent.ReceiverTeam == playerStats.PlayerTeam {
 					info.Outgoing += damageEvent.Damage
@@ -78,20 +76,19 @@ func GetAccountInfo(id string) (*AccountInfo, error) {
 		return cache, nil
 	} else {
 		details, err := GetAccountDetails(name, tag)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 		info := &AccountInfo{
-			Name: details.Name,
-			Tag: details.Tag,
-			PUuid: details.PUuid,
+			Name:    details.Name,
+			Tag:     details.Tag,
+			PUuid:   details.PUuid,
 			Display: fmt.Sprintf("%s#%s", details.Name, details.Tag),
 		}
 		uuidCache[fmt.Sprintf("%s#%s", name, tag)] = info
 		return info, nil
 	}
 }
-
 
 func GetDeathMatchRanking(data *MatchData) []MatchPlayer {
 	players := data.Players["all_players"]
@@ -121,18 +118,18 @@ func GetRankingFromPlayers(players []MatchPlayer, id string) (int, *MatchPlayer)
 func ParseNameTag(nameTag string) (name string, tag string, err error) {
 	parts := strings.Split(nameTag, "#")
 	if len(parts) != 2 {
-		return "", "", errors.New(fmt.Sprintf("名称格式不正确: %s", nameTag))
+		return "", "", fmt.Errorf("名称格式不正确: %s", nameTag)
 	}
 	return parts[0], parts[1], nil
 }
 
-func FoundPlayerInTeam(nameTag string, data *MatchData) (string, error){
+func FoundPlayerInTeam(nameTag string, data *MatchData) (string, error) {
 	if len(data.Teams) == 0 {
 		return "", nil
 	}
 	_, player := GetRankingFromPlayers(data.Players["all_players"], nameTag)
 	if player == nil {
-		return "", errors.New(fmt.Sprintf("在该排名中找不到玩家: %s", nameTag))
+		return "", fmt.Errorf("在该排名中找不到玩家: %s", nameTag)
 	}
 	return player.Team, nil
 }
