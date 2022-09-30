@@ -7,7 +7,6 @@ import (
 )
 
 type (
-
 	ApiError struct {
 		Status int
 		Errors []Error
@@ -190,7 +189,7 @@ type (
 			} `json:"weapon"`
 			Remaining int `json:"remaining"`
 			Spent     int `json:"spent"`
-		}
+		} `json:"economy"`
 		WasAfk        bool `json:"was_afk"`
 		WasPenalized  bool `json:"was_penalized"`
 		StayedInSpawn bool `json:"stayed_in_spawn"`
