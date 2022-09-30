@@ -248,8 +248,8 @@ func matchRounds(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("\t\tAFK: %t", playerStats.WasAfk))
 			msg.Append(qq.NewTextfLn("\t\t被惩罚: %t", playerStats.WasPenalized))
 			msg.Append(qq.NewTextfLn("\t\t回合花费: $%d (剩余 $%d)", playerStats.Economy.Spent, playerStats.Economy.Remaining))
-			msg.Append(qq.NewTextfLn("\t\t武器: %s", playerStats.Economy.Weapon.Weapon.Name))
-			msg.Append(qq.NewTextfLn("\t\t装备: %s", playerStats.Economy.Weapon.Armor.Name))
+			msg.Append(qq.NewTextfLn("\t\t武器: %s", playerStats.Economy.Weapon.Name))
+			msg.Append(qq.NewTextfLn("\t\t装备: %s", playerStats.Economy.Weapon.Name))
 
 			if playerStats.Damage > 0 {
 				msg.Append(qq.NewTextfLn("\t\t分别伤害:"))
@@ -267,7 +267,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 
 			if playerStats.Kills > 0 {
 				msg.Append(qq.NewTextLn("\t\t分别击杀:"))
-				for _, killEvent := range playerStats.KillsEvents {
+				for _, killEvent := range playerStats.KillEvents {
 					msg.Append(qq.NewTextfLn("\t\t\t%s:", killEvent.VictimDisplayName))
 					msg.Append(qq.NewTextfLn("\t\t\t\t所在队伍: %s", killEvent.VictimTeam))
 					msg.Append(qq.NewTextfLn("\t\t\t\t击杀使用武器: %s", killEvent.DamageWeaponName))
