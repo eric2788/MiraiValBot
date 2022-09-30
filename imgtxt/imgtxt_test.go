@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/qq"
+	"github.com/google/uuid"
 )
 
-func TestGenerateImage(t *testing.T) {
+func TestGeneratePlayerImage(t *testing.T) {
 	msg, err := NewPrependMessage()
 
 	if err != nil {
@@ -59,6 +60,34 @@ func TestGenerateImage(t *testing.T) {
 		msg.Append(qq.NewTextfLn("\t\t总承受 %d (%.1f%%)"))
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)"))
 
+	}
+
+	b, err := msg.GenerateImage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Create("test.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	if _, err := f.Write(b); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGenerateLeaderboardImage(t *testing.T) {
+
+	msg, err := NewPrependMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg.Append(qq.NewTextLn("名次\t\t玩家\t\t均分\tK\tD\tA\t爆头率\t友伤\t装包\t拆包"))
+	for i := 0; i < 10; i++ {
+		msg.Append(qq.NewTextfLn("%d\t\t%s\t\t%d\t%d\t%d\t%d\t%.1f%%\t%d\t%d\t%d",
+			i+1,uuid.New().String()[:10],50,1, 2, 3, float64(20), 4, 5, 16,
+		))
 	}
 
 	b, err := msg.GenerateImage()
