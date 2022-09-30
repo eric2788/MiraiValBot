@@ -1,9 +1,11 @@
 package valorant
 
 import (
+	"testing"
+
+	"github.com/eric2788/common-utils/request"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 type Void struct{}
@@ -22,13 +24,25 @@ func init() {
 	logrus.SetLevel(logrus.DebugLevel)
 }
 
+func isAllowedStatus(err error) bool {
+	status := 0
+	if api, apiOK := err.(*ApiError); apiOK {
+		status = api.Status
+	} else if http, httpOK := err.(*request.HttpError); httpOK {
+		status = http.Code
+	}
+	_, ok := allowedStatusCode[status]
+	if ok {
+		logger.Debugf("%d is in allowed status code, skipped", status)
+	}
+	return ok
+}
+
 func TestGetAccountDetails(t *testing.T) {
 	detail, err := GetAccountDetails("勝たんしかrinrin", "JP1")
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -41,10 +55,8 @@ func TestGetAccountDetails(t *testing.T) {
 func TestGetMatchHistories(t *testing.T) {
 	histories, err := GetMatchHistoriesAPI("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -54,10 +66,8 @@ func TestGetMatchHistories(t *testing.T) {
 func TestGetMatchDetails(t *testing.T) {
 	data, err := GetMatchDetailsAPI("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -70,10 +80,8 @@ func TestGetMatchDetails(t *testing.T) {
 func TestGetMMRHistories(t *testing.T) {
 	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -84,10 +92,8 @@ func TestGetMMRHistories(t *testing.T) {
 func TestGetMMRDetailsV1(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV1("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -99,10 +105,8 @@ func TestGetMMRDetailsV1(t *testing.T) {
 func TestGetMMRDetailsV2(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}
@@ -113,10 +117,8 @@ func TestGetMMRDetailsV2(t *testing.T) {
 func TestGetMMRDetailsBySeason(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", "e3a3", AsiaSpecific)
 	if err != nil {
-		if e, ok := err.(*ApiError); ok {
-			if _, ok := allowedStatusCode[e.Status]; ok {
-				return
-			}
+		if isAllowedStatus(err) {
+			return
 		}
 		t.Fatal(err)
 	}

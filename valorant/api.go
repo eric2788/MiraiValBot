@@ -94,6 +94,8 @@ func getRequestCustom(path string, response interface{}) error {
 		if httpErr, ok := err.(*request.HttpError); ok {
 			if err := request.Read(httpErr.Response, response); err == nil {
 				return nil
+			}else{
+				logger.Warnf("cannot parse http error response to Resp: %v, use back http error as error.", err)
 			}
 		}
 		return err
