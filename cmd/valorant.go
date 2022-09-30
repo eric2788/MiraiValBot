@@ -134,7 +134,7 @@ func match(args []string, source *command.MessageSource) error {
 
 func matchPlayers(args []string, source *command.MessageSource) error {
 
-	go qq.SendWithRandomRiskyStrategy(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家的资料..")))
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家的资料..")))
 
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
@@ -152,6 +152,8 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 func leaderboard(args []string, source *command.MessageSource) error {
 
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战排行榜的资料..")))
+
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
 		return err
@@ -167,6 +169,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("%d\t%s\t%d\t%d\t%d\t%d\t%.1f%%",
 				i+1,
 				fmt.Sprintf("%s#%s", player.Name, player.Tag),
+				player.Stats.Score,
 				player.Stats.Kills,
 				player.Stats.Deaths,
 				player.Stats.Assists,
@@ -192,6 +195,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("%d\t%s\t%d\t%d\t%d\t%d\t%.1f%%\t%d\t%d\t%d",
 				i+1,
 				fmt.Sprintf("%s#%s", player.Name, player.Tag),
+				player.Stats.Score,
 				player.Stats.Kills,
 				player.Stats.Deaths,
 				player.Stats.Assists,
@@ -208,7 +212,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 
 func matchRounds(args []string, source *command.MessageSource) error {
 
-	go qq.SendWithRandomRiskyStrategy(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合的资料..")))
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合的资料..")))
 
 	match, err := valorant.GetMatchDetails(args[0])
 	if err != nil {
