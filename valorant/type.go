@@ -166,7 +166,7 @@ type (
 			DefusedBy              EventOwner       `json:"defused_by"`
 			DefuseTimeInRound      int64            `json:"defuse_time_in_round"`
 			PlayerLocationOnDefuse []PlayerLocation `json:"player_locations_on_defuse"`
-		}
+		} `json:"defuse_events"`
 		PlayerStats []MatchPlayerStats `json:"player_stats"`
 	}
 
