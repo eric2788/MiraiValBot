@@ -105,9 +105,12 @@ func matches(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 		msg.Append(qq.NewTextfLn("服务器节点: %s", match.MetaData.Cluster))
 		msg.Append(qq.NewTextfLn("对战结果: %s", formatResult(match, info.PUuid)))
-		msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细对战玩家信息", match.MetaData.MatchId))
-		msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细对战回合信息", match.MetaData.MatchId))
 	}
+
+	msg.Append(qq.NewTextLn("===================="))
+	msg.Append(qq.NewTextfLn("输入 !val leaderboard <对战ID> 查看排行榜"))
+	msg.Append(qq.NewTextfLn("输入 !val players <对战ID> 查看对战玩家"))
+	msg.Append(qq.NewTextfLn("输入 !val rounds <对战ID> 查看对战回合"))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
@@ -291,9 +294,9 @@ func matchRounds(args []string, source *command.MessageSource) error {
 	}
 
 	sending := qq.CreateReply(source.Message).
-					Append(qq.NewTextLn("链接只能使用一次，五分钟后过期。")).
-					Append(qq.NewTextfLn("https://pasteme.cn#%s", key)).
-					Append(qq.NewTextf("如过期，请重新输入指令生成。"))
+		Append(qq.NewTextLn("链接只能使用一次，五分钟后过期。")).
+		Append(qq.NewTextfLn("https://pasteme.cn#%s", key)).
+		Append(qq.NewTextf("如过期，请重新输入指令生成。"))
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
