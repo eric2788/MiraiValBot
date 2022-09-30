@@ -8,7 +8,7 @@ import (
 )
 
 func TestGetDeathMatchRanking(t *testing.T) {
-	match, err := GetMatchDetails("a4e99fec-647d-4a15-9015-967c8e29355a")
+	match, err := GetMatchDetailsAPI("a4e99fec-647d-4a15-9015-967c8e29355a")
 	if err != nil {
 		if e, ok := err.(*ApiError); ok {
 			if _, ok := allowedStatusCode[e.Status]; ok {
