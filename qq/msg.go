@@ -10,6 +10,10 @@ import (
 	"github.com/eric2788/common-utils/request"
 )
 
+type AppendableMessage struct {
+	Texts []*message.TextElement
+}
+
 func NewTextf(msg string, arg ...interface{}) *message.TextElement {
 	return message.NewText(fmt.Sprintf(msg, arg...))
 }

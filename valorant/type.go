@@ -7,6 +7,7 @@ import (
 )
 
 type (
+
 	ApiError struct {
 		Status int
 		Errors []Error

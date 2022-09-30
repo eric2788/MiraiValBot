@@ -1,15 +1,16 @@
 package valorant
 
 import (
-	"errors"
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/corpix/uarand"
-	"github.com/eric2788/common-utils/request"
-	"github.com/eric2788/common-utils/set"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/corpix/uarand"
+	"github.com/eric2788/MiraiValBot/redis"
+	"github.com/eric2788/common-utils/request"
+	"github.com/eric2788/common-utils/set"
 )
 
 type Region string
@@ -123,16 +124,25 @@ func GetMatchHistories(name, tag string, region Region) ([]MatchData, error) {
 	}
 	var matchHistories []MatchData
 	err = resp.ParseData(&matchHistories)
+	go cacheMatchHistories(matchHistories)
 	return matchHistories, err
 }
 
 func GetMatchDetails(matchId string) (*MatchData, error) {
+	matchDetails := &MatchData{}
+
+	if exist, err := redis.Get(matchId, matchDetails); exist {
+		return matchDetails, nil
+	}else if err != nil {
+		logger.Warnf("从 redis 提取快取时出现错误: %v, 将使用 HTTP 请求.", err)
+	}
+
 	resp, err := getRequest(fmt.Sprintf("%v/match/%s", V2, matchId))
 	if err != nil {
 		return nil, err
 	}
-	matchDetails := &MatchData{}
 	err = resp.ParseData(matchDetails)
+	go cacheMatchData(matchDetails)
 	return matchDetails, err
 }
 
@@ -162,7 +172,7 @@ func GetGameStatus(region Region) (*StatusResp, error) {
 	} else if len(data.Errors) > 0 {
 		return nil, &ApiError{data.Status, data.Errors}
 	} else if data.Status != 200 {
-		return nil, errors.New(fmt.Sprintf("status code %v", data.Status))
+		return nil, fmt.Errorf("status code %v", data.Status)
 	}
 	return data, err
 }
@@ -175,7 +185,7 @@ func GetMMRHistories(name, tag string, region Region) (*PlayerInfoResp, error) {
 	} else if len(data.Errors) > 0 {
 		return nil, &ApiError{data.Status, data.Errors}
 	} else if data.Status != 200 {
-		return nil, errors.New(fmt.Sprintf("status code %v", data.Status))
+		return nil, fmt.Errorf("status code %v", data.Status)
 	}
 	return data, err
 }
@@ -202,7 +212,7 @@ func GetMMRDetailsV2(name, tag string, region Region) (*MMRV2Details, error) {
 
 func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV2SeasonDetails, error) {
 	if !AllowedSeasons.Contains(filter) {
-		return nil, errors.New(fmt.Sprintf("season %v not allowed", filter))
+		return nil, fmt.Errorf("season %v not allowed", filter)
 	}
 	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V2, region, name, tag, filter))
 	if err != nil {
