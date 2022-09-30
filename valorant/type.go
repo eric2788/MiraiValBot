@@ -7,7 +7,6 @@ import (
 )
 
 type (
-
 	ApiError struct {
 		Status int
 		Errors []Error
@@ -167,7 +166,7 @@ type (
 			DefusedBy              EventOwner       `json:"defused_by"`
 			DefuseTimeInRound      int64            `json:"defuse_time_in_round"`
 			PlayerLocationOnDefuse []PlayerLocation `json:"player_locations_on_defuse"`
-		}
+		} `json:"defuse_events"`
 		PlayerStats []MatchPlayerStats `json:"player_stats"`
 	}
 
@@ -190,7 +189,7 @@ type (
 			} `json:"weapon"`
 			Remaining int `json:"remaining"`
 			Spent     int `json:"spent"`
-		}
+		} `json:"economy"`
 		WasAfk        bool `json:"was_afk"`
 		WasPenalized  bool `json:"was_penalized"`
 		StayedInSpawn bool `json:"stayed_in_spawn"`

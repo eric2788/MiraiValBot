@@ -164,23 +164,29 @@ func leaderboard(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("对战 %s 的玩家排行榜", match.MetaData.MatchId))
 	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
 		players := valorant.GetDeathMatchRanking(match)
-		msg.Append(qq.NewTextLn("名次\t\t玩家\t\t均分\tK\tD\tA\t爆头率"))
 		for i, player := range players {
-			total := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
-			msg.Append(qq.NewTextfLn("爆头率: %.1f", formatPercentageInt(player.Stats.Headshots, total)))
 		}
 	} else {
 		players := valorant.GetMatchRanking(match)
 		ffMap := valorant.GetFriendlyFireInfo(match)
+
 		getFFDamage := func(player valorant.MatchPlayer) int {
 			if info, ok := ffMap[player.PUuid]; ok {
 				return info.Outgoing
 			} else {
 				return player.Behaviour.FriendlyFire.Outgoing
+			}
+		}
+
+		getFFKills := func(player valorant.MatchPlayer) int {
+			if info, ok := ffMap[player.PUuid]; ok {
+				return info.Kills
+			} else {
+				return 0
 			}
 		}
 
@@ -190,8 +196,9 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
-			msg.Append(qq.NewTextfLn("爆头率: %.1f", formatPercentageInt(player.Stats.Headshots, totalShots)))
+			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
 			msg.Append(qq.NewTextfLn("队友伤害: %d", getFFDamage(player)))
+			msg.Append(qq.NewTextfLn("队友误杀: %d", getFFKills(player)))
 			msg.Append(qq.NewTextfLn("装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
 			msg.Append(qq.NewTextfLn("拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
 		}
@@ -283,7 +290,10 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	sending := qq.CreateReply(source.Message).Append(qq.NewTextf("https://pasteme.cn#%s", key))
+	sending := qq.CreateReply(source.Message).
+					Append(qq.NewTextLn("链接只能使用一次，五分钟后过期。")).
+					Append(qq.NewTextfLn("https://pasteme.cn#%s", key)).
+					Append(qq.NewTextf("如过期，请重新输入指令生成。"))
 	return qq.SendWithRandomRiskyStrategy(sending)
 }
 
@@ -476,80 +486,6 @@ func appendDetails(msg *message.SendingMessage, maintenance valorant.MaintainInf
 	}
 }
 
-func generateMatchLeaderboardImage(match *valorant.MatchData) (*message.GroupImageElement, error) {
-
-	key := fmt.Sprintf("valorant:leaderboard:%s", match.MetaData.MatchId)
-
-	var imgCache = &message.GroupImageElement{}
-	if exist, err := redis.Get(key, imgCache); err == nil && exist {
-		return imgCache, nil
-	} else if err != nil {
-		logger.Warnf("从 redis 获取对战排行榜图片(%s)时出现错误: %v, 将重新生成。", match.MetaData.MatchId, err)
-	}
-
-	msg, err := imgtxt.NewPrependMessage()
-	if err != nil {
-		return nil, err
-	}
-	msg.Append(qq.NewTextfLn("对战 %s 的玩家排行榜", match.MetaData.MatchId))
-	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
-		players := valorant.GetDeathMatchRanking(match)
-		msg.Append(qq.NewTextLn("名次\t\t玩家\t\t均分\tK\tD\tA\t爆头率"))
-		for i, player := range players {
-			total := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
-			msg.Append(qq.NewTextfLn("%d\t%s\t%d\t%d\t%d\t%d\t%.1f%%",
-				i+1,
-				fmt.Sprintf("%s#%s", player.Name, player.Tag),
-				player.Stats.Score,
-				player.Stats.Kills,
-				player.Stats.Deaths,
-				player.Stats.Assists,
-				formatPercentageInt(player.Stats.Headshots, total),
-			))
-		}
-	} else {
-		players := valorant.GetMatchRanking(match)
-		ffMap := valorant.GetFriendlyFireInfo(match)
-		getFFDamage := func(player valorant.MatchPlayer) int {
-			if info, ok := ffMap[player.PUuid]; ok {
-				return info.Outgoing
-			} else {
-				return player.Behaviour.FriendlyFire.Outgoing
-			}
-		}
-
-		msg.Append(qq.NewTextLn("名次\t\t玩家\t\t均分\tK\tD\tA\t爆头率\t友伤\t装包\t拆包"))
-		for i, player := range players {
-			totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
-			msg.Append(qq.NewTextfLn("%d\t\t%s\t\t%d\t%d\t%d\t%d\t%.1f%%\t%d\t%d\t%d",
-				i+1,
-				fmt.Sprintf("%s#%s", player.Name, player.Tag),
-				player.Stats.Score,
-				player.Stats.Kills,
-				player.Stats.Deaths,
-				player.Stats.Assists,
-				formatPercentageInt(player.Stats.Headshots, totalShots),
-				getFFDamage(player),
-				valorant.GetPlantCount(match, player.PUuid),
-				valorant.GetDefuseCount(match, player.PUuid),
-			))
-		}
-	}
-
-	img, err := msg.ToGroupImageElement()
-	if err != nil {
-		return nil, err
-	}
-
-	if err = redis.Store(key, img); err != nil {
-		logger.Warnf("储存对战玩家图片(%s)到redis时出现错误: %v", match.MetaData.MatchId, err)
-	} else {
-		logger.Infof("储存对战玩家图片(%s)到redis成功", match.MetaData.MatchId)
-	}
-
-	return img, nil
-}
-
 func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageElement, error) {
 
 	key := fmt.Sprintf("valorant:match_player:%s", match.MetaData.MatchId)
@@ -569,7 +505,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		return nil, err
 	}
 	for i, player := range ranking {
-		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
+		msg.Append(qq.NewTextfLn("\t第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 
 		// 基本资料
 		msg.Append(qq.NewTextLn("\t基本资料:"))
