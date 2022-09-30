@@ -117,15 +117,32 @@ func GetAccountDetails(name, tag string) (*AccountDetails, error) {
 	return accountDetails, err
 }
 
-func GetMatchHistories(name, tag string, region Region) ([]MatchData, error) {
+func GetMatchHistoriesAPI(name, tag string, region Region) ([]MatchData, error) {
 	resp, err := getRequest(fmt.Sprintf("%v/matches/%s/%s/%s", V3, region, name, tag))
 	if err != nil {
 		return nil, err
 	}
 	var matchHistories []MatchData
 	err = resp.ParseData(&matchHistories)
-	go cacheMatchHistories(matchHistories)
 	return matchHistories, err
+}
+
+func GetMatchHistories(name, tag string, region Region) ([]MatchData, error) {
+	matchHistories, err := GetMatchHistoriesAPI(name, tag, region)
+	if err == nil {
+		go cacheMatchHistories(matchHistories)
+	}
+	return matchHistories, err
+}
+
+func GetMatchDetailsAPI(matchId string) (*MatchData, error) {
+	resp, err := getRequest(fmt.Sprintf("%v/match/%s", V2, matchId))
+	if err != nil {
+		return nil, err
+	}
+	matchDetails := &MatchData{}
+	err = resp.ParseData(matchDetails)
+	return matchDetails, err
 }
 
 func GetMatchDetails(matchId string) (*MatchData, error) {
@@ -133,16 +150,14 @@ func GetMatchDetails(matchId string) (*MatchData, error) {
 
 	if exist, err := redis.Get(matchId, matchDetails); exist {
 		return matchDetails, nil
-	}else if err != nil {
+	} else if err != nil {
 		logger.Warnf("从 redis 提取快取时出现错误: %v, 将使用 HTTP 请求.", err)
 	}
 
-	resp, err := getRequest(fmt.Sprintf("%v/match/%s", V2, matchId))
-	if err != nil {
-		return nil, err
+	matchDetails, err := GetMatchDetailsAPI(matchId)
+	if err == nil {
+		go cacheMatchData(matchDetails)
 	}
-	err = resp.ParseData(matchDetails)
-	go cacheMatchData(matchDetails)
 	return matchDetails, err
 }
 

@@ -39,7 +39,7 @@ func TestGetAccountDetails(t *testing.T) {
 }
 
 func TestGetMatchHistories(t *testing.T) {
-	histories, err := GetMatchHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
+	histories, err := GetMatchHistoriesAPI("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
 		if e, ok := err.(*ApiError); ok {
 			if _, ok := allowedStatusCode[e.Status]; ok {
@@ -52,7 +52,7 @@ func TestGetMatchHistories(t *testing.T) {
 }
 
 func TestGetMatchDetails(t *testing.T) {
-	data, err := GetMatchDetails("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
+	data, err := GetMatchDetailsAPI("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
 	if err != nil {
 		if e, ok := err.(*ApiError); ok {
 			if _, ok := allowedStatusCode[e.Status]; ok {
