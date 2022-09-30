@@ -10,6 +10,7 @@ import (
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/paste"
 	"github.com/eric2788/MiraiValBot/qq"
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/valorant"
 	"github.com/eric2788/common-utils/datetime"
 )
@@ -125,8 +126,9 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 	msg.Append(qq.NewTextfLn("服务器节点: %s", match.MetaData.Cluster))
 	msg.Append(qq.NewTextfLn("对战结果: %s", formatResultObjective(match)))
-	msg.Append(qq.NewTextfLn("输入 !val players %s 查看详细对战玩家信息", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看详细对战回合信息", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val leaderboard %s 查看排行榜", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val players %s 查看对战玩家", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看对战回合", match.MetaData.MatchId))
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
@@ -139,76 +141,69 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	ffInfo := valorant.GetFriendlyFireInfo(match)
-	ranking := valorant.GetMatchRanking(match)
-
-	msg, err := imgtxt.NewPrependMessage()
+	img, err := generateMatchPlayersImage(match)
 	if err != nil {
 		return err
 	}
-	for i, player := range ranking {
-		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 
-		// 基本资料
-		msg.Append(qq.NewTextLn("\t基本资料:"))
-		msg.Append(qq.NewTextfLn("\t\tKDA: %d | %d | %d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
-		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
-		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
-		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
-
-		// 击中分布
-		total := player.Stats.BodyShots + player.Stats.Headshots + player.Stats.LegShots
-		msg.Append(qq.NewTextLn("\t击中次数分布"))
-		msg.Append(qq.NewTextfLn("\t\t头部: %.1f%% (%d次)", formatPercentageInt(player.Stats.Headshots, total), player.Stats.Headshots))
-		msg.Append(qq.NewTextfLn("\t\t身体: %.1f%% (%d次)", formatPercentageInt(player.Stats.BodyShots, total), player.Stats.BodyShots))
-		msg.Append(qq.NewTextfLn("\t\t腿部: %.1f%% (%d次)", formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots))
-
-		// 行为
-		friendlyFire := &valorant.FriendlyFireInfo{FriendlyFire: player.Behaviour.FriendlyFire}
-		if ff, ok := ffInfo[player.PUuid]; ok {
-			friendlyFire = ff
-		} else {
-			logger.Warnf("找不到 %s#%s 的隊友傷害行為資訊。", player.Name, player.Tag)
-		}
-		msg.Append(qq.NewTextLn("\t行为:"))
-		msg.Append(qq.NewTextfLn("\t\tAFK回合次数: %.0f", player.Behaviour.AfkRounds))
-		msg.Append(qq.NewTextfLn("\t\t误击队友伤害: %d", friendlyFire.Outgoing))
-		msg.Append(qq.NewTextfLn("\t\t误杀队友次数: %d", friendlyFire.Kills))
-		msg.Append(qq.NewTextfLn("\t\t被误击队友伤害: %d", friendlyFire.Incoming))
-		msg.Append(qq.NewTextfLn("\t\t被误杀队友次数: %d", friendlyFire.Deaths))
-		msg.Append(qq.NewTextfLn("\t\t拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
-		msg.Append(qq.NewTextfLn("\t\t装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
-
-		//技能使用
-		total = 0
-		for _, times := range player.AbilityCasts {
-			total += times
-		}
-
-		msg.Append(qq.NewTextLn("\t技能使用次数分布:"))
-		msg.Append(qq.NewTextfLn("\t\t技能 Q: %d次 (%.1f%%)", player.AbilityCasts["q_cast"], formatPercentageInt(player.AbilityCasts["q_cast"], total)))
-		msg.Append(qq.NewTextfLn("\t\t技能 E: %d次 (%.1f%%)", player.AbilityCasts["e_cast"], formatPercentageInt(player.AbilityCasts["e_cast"], total)))
-		msg.Append(qq.NewTextfLn("\t\t技能 C: %d次 (%.1f%%)", player.AbilityCasts["c_cast"], formatPercentageInt(player.AbilityCasts["c_cast"], total)))
-		msg.Append(qq.NewTextfLn("\t\t技能 X: %d次 (%.1f%%)", player.AbilityCasts["x_cast"], formatPercentageInt(player.AbilityCasts["x_cast"], total)))
-
-		// 经济
-		msg.Append(qq.NewTextLn("\t经济:"))
-		msg.Append(qq.NewTextfLn("\t\t总支出 $%d", player.Economy.Spent.OverAll))
-		msg.Append(qq.NewTextfLn("\t\t平均支出 $%d", player.Economy.Spent.Average))
-
-		// 伤害
-		totalDamage := player.DamageReceived + player.DamageMade
-		msg.Append(qq.NewTextLn("\t伤害分布:"))
-		msg.Append(qq.NewTextfLn("\t\t总承受 %d (%.1f%%)", player.DamageReceived, formatPercentage(player.DamageReceived, totalDamage)))
-		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
-	}
-
-	img, err := msg.ToGroupImageElement()
-	if err != nil {
-		return err
-	}
 	sending := message.NewSendingMessage().Append(img)
 	return qq.SendWithRandomRiskyStrategy(sending)
+}
+
+func leaderboard(args []string, source *command.MessageSource) error {
+
+	match, err := valorant.GetMatchDetails(args[0])
+	if err != nil {
+		return err
+	}
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextLn("对战 %s 的玩家排行榜"))
+	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
+		players := valorant.GetDeathMatchRanking(match)
+		msg.Append(qq.NewTextLn("名次\t玩家\t均分\tK\tD\tA\t爆头率"))
+		for i, player := range players {
+			total := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
+			msg.Append(qq.NewTextfLn("%d\t%s\t%d\t%d\t%d\t%d\t%.1f%%",
+				i+1,
+				fmt.Sprintf("%s#%s", player.Name, player.Tag),
+				player.Stats.Kills,
+				player.Stats.Deaths,
+				player.Stats.Assists,
+				formatPercentageInt(player.Stats.Headshots, total),
+			))
+		}
+	} else {
+		players := valorant.GetMatchRanking(match)
+
+		ffMap := valorant.GetFriendlyFireInfo(match)
+
+		getFFDamage := func(player valorant.MatchPlayer) int {
+			if info, ok := ffMap[player.PUuid]; ok {
+				return info.Outgoing
+			} else {
+				return player.Behaviour.FriendlyFire.Outgoing
+			}
+		}
+
+		msg.Append(qq.NewTextLn("名次\t玩家\t均分\tK\tD\tA\t爆头率\t友伤\t装包\t拆包"))
+		for i, player := range players {
+			totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
+			msg.Append(qq.NewTextfLn("%d\t%s\t%d\t%d\t%d\t%d\t%.1f%%\t%d\t%d\t%d",
+				i+1,
+				fmt.Sprintf("%s#%s", player.Name, player.Tag),
+				player.Stats.Kills,
+				player.Stats.Deaths,
+				player.Stats.Assists,
+				formatPercentageInt(player.Stats.Headshots, totalShots),
+				getFFDamage(player),
+				valorant.GetPlantCount(match, player.PUuid),
+				valorant.GetDefuseCount(match, player.PUuid),
+			))
+		}
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
@@ -340,6 +335,7 @@ var (
 	statusCommand       = command.NewNode([]string{"status", "状态"}, "查询状态", false, status)
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
+	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
 	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
 	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
 	mmrCommand          = command.NewNode([]string{"mmr", "段位"}, "查询段位", false, mmr, "<名称#Tag>")
@@ -354,6 +350,7 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	statusCommand,
 	matchesCommand,
 	matchCommand,
+	leaderboardCommand,
 	matchPlayerscommand,
 	matchRoundsCommand,
 	mmrCommand,
@@ -483,4 +480,94 @@ func appendDetails(msg *message.SendingMessage, maintenance valorant.MaintainInf
 		msg.Append(qq.NewTextfLn("	更新于: %s", formatTime(update.UpdatedAt)))
 		msg.Append(qq.NewTextfLn("	发布者: %s", formatTime(update.Author)))
 	}
+}
+
+func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageElement, error) {
+
+	key := fmt.Sprintf("valorant:match_player:%s", match.MetaData.MatchId)
+
+	var imgCache = &message.GroupImageElement{}
+	if exist, err := redis.Get(key, imgCache); err == nil && exist {
+		return imgCache, nil
+	} else if err != nil {
+		logger.Warnf("从 redis 获取对战玩家图片(%s)时出现错误: %v, 将重新生成。", match.MetaData.MatchId, err)
+	}
+
+	ffInfo := valorant.GetFriendlyFireInfo(match)
+	ranking := valorant.GetMatchRanking(match)
+
+	msg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		return nil, err
+	}
+	for i, player := range ranking {
+		msg.Append(qq.NewTextfLn("第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
+
+		// 基本资料
+		msg.Append(qq.NewTextLn("\t基本资料:"))
+		msg.Append(qq.NewTextfLn("\t\tKDA: %d | %d | %d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
+		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
+		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
+		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
+
+		// 击中分布
+		total := player.Stats.BodyShots + player.Stats.Headshots + player.Stats.LegShots
+		msg.Append(qq.NewTextLn("\t击中次数分布"))
+		msg.Append(qq.NewTextfLn("\t\t头部: %.1f%% (%d次)", formatPercentageInt(player.Stats.Headshots, total), player.Stats.Headshots))
+		msg.Append(qq.NewTextfLn("\t\t身体: %.1f%% (%d次)", formatPercentageInt(player.Stats.BodyShots, total), player.Stats.BodyShots))
+		msg.Append(qq.NewTextfLn("\t\t腿部: %.1f%% (%d次)", formatPercentageInt(player.Stats.LegShots, total), player.Stats.LegShots))
+
+		// 行为
+		friendlyFire := &valorant.FriendlyFireInfo{FriendlyFire: player.Behaviour.FriendlyFire}
+		if ff, ok := ffInfo[player.PUuid]; ok {
+			friendlyFire = ff
+		} else {
+			logger.Warnf("找不到 %s#%s 的隊友傷害行為資訊。", player.Name, player.Tag)
+		}
+		msg.Append(qq.NewTextLn("\t行为:"))
+		msg.Append(qq.NewTextfLn("\t\tAFK回合次数: %.2f", player.Behaviour.AfkRounds))
+		msg.Append(qq.NewTextfLn("\t\t误击队友伤害: %d", friendlyFire.Outgoing))
+		msg.Append(qq.NewTextfLn("\t\t误杀队友次数: %d", friendlyFire.Kills))
+		msg.Append(qq.NewTextfLn("\t\t被误击队友伤害: %d", friendlyFire.Incoming))
+		msg.Append(qq.NewTextfLn("\t\t被误杀队友次数: %d", friendlyFire.Deaths))
+		msg.Append(qq.NewTextfLn("\t\t拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
+		msg.Append(qq.NewTextfLn("\t\t装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
+
+		//技能使用
+		total = 0
+		for _, times := range player.AbilityCasts {
+			total += times
+		}
+
+		msg.Append(qq.NewTextLn("\t技能使用次数分布:"))
+		msg.Append(qq.NewTextfLn("\t\t技能 Q: %d次 (%.1f%%)", player.AbilityCasts["q_cast"], formatPercentageInt(player.AbilityCasts["q_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 E: %d次 (%.1f%%)", player.AbilityCasts["e_cast"], formatPercentageInt(player.AbilityCasts["e_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 C: %d次 (%.1f%%)", player.AbilityCasts["c_cast"], formatPercentageInt(player.AbilityCasts["c_cast"], total)))
+		msg.Append(qq.NewTextfLn("\t\t技能 X: %d次 (%.1f%%)", player.AbilityCasts["x_cast"], formatPercentageInt(player.AbilityCasts["x_cast"], total)))
+
+		// 经济
+		msg.Append(qq.NewTextLn("\t经济:"))
+		msg.Append(qq.NewTextfLn("\t\t总支出 $%d", player.Economy.Spent.OverAll))
+		msg.Append(qq.NewTextfLn("\t\t平均支出 $%d", player.Economy.Spent.Average))
+
+		// 伤害
+		totalDamage := player.DamageReceived + player.DamageMade
+		msg.Append(qq.NewTextLn("\t伤害分布:"))
+		msg.Append(qq.NewTextfLn("\t\t总承受 %d (%.1f%%)", player.DamageReceived, formatPercentage(player.DamageReceived, totalDamage)))
+		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
+	}
+
+	img, err := msg.ToGroupImageElement()
+
+	if err == nil {
+		if err = redis.Store(key, img); err != nil {
+			logger.Warnf("储存对战玩家图片(%s)到快取时出现错误: %v", match.MetaData.MatchId, err)
+		} else {
+			logger.Infof("储存对战玩家图片(%s)成功", match.MetaData.MatchId)
+		}
+
+		return img, nil
+	}
+
+	return nil, err
 }
