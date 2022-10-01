@@ -8,7 +8,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/eventhook"
 	"github.com/eric2788/MiraiValBot/file"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
+	"github.com/eric2788/MiraiValBot/qq"
 	"runtime/debug"
 	"sync"
 )
@@ -28,7 +28,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 		}
 		source := &MessageSource{ct, msg}
 		content := msg.ToString()
-		member := qq2.FindGroupMember(msg.Sender.Uin)
+		member := qq.FindGroupMember(msg.Sender.Uin)
 		if member == nil {
 			logger.Infof("%s (%d) 不是瓦群成員，已略過。", msg.Sender.Nickname, msg.Sender.Uin)
 			return
@@ -41,7 +41,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 				err := fmt.Errorf(fmt.Sprintf("%v", e))
 				logger.Errorf("處理指令 %s 時出現严重錯誤: %v", content, err)
 				debug.PrintStack()
-				_ = qq2.SendGroupMessageByGroup(msg.GroupCode, qq2.CreateReply(msg).Append(qq2.NewTextf("处理此指令时出现严重错误: %v", err)))
+				_ = qq.SendGroupMessageByGroup(msg.GroupCode, qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现严重错误: %v", err)))
 			}
 
 		}()
@@ -51,8 +51,8 @@ func (c *command) HookEvent(bot *bot.Bot) {
 
 		if err != nil {
 			logger.Warnf("處理指令 %s 時出現錯誤: %v", content, err)
-			errorMsg := qq2.CreateReply(msg).Append(qq2.NewTextf("处理此指令时出现错误: %v", err))
-			_ = qq2.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
+			errorMsg := qq.CreateReply(msg).Append(qq.NewTextf("处理此指令时出现错误: %v", err))
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, errorMsg)
 			return
 		}
 
@@ -75,12 +75,18 @@ func (c *command) HookEvent(bot *bot.Bot) {
 				helpMessage := message.NewSendingMessage().Append(message.NewText(response.Content))
 
 				if msg.Sender.IsFriend {
-					if err = qq2.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
+					if err = qq.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
 						logger.Infof("已向 %s (%d) 發送指令幫助的私人訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					} else {
+						logger.Warnf("無法向 %s (%d) 發送指令幫助的私人訊息: %v, 將改為發送群消息。", msg.Sender.Nickname, msg.Sender.Uin, err)
+						_ = qq.SendWithRandomRiskyStrategy(helpMessage)
 					}
 				} else {
-					if err = qq2.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage); err == nil {
+					if err = qq.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage); err == nil {
 						logger.Infof("已向 %s (%d) 發送指令幫助的臨時會話訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+					} else {
+						logger.Warnf("無法向 %s (%d) 發送指令幫助的臨時會話訊息: %v, 將改為發送群消息。", msg.Sender.Nickname, msg.Sender.Uin, err)
+						_ = qq.SendWithRandomRiskyStrategy(helpMessage)
 					}
 				}
 				responseContent = "未知参数，已私聊你指令列表。"
@@ -88,17 +94,17 @@ func (c *command) HookEvent(bot *bot.Bot) {
 			}
 
 			// 發送群組訊息提示
-			hintMessage := qq2.CreateReply(msg).Append(message.NewText(responseContent))
-			_ = qq2.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
+			hintMessage := qq.CreateReply(msg).Append(message.NewText(responseContent))
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
 		} else if response.Content != "" {
-			m := qq2.CreateReply(msg).Append(message.NewText(response.Content))
-			_ = qq2.SendGroupMessageByGroup(msg.GroupCode, m)
+			m := qq.CreateReply(msg).Append(message.NewText(response.Content))
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
 		}
 	})
 
 	// 瓦群成员自动接受好友邀请
 	bot.OnNewFriendRequest(func(ct *client.QQClient, req *client.NewFriendRequest) {
-		if qq2.FindGroupMember(req.RequesterUin) == nil {
+		if qq.FindGroupMember(req.RequesterUin) == nil {
 			logger.Infof("%s (%d) 非瓦群成員，已無視好友邀請。", req.RequesterNick, req.RequesterUin)
 			req.Reject()
 			return

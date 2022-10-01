@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/eric2788/MiraiValBot/file"
 	"strings"
 	"time"
 
@@ -115,6 +116,18 @@ func untrack(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextf("已中止监听玩家 %s#%s", name, tag))
 	} else {
 		reply.Append(qq.NewTextf("该玩家(%s#%s) 尚未启动监听。", name, tag))
+	}
+
+	return qq.SendGroupMessage(reply)
+}
+
+func tracking(args []string, source *command.MessageSource) error {
+	reply := qq.CreateReply(source.Message)
+	listening := file.DataStorage.Listening.Valorant
+	if listening.Size() > 0 {
+		reply.Append(qq.NewTextf("正在监听的玩家: %v", listening.ToArr()))
+	} else {
+		reply.Append(message.NewText("没有正在监听的玩家"))
 	}
 
 	return qq.SendGroupMessage(reply)
@@ -393,6 +406,7 @@ var (
 	statusCommand       = command.NewNode([]string{"status", "状态"}, "查询状态", false, status)
 	trackCommand        = command.NewNode([]string{"track", "追踪玩家"}, "追踪玩家最新对战", false, track, "<名称#Tag>")
 	untrackCommand      = command.NewNode([]string{"untrack", "取消追踪玩家"}, "取消追踪玩家最新对战", false, untrack, "<名称#Tag>")
+	trackingCommand     = command.NewNode([]string{"tracking", "追踪中"}, "查询追踪中的玩家", false, tracking)
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
@@ -410,6 +424,7 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	statusCommand,
 	trackCommand,
 	untrackCommand,
+	trackingCommand,
 	matchesCommand,
 	matchCommand,
 	leaderboardCommand,
