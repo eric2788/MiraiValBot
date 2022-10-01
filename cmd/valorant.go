@@ -75,6 +75,14 @@ func status(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
+func track(args []string, source *command.MessageSource) error {
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+}
+
+func untrack(args []string, source *command.MessageSource) error {
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+}
+
 func matches(args []string, source *command.MessageSource) error {
 
 	if err := qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战资料..."))); err != nil {
@@ -171,7 +179,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
+			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		}
 	} else {
 		players := valorant.GetMatchRanking(match)
@@ -198,7 +206,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
+			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
 			msg.Append(qq.NewTextfLn("队友伤害: %d", getFFDamage(player)))
 			msg.Append(qq.NewTextfLn("队友误杀: %d", getFFKills(player)))
@@ -346,6 +354,8 @@ var (
 	infoCommand         = command.NewNode([]string{"info", "资讯"}, "查询玩家账户资讯", false, info, "<名称#Tag>")
 	forceUpdateCommand  = command.NewNode([]string{"update", "更新"}, "强制更新玩家资讯", false, forceUpdate, "<名称#Tag>")
 	statusCommand       = command.NewNode([]string{"status", "状态"}, "查询状态", false, status)
+	trackCommand        = command.NewNode([]string{"track", "追踪玩家"}, "追踪玩家最新对战", false, track, "<名称#Tag>")
+	untrackCommand      = command.NewNode([]string{"untrack", "取消追踪玩家"}, "取消追踪玩家最新对战", false, untrack, "<名称#Tag>")
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
@@ -361,6 +371,8 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	infoCommand,
 	forceUpdateCommand,
 	statusCommand,
+	trackCommand,
+	untrackCommand,
 	matchesCommand,
 	matchCommand,
 	leaderboardCommand,
@@ -518,7 +530,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 
 		// 基本资料
 		msg.Append(qq.NewTextLn("\t基本资料:"))
-		msg.Append(qq.NewTextfLn("\t\tK/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
+		msg.Append(qq.NewTextfLn("\t\tK/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
 		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
 		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
