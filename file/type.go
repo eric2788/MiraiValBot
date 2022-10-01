@@ -25,6 +25,7 @@ type (
 		Bilibili []int64  `json:"bilibili"`
 		Youtube  []string `json:"youtube"`
 		Twitter  []string `json:"twitter"`
+		Valorant []string `json:"valorant"`
 	}
 
 	setting struct {
@@ -60,6 +61,7 @@ type (
 		Bilibili *set.Int64Set
 		Youtube  *set.StringSet
 		Twitter  *set.StringSet
+		Valorant *set.StringSet
 	}
 
 	Setting struct {
@@ -92,6 +94,7 @@ func (s *StorageData) toRealStorageData() *storageData {
 			Bilibili: s.Listening.Bilibili.ToArr(),
 			Youtube:  s.Listening.Youtube.ToArr(),
 			Twitter:  s.Listening.Twitter.ToArr(),
+			Valorant: s.Listening.Valorant.ToArr(),
 		},
 	}
 }
@@ -116,6 +119,7 @@ func (s *StorageData) parse(sd *storageData) {
 		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),
 		Youtube:  set.FromStrArr(sd.Listening.Youtube),
 		Twitter:  set.FromStrArr(sd.Listening.Twitter),
+		Valorant: set.FromStrArr(sd.Listening.Valorant),
 	}
 }
 

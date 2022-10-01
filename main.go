@@ -16,6 +16,7 @@ import (
 	// 所有廣播訂閱平台
 	_ "github.com/eric2788/MiraiValBot/sites/bilibili"
 	_ "github.com/eric2788/MiraiValBot/sites/twitter"
+	_ "github.com/eric2788/MiraiValBot/sites/valorant"
 	_ "github.com/eric2788/MiraiValBot/sites/youtube"
 
 	// 所有 redis 訂閱處理器

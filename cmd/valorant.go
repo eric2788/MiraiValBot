@@ -13,6 +13,8 @@ import (
 	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/valorant"
 	"github.com/eric2788/common-utils/datetime"
+
+	v "github.com/eric2788/MiraiValBot/sites/valorant"
 )
 
 func info(args []string, source *command.MessageSource) error {
@@ -76,11 +78,46 @@ func status(args []string, source *command.MessageSource) error {
 }
 
 func track(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+
+	name, tag, err := valorant.ParseNameTag(args[0])
+
+	if err != nil {
+		return err
+	}
+
+	reply := qq.CreateReply(source.Message)
+	success, err := v.StartListen(name, tag)
+
+	if err != nil {
+		reply.Append(qq.NewTextf("监听玩家时出现错误: %v", err))
+	} else if success {
+		reply.Append(qq.NewTextf("开始监听玩家 %s#%s", name, tag))
+	} else {
+		reply.Append(qq.NewTextf("该玩家(%s#%s) 已经启动监听。", name, tag))
+	}
+
+	return qq.SendGroupMessage(reply)
 }
 
 func untrack(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+	name, tag, err := valorant.ParseNameTag(args[0])
+
+	if err != nil {
+		return err
+	}
+
+	reply := qq.CreateReply(source.Message)
+	success, err := v.StopListen(name, tag)
+
+	if err != nil {
+		reply.Append(qq.NewTextf("中止监听玩家时出现错误: %v", err))
+	} else if success {
+		reply.Append(qq.NewTextf("已中止监听玩家 %s#%s", name, tag))
+	} else {
+		reply.Append(qq.NewTextf("该玩家(%s#%s) 尚未启动监听。", name, tag))
+	}
+
+	return qq.SendGroupMessage(reply)
 }
 
 func matches(args []string, source *command.MessageSource) error {

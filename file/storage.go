@@ -39,6 +39,7 @@ var defaultStorageData = storageData{
 		Bilibili: []int64{},
 		Youtube:  []string{},
 		Twitter:  []string{},
+		Valorant: []string{},
 	},
 }
 
