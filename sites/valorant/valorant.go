@@ -7,7 +7,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
-	"github.com/eric2788/MiraiValBot/valorant"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -32,7 +31,7 @@ func (m *messageHandler) GetOfflineListening() []string {
 }
 
 func (m *messageHandler) ToLiveData(message *redis.Message) (interface{}, error) {
-	var matchData = &valorant.MatchMetaData{}
+	var matchData = &MatchMetaDataSub{}
 	err := json.Unmarshal([]byte(message.Payload), matchData)
 	return matchData, err
 }
