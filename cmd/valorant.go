@@ -171,7 +171,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
+			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		}
 	} else {
 		players := valorant.GetMatchRanking(match)
@@ -198,7 +198,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
+			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
 			msg.Append(qq.NewTextfLn("队友伤害: %d", getFFDamage(player)))
 			msg.Append(qq.NewTextfLn("队友误杀: %d", getFFKills(player)))
@@ -297,7 +297,6 @@ func matchRounds(args []string, source *command.MessageSource) error {
 	if err != nil {
 		pbUrl = fmt.Sprintf("(错误: %v)", err)
 	}
-
 
 	sending := qq.CreateReply(source.Message)
 
@@ -519,7 +518,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 
 		// 基本资料
 		msg.Append(qq.NewTextLn("\t基本资料:"))
-		msg.Append(qq.NewTextfLn("\t\tKDA: %d | %d | %d", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists))
+		msg.Append(qq.NewTextfLn("\t\tK/D/A: %d/%d/%d (%.1f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
 		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
 		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
