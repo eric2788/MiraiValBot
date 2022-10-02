@@ -65,7 +65,7 @@ func tListening(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("没有在监听的推特用户"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq2.SendWithRandomRiskyStrategy(reply)
 }
 
 var (

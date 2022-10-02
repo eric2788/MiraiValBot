@@ -55,7 +55,7 @@ func bCaring(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("暂无高亮用户"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq2.SendWithRandomRiskyStrategy(reply)
 }
 
 func bClearInfo(args []string, source *command.MessageSource) error {
@@ -140,7 +140,7 @@ func bListening(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("没有正在监听的房间号"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq2.SendWithRandomRiskyStrategy(reply)
 }
 
 var (

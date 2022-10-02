@@ -66,7 +66,7 @@ func yListening(args []string, source *command.MessageSource) error {
 		reply.Append(qq2.NewTextf("没有监听的房间号"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq2.SendWithRandomRiskyStrategy(reply)
 }
 
 var (

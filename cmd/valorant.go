@@ -129,7 +129,7 @@ func tracking(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("没有正在监听的玩家"))
 	}
 
-	return qq.SendGroupMessage(reply)
+	return qq.SendWithRandomRiskyStrategy(reply)
 }
 
 func matches(args []string, source *command.MessageSource) error {
