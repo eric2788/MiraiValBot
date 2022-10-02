@@ -6,6 +6,7 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
 	"github.com/eric2788/MiraiValBot/valorant"
+	"strings"
 )
 
 var (
@@ -15,11 +16,12 @@ var (
 
 func StartListen(name, tag string) (bool, error) {
 
-	if _, err := valorant.GetAccountDetails(name, tag); err != nil {
+	ac, err := valorant.GetAccountDetails(name, tag)
+	if err != nil {
 		return false, err
 	}
 
-	id := fmt.Sprintf("%s#%s", name, tag)
+	id := fmt.Sprintf("%s//%s#%s", ac.PUuid, name, tag)
 
 	file.UpdateStorage(func() {
 		(*listening).Valorant.Add(id)
@@ -33,26 +35,53 @@ func StartListen(name, tag string) (bool, error) {
 
 	broadcaster := info.Instance.(*bc.Broadcaster)
 
-	return broadcaster.Subscribe(topic(id), MessageHandler)
+	return broadcaster.Subscribe(topic(ac.PUuid), MessageHandler)
 }
 
 func StopListen(name, tag string) (bool, error) {
 
-	id := fmt.Sprintf("%s#%s", name, tag)
+	nameTag := fmt.Sprintf("%s#%s", name, tag)
 
-	if !(*listening).Valorant.Contains(id) {
+	idToDelete, uuidToUnSub := "", ""
+	for line := range (*listening).Valorant.Iterator() {
+		parts := strings.Split(line, "//")
+		if len(parts) != 2 {
+			logger.Warnf("Invalid line in listening: %s", line)
+			continue
+		}
+		if parts[1] == nameTag {
+			idToDelete = line
+			uuidToUnSub = parts[0]
+			break
+		}
+	}
+
+	if idToDelete == "" || uuidToUnSub == "" {
 		return false, nil
 	}
 
 	file.UpdateStorage(func() {
-		(*listening).Valorant.Delete(id)
+		(*listening).Valorant.Delete(idToDelete)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
 
 	broadcaster := info.Instance.(*bc.Broadcaster)
 
-	result := broadcaster.UnSubscribe(topic(id))
+	result := broadcaster.UnSubscribe(topic(uuidToUnSub))
 
 	return result, nil
+}
+
+func GetListening() []string {
+	var displayNames []string
+	for line := range (*listening).Valorant.Iterator() {
+		parts := strings.Split(line, "//")
+		if len(parts) != 2 {
+			logger.Warnf("Invalid line in listening: %s", line)
+			continue
+		}
+		displayNames = append(displayNames, parts[1])
+	}
+	return displayNames
 }

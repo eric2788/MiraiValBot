@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/eric2788/MiraiValBot/file"
 	"strings"
 	"time"
 
@@ -123,9 +122,9 @@ func untrack(args []string, source *command.MessageSource) error {
 
 func tracking(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
-	listening := file.DataStorage.Listening.Valorant
-	if listening.Size() > 0 {
-		reply.Append(qq.NewTextf("正在监听的玩家: %v", listening.ToArr()))
+	listening := v.GetListening()
+	if len(listening) > 0 {
+		reply.Append(qq.NewTextf("正在监听的玩家: %v", listening))
 	} else {
 		reply.Append(message.NewText("没有正在监听的玩家"))
 	}
@@ -255,6 +254,12 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
 			msg.Append(qq.NewTextLn("===================="))
 			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
+
+			// 如果是競技模式，則顯示段位
+			if strings.ToLower(match.MetaData.Mode) == "competitive" {
+				msg.Append(qq.NewTextfLn("段位: %s", player.CurrentTierPatched))
+			}
+
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
@@ -586,6 +591,11 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
 		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
 		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
+
+		// 如果是競技模式，則顯示段位
+		if strings.ToLower(match.MetaData.Mode) == "competitive" {
+			msg.Append(qq.NewTextfLn("\t\t段位: %s", player.CurrentTierPatched))
+		}
 
 		// 击中分布
 		total := player.Stats.BodyShots + player.Stats.Headshots + player.Stats.LegShots

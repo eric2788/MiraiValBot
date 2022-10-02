@@ -8,6 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
 	"github.com/go-redis/redis/v8"
+	"strings"
 )
 
 var logger = utils.GetModuleLogger("sites.valorant")
@@ -24,8 +25,13 @@ func (m *messageHandler) PubSubPrefix() string {
 func (m *messageHandler) GetOfflineListening() []string {
 	listening := file.DataStorage.Listening.Valorant.ToArr()
 	topics := make([]string, len(listening))
-	for i, v := range listening {
-		topics[i] = fmt.Sprintf("valorant:%s", v)
+	for i, line := range listening {
+		parts := strings.Split(line, "//")
+		if len(parts) != 2 {
+			logger.Warnf("Invalid line in listening: %s", line)
+			continue
+		}
+		topics[i] = fmt.Sprintf("valorant:%s", parts[0])
 	}
 	return topics
 }

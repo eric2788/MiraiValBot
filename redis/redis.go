@@ -108,3 +108,12 @@ func Get(key string, arg interface{}) (bool, error) {
 	dec := gob.NewDecoder(buffer)
 	return true, dec.Decode(arg)
 }
+
+func GetString(key string) (string, error) {
+	s, err := rdb.Get(ctx, key).Result()
+	if err == rgo.Nil {
+		return "", nil
+	} else {
+		return s, err
+	}
+}
