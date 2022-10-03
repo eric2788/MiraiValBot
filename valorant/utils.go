@@ -2,7 +2,9 @@ package valorant
 
 import (
 	"fmt"
+	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -191,9 +193,54 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error){
 	}
 
 	return &Statistics{
-		KDRatio: float64(totalKills)/float64(totalDeaths)*100,
+		KDRatio: float64(totalKills)/float64(totalDeaths),
 		HeadshotRate: float64(totalHeadShots)/float64(totalShots)*100,
 	}, nil
 
+}
 
+
+var seasonRegex = regexp.MustCompile("^[e](\\d+)[a](\\d+)$")
+
+func findEposideAct(season string) (ep int, act int) {
+	finds := seasonRegex.FindStringSubmatch(season)
+
+	if len(finds) != 3 {
+		ep, act = 0, 0
+		return
+	}
+
+	ep, err := strconv.Atoi(finds[1])
+	if err != nil {
+		ep = 0
+	}
+
+	act, err = strconv.Atoi(finds[2])
+	if err != nil {
+		act = 0
+	}
+	return
+}
+
+
+func SortSeason(seasons map[string]MMRV2SeasonDetails) []string {
+
+	keys := make([]string, 0, len(seasons))
+	for season := range seasons {
+		keys = append(keys, season)
+	}
+
+	sort.Slice(keys, func (i, j int) bool {
+		
+		iep, iact := findEposideAct(keys[i])
+		jep, jact := findEposideAct(keys[j])
+
+		if iep == jep {
+			return iact > jact
+		}else{
+			return iep > jep
+		}
+	})
+
+	return keys
 }

@@ -288,8 +288,8 @@ func stats(args []string, source *command.MessageSource) error {
 	}
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 在最近五场对战中的统计数据: "))
-	msg.Append(qq.NewTextfLn("总爆头率: %.2f", stats.HeadshotRate))
+	msg.Append(qq.NewTextfLn("%s 在最近五场对战中的统计数据: ", args[0]))
+	msg.Append(qq.NewTextfLn("总爆头率: %.2f%%", stats.HeadshotRate))
 	msg.Append(qq.NewTextfLn("总KD比例: %.2f", stats.KDRatio))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -404,10 +404,16 @@ func mmr(args []string, source *command.MessageSource) error {
 		return err
 	}
 	msg := message.NewSendingMessage()
+
+	plus := ""
+	if mmr.MMRChangeToLastGame > 0 {
+		plus = "+"
+	}
+
 	msg.Append(qq.NewTextfLn("%s 的 MMR 资料:", args[0]))
 	msg.Append(qq.NewTextfLn("目前段位: %s", mmr.CurrentTierPatched))
 	msg.Append(qq.NewTextfLn("目前段位分数: %d/100", mmr.RankingInTier))
-	msg.Append(qq.NewTextfLn("上一次的分数变更: %d", mmr.MMRChangeToLastGame))
+	msg.Append(qq.NewTextfLn("上一次的分数变更: %s%d", plus, mmr.MMRChangeToLastGame))
 	msg.Append(qq.NewTextfLn("ELO: %d", mmr.Elo))
 	img, err := qq.NewImageByUrl(mmr.Images["small"])
 	if err == nil {
@@ -434,11 +440,17 @@ func mmrHistories(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("%s 的 MMR 变更记录: ", fmt.Sprintf("%s#%s", info.Name, info.Tag)))
 
 	for _, data := range info.Data {
+		symbol := ""
+
+		if data.MMRChangeToLastGame > 0 {
+			symbol = "+"
+		}
+
 		msg.Append(qq.NewTextLn("===================="))
 		msg.Append(qq.NewTextfLn("对战时间: %s", datetime.FormatSeconds(data.DateRaw)))
 		msg.Append(qq.NewTextfLn("段位: %s", data.CurrentTierPatched))
-		msg.Append(qq.NewTextfLn("ELO: %s", data.Elo))
-		msg.Append(qq.NewTextfLn("分数变更: %d", data.MMRChangeToLastGame))
+		msg.Append(qq.NewTextfLn("ELO: %d", data.Elo))
+		msg.Append(qq.NewTextfLn("分数变更: %s%d", symbol, data.MMRChangeToLastGame))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -494,11 +506,14 @@ func mmrActs(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("目前段位: %s", acts.CurrentData.CurrentTierPatched))
 	msg.Append(qq.NewTextfLn("赛季段位:"))
 
-	for season, data := range acts.BySeason {
+	for _, season := range valorant.SortSeason(acts.BySeason) {
+
+		data := acts.BySeason[season]
+
 		if data.Error != "" {
-			msg.Append(qq.NewTextfLn("\t%s: 没有记录", season))
+			msg.Append(qq.NewTextfLn("	%s: 没有记录", season))
 		} else {
-			msg.Append(qq.NewTextfLn("\t%s: %s", season, data.FinalRankPatched))
+			msg.Append(qq.NewTextfLn("	%s: %s", season, data.FinalRankPatched))
 		}
 	}
 
