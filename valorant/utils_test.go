@@ -32,3 +32,24 @@ func TestPercentageDisplay(t *testing.T) {
 	total, a, b := 23, 11, 12
 	t.Logf("A %.1f%% (%d) B %.1f%% (%d) - %.0f", float64(a)/float64(total)*100, a, float64(b)/float64(total)*100, b, float64(b)/float64(total))
 }
+
+func TestSortSeason(t *testing.T) {
+	seasonKeys := []string{
+		"e1a1", "e2a1", "e2a3", "e5a1", "e4a1", "e4a2", "e4a3", "e5a2", "e5a3", "e1a2", "e1a3", "e2a2", "e3a1", "e3a3",
+	}
+	seasons := make(map[string]MMRV2SeasonDetails)
+
+	for _, key := range seasonKeys {
+		seasons[key] = MMRV2SeasonDetails{}
+	}
+
+	t.Log("before:")
+	for season := range seasons {
+		t.Log(season)
+	}
+	sorted := SortSeason(seasons)
+	t.Log("after:")
+	for _, season := range sorted {
+		t.Log(season)
+	}
+}
