@@ -273,6 +273,28 @@ func leaderboard(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
+func stats(args []string, source *command.MessageSource) error {
+
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取最近五场对战资料的统计数据...")))
+
+	stats, err := valorant.GetStatistics(name, tag, valorant.AsiaSpecific)
+	if err != nil {
+		return err
+	}
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("%s 在最近五场对战中的统计数据: "))
+	msg.Append(qq.NewTextfLn("总爆头率: %.2f", stats.HeadshotRate))
+	msg.Append(qq.NewTextfLn("总KD比例: %.2f", stats.KDRatio))
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
 func matchRounds(args []string, source *command.MessageSource) error {
 
 	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合的资料..")))
@@ -371,8 +393,13 @@ func matchRounds(args []string, source *command.MessageSource) error {
 
 // mmr get MMRV1Details
 func mmr(args []string, source *command.MessageSource) error {
-	parts := strings.Split(args[0], "#")
-	mmr, err := valorant.GetMMRDetailsV1(parts[0], parts[1], valorant.AsiaSpecific)
+
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+
+	mmr, err := valorant.GetMMRDetailsV1(name, tag, valorant.AsiaSpecific)
 	if err != nil {
 		return err
 	}
@@ -393,12 +420,89 @@ func mmr(args []string, source *command.MessageSource) error {
 
 // mmrHistories get MMRHistories
 func mmrHistories(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+
+	info, err := valorant.GetMMRHistories(name, tag, valorant.AsiaSpecific)
+	if err != nil {
+		return err
+	}
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("%s 的 MMR 变更记录: ", fmt.Sprintf("%s#%s", info.Name, info.Tag)))
+
+	for _, data := range info.Data {
+		msg.Append(qq.NewTextLn("===================="))
+		msg.Append(qq.NewTextfLn("对战时间: %s", datetime.FormatSeconds(data.DateRaw)))
+		msg.Append(qq.NewTextfLn("段位: %s", data.CurrentTierPatched))
+		msg.Append(qq.NewTextfLn("ELO: %s", data.Elo))
+		msg.Append(qq.NewTextfLn("分数变更: %d", data.MMRChangeToLastGame))
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
 // mmrBySeason GetMMRDetailsBySeason
 func mmrBySeason(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+
+	data, err := valorant.GetMMRDetailsBySeason(name, tag, args[1], valorant.AsiaSpecific)
+	if err != nil {
+		return err
+	}
+
+	if data.NumberOfGames == 0 {
+		msg := qq.CreateReply(source.Message)
+		msg.Append(qq.NewTextfLn("找不到 %s 在赛季 %s 的记录。", args[0], args[1]))
+		return qq.SendWithRandomRiskyStrategy(msg)
+	}
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("%s 在赛季 %s 的 MMR 资料如下:", args[0], args[1]))
+	msg.Append(qq.NewTextfLn("最终段位: %s", data.FinalRankPatched))
+	msg.Append(qq.NewTextfLn("总场数: %d", data.NumberOfGames))
+	msg.Append(qq.NewTextfLn("总胜利次数: %d", data.Wins))
+	msg.Append(qq.NewTextfLn("胜率: %.1f", formatPercentageInt(data.Wins, data.NumberOfGames)))
+	msg.Append(qq.NewTextfLn("段位变更记录(每次胜利): "))
+
+	for i, act := range data.ActRankWins {
+		msg.Append(qq.NewTextfLn("\t%d. %s", i+1, act.PatchedTier))
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
+// mmrActs GetMMRDetailsV2
+func mmrActs(args []string, source *command.MessageSource) error {
+	name, tag, err := valorant.ParseNameTag(args[0])
+	if err != nil {
+		return err
+	}
+
+	acts, err := valorant.GetMMRDetailsV2(name, tag, valorant.AsiaSpecific)
+	if err != nil {
+		return err
+	}
+
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("%s#%s 的赛季段位资料如下: ", acts.Name, acts.Tag))
+	msg.Append(qq.NewTextfLn("目前段位: %s", acts.CurrentData.CurrentTierPatched))
+	msg.Append(qq.NewTextfLn("赛季段位:"))
+
+	for season, data := range acts.BySeason {
+		if data.Error != "" {
+			msg.Append(qq.NewTextfLn("\t%s: 没有记录", season))
+		} else {
+			msg.Append(qq.NewTextfLn("\t%s: %s", season, data.FinalRankPatched))
+		}
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
 func localize(args []string, source *command.MessageSource) error {
@@ -415,11 +519,13 @@ var (
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
+	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>")
 	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
 	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
 	mmrCommand          = command.NewNode([]string{"mmr", "段位"}, "查询段位", false, mmr, "<名称#Tag>")
-	mmrHistoriesCommand = command.NewNode([]string{"mmrHistories", "段位历史"}, "查询段位历史", false, mmrHistories, "<名称#Tag>")
-	mmrBySeasonCommand  = command.NewNode([]string{"mmrBySeason", "赛季段位"}, "查询赛季段位", false, mmrBySeason, "<名称#Tag>", "<赛季>")
+	mmrHistoriesCommand = command.NewNode([]string{"mmrhist", "段位历史"}, "查询段位历史", false, mmrHistories, "<名称#Tag>")
+	mmrBySeasonCommand  = command.NewNode([]string{"season", "赛季段位"}, "查询赛季段位", false, mmrBySeason, "<名称#Tag>", "<赛季>")
+	mmrActsCommand      = command.NewNode([]string{"mmracts", "赛季段位历史"}, "查询赛季段位历史", false, mmrActs, "<名称#Tag>")
 	localizeCommand     = command.NewNode([]string{"localize", "本地化"}, "更新i18n内容", true, localize)
 )
 
@@ -433,11 +539,13 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	matchesCommand,
 	matchCommand,
 	leaderboardCommand,
+	statsCommand,
 	matchPlayerscommand,
 	matchRoundsCommand,
 	mmrCommand,
 	mmrHistoriesCommand,
 	mmrBySeasonCommand,
+	mmrActsCommand,
 	localizeCommand,
 )
 

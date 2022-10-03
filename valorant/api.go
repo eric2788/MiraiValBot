@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -236,7 +237,7 @@ func GetMMRDetailsV2(name, tag string, region Region) (*MMRV2Details, error) {
 
 func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV2SeasonDetails, error) {
 	if !AllowedSeasons.Contains(filter) {
-		return nil, fmt.Errorf("season %v not allowed", filter)
+		return nil, fmt.Errorf("无效的赛季: %v, 可用的赛季: %s", filter, strings.Join(AllowedSeasons.ToArr(), ", "))
 	}
 	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V2, region, name, tag, filter))
 	if err != nil {
