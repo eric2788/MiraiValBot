@@ -591,16 +591,11 @@ func formatResultObjective(data *valorant.MatchData) string {
 			player.Stats.Assists,
 			player.Stats.Score,
 		)
-	case "unrated":
-		fallthrough
-	case "competitive":
-		fallthrough
-	case "custom game":
+	default:
 		red := data.Teams["red"]
 		blue := data.Teams["blue"]
 		return fmt.Sprintf("Red %d : %d Blue", red.RoundsWon, blue.RoundsWon)
 	}
-	return fmt.Sprintf("(错误: 不支援的模式 %s)", data.MetaData.Mode)
 }
 
 func formatResult(data valorant.MatchData, name string) string {
@@ -620,11 +615,7 @@ func formatResult(data valorant.MatchData, name string) string {
 			player.Stats.Assists,
 			player.Stats.Score,
 		)
-	case "unrated":
-		fallthrough
-	case "competitive":
-		fallthrough
-	case "custom game":
+	default:
 		red := data.Teams["red"]
 		blue := data.Teams["blue"]
 		team, err := valorant.FoundPlayerInTeam(name, &data)
@@ -633,7 +624,6 @@ func formatResult(data valorant.MatchData, name string) string {
 		}
 		return fmt.Sprintf("Red %d : %d Blue (用户所在队伍: %s)", red.RoundsWon, blue.RoundsWon, team)
 	}
-	return fmt.Sprintf("(错误: 不支援的模式 %s)", data.MetaData.Mode)
 }
 
 func formatPercentage(part, total int64) float64 {
