@@ -336,6 +336,11 @@ type (
 
 		BySeason map[string]MMRV2SeasonDetails `json:"by_season"`
 	}
+
+	Statistics struct {
+		KDRatio float64
+		HeadshotRate float64
+	}
 )
 
 func (resp *Resp) ParseData(t interface{}) error {

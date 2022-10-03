@@ -157,3 +157,43 @@ func GetPlantCount(data *MatchData, id string) int {
 	}
 	return plant
 }
+
+func GetStatistics(name, tag string, region Region) (*Statistics, error){
+
+	ac, err := GetAccountDetails(name, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	matches, err := GetMatchHistories(name, tag, region)
+	if err != nil {
+		return nil, err
+	}
+
+	totalShots, totalHeadShots := 0, 0
+	totalKills, totalDeaths := 0, 0
+
+	for _, match := range matches {
+		players := match.Players["all_players"]
+
+		for _, player := range players {
+			if player.PUuid == ac.PUuid {
+
+				totalShots += (player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots)
+				totalHeadShots += player.Stats.Headshots
+
+				totalKills += player.Stats.Kills
+				totalDeaths += player.Stats.Deaths
+
+				break
+			}
+		}
+	}
+
+	return &Statistics{
+		KDRatio: float64(totalKills)/float64(totalDeaths)*100,
+		HeadshotRate: float64(totalHeadShots)/float64(totalShots)*100,
+	}, nil
+
+
+}
