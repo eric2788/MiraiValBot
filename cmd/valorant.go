@@ -260,6 +260,11 @@ func leaderboard(args []string, source *command.MessageSource) error {
 				msg.Append(qq.NewTextfLn("段位: %s", player.CurrentTierPatched))
 			}
 
+			// 如果不是死鬥模式，則顯示所屬隊伍
+			if strings.ToLower(match.MetaData.Mode) != "deathmatch" {
+				msg.Append(qq.NewTextfLn("队伍: %s", player.Team))
+			}
+
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
@@ -328,7 +333,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 		}
 
 		for _, playerStats := range round.PlayerStats {
-			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的表現:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
+			msg.Append(qq.NewTextfLn("\t%s(队伍:%s) 在该回合的表现:", playerStats.PlayerDisplayName, playerStats.PlayerTeam))
 
 			msg.Append(qq.NewTextfLn("\t\tAFK: %t", playerStats.WasAfk))
 			msg.Append(qq.NewTextfLn("\t\t被惩罚: %t", playerStats.WasPenalized))
@@ -703,7 +708,11 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		msg.Append(qq.NewTextfLn("\t\tK/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		msg.Append(qq.NewTextfLn("\t\t分数: %d", player.Stats.Score))
 		msg.Append(qq.NewTextfLn("\t\t使用角色: %s", player.Character))
-		msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
+
+		// 如果不是死鬥模式，则显示所在队伍
+		if strings.ToLower(match.MetaData.Mode) != "deathmatch" {
+			msg.Append(qq.NewTextfLn("\t\t所在队伍: %s", player.Team))
+		}
 
 		// 如果是競技模式，則顯示段位
 		if strings.ToLower(match.MetaData.Mode) == "competitive" {
