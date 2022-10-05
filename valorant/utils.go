@@ -2,11 +2,15 @@ package valorant
 
 import (
 	"fmt"
+	"github.com/eric2788/MiraiValBot/redis"
+	"github.com/google/uuid"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 )
+
+const shortenPuuidKey = "valorant:puuid_short_list"
 
 var uuidCache = make(map[string]*AccountInfo)
 
@@ -160,7 +164,7 @@ func GetPlantCount(data *MatchData, id string) int {
 	return plant
 }
 
-func GetStatistics(name, tag string, region Region) (*Statistics, error){
+func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 
 	ac, err := GetAccountDetails(name, tag)
 	if err != nil {
@@ -193,12 +197,11 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error){
 	}
 
 	return &Statistics{
-		KDRatio: float64(totalKills)/float64(totalDeaths),
-		HeadshotRate: float64(totalHeadShots)/float64(totalShots)*100,
+		KDRatio:      float64(totalKills) / float64(totalDeaths),
+		HeadshotRate: float64(totalHeadShots) / float64(totalShots) * 100,
 	}, nil
 
 }
-
 
 var seasonRegex = regexp.MustCompile("^[e](\\d+)[a](\\d+)$")
 
@@ -222,6 +225,27 @@ func findEposideAct(season string) (ep int, act int) {
 	return
 }
 
+func ShortenUUID(puuid string) (int64, error) {
+	if _, err := uuid.Parse(puuid); err != nil {
+		return -1, err
+	}
+	if err := redis.ListAdd(shortenPuuidKey, puuid); err != nil && err != redis.ListExists {
+		return -1, err
+	}
+	return redis.ListPos(shortenPuuidKey, puuid)
+}
+
+func GetRealId(id string) (string, error) {
+	// already is uuid
+	if _, err := uuid.Parse(id); err == nil {
+		return id, nil
+	}
+	pos, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return "", err
+	}
+	return redis.ListIndex(shortenPuuidKey, pos)
+}
 
 func SortSeason(seasons map[string]MMRV2SeasonDetails) []string {
 
@@ -230,14 +254,14 @@ func SortSeason(seasons map[string]MMRV2SeasonDetails) []string {
 		keys = append(keys, season)
 	}
 
-	sort.Slice(keys, func (i, j int) bool {
-		
+	sort.Slice(keys, func(i, j int) bool {
+
 		iep, iact := findEposideAct(keys[i])
 		jep, jact := findEposideAct(keys[j])
 
 		if iep == jep {
 			return iact > jact
-		}else{
+		} else {
 			return iep > jep
 		}
 	})

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"github.com/eric2788/MiraiValBot/file"
 	rgo "github.com/go-redis/redis/v8"
@@ -12,6 +13,8 @@ import (
 
 var rdb *rgo.Client
 var ctx = context.Background()
+
+var posArg rgo.LPosArgs
 
 const (
 	Permanent   = time.Hour * 86400
@@ -87,6 +90,37 @@ func SetAdd(key string, value interface{}) error {
 
 func SetRemove(key string, value interface{}) error {
 	return rdb.SRem(ctx, key, value).Err()
+}
+
+func ListPos(key, value string) (int64, error) {
+	index, err := rdb.LPos(ctx, key, value, posArg).Result()
+	if err == rgo.Nil {
+		return -1, nil
+	} else {
+		return index, err
+	}
+}
+
+var ListExists = errors.New("this key in list exists")
+
+func ListAdd(key, value string) error {
+	if index, err := ListPos(key, value); err == nil && index > -1 {
+		return ListExists
+	}
+	return rdb.LPush(ctx, key, value).Err()
+}
+
+func ListIndex(key string, index int64) (string, error) {
+	s, err := rdb.LIndex(ctx, key, index).Result()
+	if err == rgo.Nil {
+		return "", nil
+	} else {
+		return s, err
+	}
+}
+
+func ListRem(key, value string) error {
+	return rdb.LRem(ctx, key, 1, value).Err()
 }
 
 func SetContains(key string, value interface{}) (bool, error) {

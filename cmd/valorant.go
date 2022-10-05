@@ -153,8 +153,11 @@ func matches(args []string, source *command.MessageSource) error {
 		if match.MetaData.MatchId == "" {
 			continue
 		}
+
+		shortHint := getShortIdHint(match.MetaData.MatchId)
+
 		msg.Append(qq.NewTextLn("===================="))
-		msg.Append(qq.NewTextfLn("对战ID: %s", match.MetaData.MatchId))
+		msg.Append(qq.NewTextfLn("对战ID: %s%s", match.MetaData.MatchId, shortHint))
 		msg.Append(qq.NewTextfLn("对战模式: %s", match.MetaData.Mode))
 		msg.Append(qq.NewTextfLn("对战开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
 		msg.Append(qq.NewTextfLn("对战时长: %s", formatDuration(match.MetaData.GameLength)))
@@ -173,12 +176,21 @@ func matches(args []string, source *command.MessageSource) error {
 }
 
 func match(args []string, source *command.MessageSource) error {
-	match, err := valorant.GetMatchDetails(args[0])
+
+	id, err := valorant.GetRealId(args[0])
+	if err != nil {
+		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
+	match, err := valorant.GetMatchDetails(id)
 	if err != nil {
 		return err
 	}
+
+	shortHint := getShortIdHint(match.MetaData.MatchId)
+
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("对战ID: %s", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("对战ID: %s%s", match.MetaData.MatchId, shortHint))
 	msg.Append(qq.NewTextfLn("对战模式: %s", match.MetaData.Mode))
 	msg.Append(qq.NewTextfLn("对战开始时间: %s", datetime.FormatSeconds(match.MetaData.GameStart)))
 	msg.Append(qq.NewTextfLn("对战时长: %s", formatDuration(match.MetaData.GameLength)))
@@ -194,9 +206,14 @@ func match(args []string, source *command.MessageSource) error {
 
 func matchPlayers(args []string, source *command.MessageSource) error {
 
+	id, err := valorant.GetRealId(args[0])
+	if err != nil {
+		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
 	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战玩家的资料..")))
 
-	match, err := valorant.GetMatchDetails(args[0])
+	match, err := valorant.GetMatchDetails(id)
 	if err != nil {
 		return err
 	}
@@ -212,9 +229,14 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 
 func leaderboard(args []string, source *command.MessageSource) error {
 
+	id, err := valorant.GetRealId(args[0])
+	if err != nil {
+		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
 	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战排行榜的资料..")))
 
-	match, err := valorant.GetMatchDetails(args[0])
+	match, err := valorant.GetMatchDetails(id)
 	if err != nil {
 		return err
 	}
@@ -302,9 +324,14 @@ func stats(args []string, source *command.MessageSource) error {
 
 func matchRounds(args []string, source *command.MessageSource) error {
 
+	id, err := valorant.GetRealId(args[0])
+	if err != nil {
+		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
 	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战回合的资料..")))
 
-	match, err := valorant.GetMatchDetails(args[0])
+	match, err := valorant.GetMatchDetails(id)
 	if err != nil {
 		return err
 	}
@@ -779,4 +806,15 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 	}
 
 	return img, nil
+}
+
+func getShortIdHint(uuid string) string {
+	shortHint := ""
+	short, err := valorant.ShortenUUID(uuid)
+	if err != nil {
+		logger.Warnf("无法缩短 UUID: %v", err)
+	} else {
+		shortHint = fmt.Sprintf("(短号: %d)", short)
+	}
+	return shortHint
 }

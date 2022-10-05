@@ -86,12 +86,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		imgElement, err := qq.NewImageByUrl(img)
 		if err != nil {
 			logger.Errorf("上傳 discord 圖片 (%v) 失敗: %v", img, err)
+			continue
 		}
 		msg.Append(imgElement)
 	}
 
-	go qq.SendRiskyMessage(3, 5, func(try int) error {
-		return qq.SendGroupMessage(msg)
-	})
-
+	_ = qq.SendWithRandomRiskyStrategy(msg)
 }
