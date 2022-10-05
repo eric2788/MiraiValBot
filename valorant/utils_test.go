@@ -2,6 +2,7 @@ package valorant
 
 import (
 	"fmt"
+	"github.com/eric2788/MiraiValBot/redis"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,6 +27,28 @@ func TestGetDeathMatchRanking(t *testing.T) {
 	}
 
 	assert.Equal(t, 12, len(players))
+}
+
+func aTestShortenUUIDs(t *testing.T) {
+	redis.Init()
+	matches, err := GetMatchHistories("suou", "9035", AsiaSpecific)
+	if err != nil {
+		t.Log(err)
+	} else {
+		var ids = make([]string, len(matches))
+		for i, match := range matches {
+			ids[i] = match.MetaData.MatchId
+		}
+		results, errs := ShortenUUIDs(ids)
+		if len(errs) > 0 {
+			for _, err := range errs {
+				t.Log(err)
+			}
+		}
+		for id, result := range results {
+			t.Logf("%s -> %d", id, result)
+		}
+	}
 }
 
 func TestPercentageDisplay(t *testing.T) {

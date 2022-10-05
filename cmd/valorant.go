@@ -146,6 +146,14 @@ func matches(args []string, source *command.MessageSource) error {
 	if err != nil {
 		return err
 	}
+
+	var uuidsToShort = make([]string, len(matches))
+	for i, match := range matches {
+		uuidsToShort[i] = match.MetaData.MatchId
+	}
+
+	shorts := getShortIdsHint(uuidsToShort)
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 最近的对战:", info.Display))
 	for _, match := range matches {
@@ -154,8 +162,7 @@ func matches(args []string, source *command.MessageSource) error {
 			continue
 		}
 
-		shortHint := getShortIdHint(match.MetaData.MatchId)
-
+		shortHint := shorts[match.MetaData.MatchId]
 		msg.Append(qq.NewTextLn("===================="))
 		msg.Append(qq.NewTextfLn("对战ID: %s%s", match.MetaData.MatchId, shortHint))
 		msg.Append(qq.NewTextfLn("对战模式: %s", match.MetaData.Mode))
@@ -814,7 +821,22 @@ func getShortIdHint(uuid string) string {
 	if err != nil {
 		logger.Warnf("无法缩短 UUID: %v", err)
 	} else {
-		shortHint = fmt.Sprintf("(短号: %d)", short)
+		shortHint = fmt.Sprintf(" (短号: %d)", short)
 	}
 	return shortHint
+}
+
+func getShortIdsHint(uuids []string) map[string]string {
+	shortHints := make(map[string]string)
+	shorts, errs := valorant.ShortenUUIDs(uuids)
+	if len(errs) > 0 {
+		for uuid, err := range errs {
+			logger.Warnf("无法缩短 UUID %s: %v", uuid, err)
+		}
+	} else {
+		for uuid, short := range shorts {
+			shortHints[uuid] = fmt.Sprintf(" (短号: %d)", short)
+		}
+	}
+	return shortHints
 }

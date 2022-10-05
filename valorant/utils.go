@@ -235,6 +235,37 @@ func ShortenUUID(puuid string) (int64, error) {
 	return redis.ListPos(shortenPuuidKey, puuid)
 }
 
+func ShortenUUIDs(puuids []string) (map[string]int64, map[string]error) {
+
+	var errMap = make(map[string]error)
+	var uuidMap = make(map[string]int64)
+	for _, puuid := range puuids {
+
+		if _, err := uuid.Parse(puuid); err != nil {
+			errMap[puuid] = err
+			continue
+		}
+
+		if err := redis.ListAdd(shortenPuuidKey, puuid); err != nil && err != redis.ListExists {
+			errMap[puuid] = err
+			continue
+		}
+
+	}
+
+	for _, puuid := range puuids {
+
+		if index, err := redis.ListPos(shortenPuuidKey, puuid); err != nil {
+			errMap[puuid] = err
+			continue
+		} else {
+			uuidMap[puuid] = index
+		}
+	}
+
+	return uuidMap, errMap
+}
+
 func GetRealId(id string) (string, error) {
 	// already is uuid
 	if _, err := uuid.Parse(id); err == nil {

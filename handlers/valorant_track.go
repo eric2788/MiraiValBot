@@ -19,7 +19,7 @@ func OnMatchesUpdated(_ *bot.Bot, data *valorant.MatchMetaDataSub) error {
 	if err != nil {
 		logger.Warnf("无法缩短 UUID: %v", err)
 	} else {
-		shortHint = fmt.Sprintf("(短号: %d)", short)
+		shortHint = fmt.Sprintf(" (短号: %d)", short)
 	}
 
 	msg := message.NewSendingMessage()

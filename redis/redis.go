@@ -104,10 +104,15 @@ func ListPos(key, value string) (int64, error) {
 var ListExists = errors.New("this key in list exists")
 
 func ListAdd(key, value string) error {
-	if index, err := ListPos(key, value); err == nil && index > -1 {
-		return ListExists
+	i, err := rdb.LPos(ctx, key, value, posArg).Result()
+	if err != nil {
+		if err != rgo.Nil {
+			return err
+		}
+	} else if i >= 0 {
+		return nil
 	}
-	return rdb.LPush(ctx, key, value).Err()
+	return rdb.RPush(ctx, key, value).Err()
 }
 
 func ListIndex(key string, index int64) (string, error) {
