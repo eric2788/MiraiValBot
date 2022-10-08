@@ -62,40 +62,40 @@ func (c *command) HookEvent(bot *bot.Bot) {
 			return
 		} else if response.ShowHelp {
 
-			var responseContent string
-
 			if response.Content == "" {
 
 				logger.Warnf("無法發送指令幫助，指令幫助為空。")
-				responseContent = "指令帮助为空"
+
+				hintMessage := qq.CreateReply(msg).Append(message.NewText("指令帮助为空"))
+				_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
 
 			} else {
 
 				// 發送私人或临时会话訊息的指令幫助
 				helpMessage := message.NewSendingMessage().Append(message.NewText(response.Content))
 
-				if msg.Sender.IsFriend {
-					if err = qq.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
-						logger.Infof("已向 %s (%d) 發送指令幫助的私人訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+				_ = qq.SendWithRandomRiskyFunc(helpMessage, func() {
+
+					if msg.Sender.IsFriend {
+						if err = qq.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
+							logger.Infof("已向 %s (%d) 發送指令幫助的私人訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+						} else {
+							logger.Warnf("無法向 %s (%d) 發送指令幫助的私人訊息: %v", msg.Sender.Nickname, msg.Sender.Uin, err)
+						}
 					} else {
-						logger.Warnf("無法向 %s (%d) 發送指令幫助的私人訊息: %v, 將改為發送群消息。", msg.Sender.Nickname, msg.Sender.Uin, err)
-						_ = qq.SendWithRandomRiskyStrategy(helpMessage)
+						if err = qq.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage); err == nil {
+							logger.Infof("已向 %s (%d) 發送指令幫助的臨時會話訊息。", msg.Sender.Nickname, msg.Sender.Uin)
+						} else {
+							logger.Warnf("無法向 %s (%d) 發送指令幫助的臨時會話訊息: %v", msg.Sender.Nickname, msg.Sender.Uin, err)
+						}
 					}
-				} else {
-					if err = qq.SendGroupTempMessage(msg.GroupCode, msg.Sender.Uin, helpMessage); err == nil {
-						logger.Infof("已向 %s (%d) 發送指令幫助的臨時會話訊息。", msg.Sender.Nickname, msg.Sender.Uin)
-					} else {
-						logger.Warnf("無法向 %s (%d) 發送指令幫助的臨時會話訊息: %v, 將改為發送群消息。", msg.Sender.Nickname, msg.Sender.Uin, err)
-						_ = qq.SendWithRandomRiskyStrategy(helpMessage)
-					}
-				}
-				responseContent = "未知参数，已私聊你指令列表。"
+
+					hintMessage := qq.CreateReply(msg).Append(message.NewText("向群发送指令帮助讯息时由于遭到屡次风控，已改为私聊你指令列表。"))
+					_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
+				})
 
 			}
 
-			// 發送群組訊息提示
-			hintMessage := qq.CreateReply(msg).Append(message.NewText(responseContent))
-			_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
 		} else if response.Content != "" {
 			m := qq.CreateReply(msg).Append(message.NewText(response.Content))
 			_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)

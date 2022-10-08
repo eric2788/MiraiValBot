@@ -157,6 +157,11 @@ func retry(maxTry int, seconds int64, do func(int) error, catch func(error) erro
 
 // SendRiskyMessage 发送风控几率大的消息並实行重试机制
 func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
+	SendRiskyMessageWithFunc(maxTry, seconds, f, nil)
+}
+
+// SendRiskyMessageWithFunc 发送风控几率大的消息並实行重试机制，並在重试失败后执行回调函数
+func SendRiskyMessageWithFunc(maxTry int, seconds int64, f func(currentTry int) error, stillRiskFunc func()) {
 	retry(maxTry, seconds, f, func(err error) error {
 		if sendErr, ok := err.(*MessageSendError); ok && sendErr.Reason == Risked {
 			logger.Warnf("嘗試发送消息時出現風控: %v", err)
@@ -164,11 +169,11 @@ func SendRiskyMessage(maxTry int, seconds int64, f func(currentTry int) error) {
 		} else {
 			return nil
 		}
-	}, nil)
+	}, stillRiskFunc)
 }
 
-func SendWithRandomRiskyStrategy(msg *message.SendingMessage) (err error) {
-	go SendRiskyMessage(5, 60, func(try int) error {
+func SendWithRandomRiskyFunc(msg *message.SendingMessage, stillRisky func()) (err error) {
+	go SendRiskyMessageWithFunc(5, 60, func(try int) error {
 		clone := CloneMessage(msg)
 		alt := GetRandomMessageByTry(try)
 		if len(alt) > 0 {
@@ -178,8 +183,12 @@ func SendWithRandomRiskyStrategy(msg *message.SendingMessage) (err error) {
 			}
 		}
 		return SendGroupMessage(clone)
-	})
+	}, stillRisky)
 	return
+}
+
+func SendWithRandomRiskyStrategy(msg *message.SendingMessage) (err error) {
+	return SendWithRandomRiskyFunc(msg, nil)
 }
 
 func CloneMessage(msg *message.SendingMessage) *message.SendingMessage {
