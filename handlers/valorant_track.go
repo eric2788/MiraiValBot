@@ -14,6 +14,11 @@ func OnMatchesUpdated(_ *bot.Bot, data *valorant.MatchMetaDataSub) error {
 
 	displayName, metaData := data.DisplayName, data.Data
 
+	if metaData.MatchId == "" || len(metaData.MatchId) == 0 {
+		logger.Warnf("收到空的對戰ID: %q, 已略過。", metaData.MatchId)
+		return nil
+	}
+
 	shortHint := ""
 	short, err := v.ShortenUUID(metaData.MatchId)
 	if err != nil {
