@@ -1,7 +1,9 @@
 package valorant
 
 import (
+	"github.com/eric2788/common-utils/datetime"
 	"testing"
+	"time"
 
 	"github.com/eric2788/common-utils/request"
 	"github.com/sirupsen/logrus"
@@ -36,6 +38,32 @@ func isAllowedStatus(err error) bool {
 		logger.Debugf("%d is in allowed status code, skipped", status)
 	}
 	return ok
+}
+
+func formatTime(timeStr string) string {
+	if timeStr == "" {
+		return "无"
+	}
+	ti, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		logger.Errorf("无法解析时间: %s, 将返回厡讯息", timeStr)
+		return timeStr
+	}
+	return datetime.FormatISO(ti)
+}
+
+func TestGetGameStatus(t *testing.T) {
+	status, err := GetGameStatus(AsiaSpecific)
+	if err != nil {
+		if isAllowedStatus(err) {
+			return
+		}
+		t.Fatal(err)
+	}
+	for _, inc := range status.Data.Incidents {
+		t.Log(formatTime(inc.CreatedAt))
+	}
+	assert.NotEmpty(t, status)
 }
 
 func TestGetAccountDetails(t *testing.T) {

@@ -677,12 +677,15 @@ func formatPercentageInt(part, total int) float64 {
 }
 
 func formatTime(timeStr string) string {
+	if timeStr == "" {
+		return "无"
+	}
 	ti, err := time.Parse(time.RFC3339, timeStr)
 	if err != nil {
 		logger.Errorf("无法解析时间: %s, 将返回厡讯息", timeStr)
 		return timeStr
 	}
-	return datetime.FormatSeconds(ti.UnixMilli())
+	return datetime.FormatISO(ti)
 }
 
 func formatDuration(milis int64) string {
