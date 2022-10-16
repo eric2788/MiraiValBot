@@ -63,14 +63,14 @@ func status(args []string, source *command.MessageSource) error {
 	}
 	msg := message.NewSendingMessage()
 	if len(status.Data.Incidents) == 0 && len(status.Data.Maintenances) == 0 {
-		msg.Append(qq.NewTextLn("目前没有任何维护或者故障。"))
+		msg.Append(qq.NewTextLn("目前没有任何维护或者事件。"))
 	} else {
 		for i, incident := range status.Data.Incidents {
-			msg.Append(qq.NewTextfLn("=========== 事故 (%d) ===========", i))
+			msg.Append(qq.NewTextfLn("=========== 事件 (%d) ===========", i+1))
 			appendDetails(msg, incident)
 		}
 		for i, maintenance := range status.Data.Maintenances {
-			msg.Append(qq.NewTextfLn("=========== 维护 (%d) ===========", i))
+			msg.Append(qq.NewTextfLn("=========== 维护 (%d) ===========", i+1))
 			appendDetails(msg, maintenance)
 		}
 	}
@@ -679,7 +679,7 @@ func formatTime(timeStr string) string {
 		logger.Errorf("无法解析时间: %s, 将返回厡讯息", timeStr)
 		return timeStr
 	}
-	return datetime.FormatSeconds(int64(ti.Second()))
+	return datetime.FormatSeconds(ti.UnixMilli())
 }
 
 func formatDuration(milis int64) string {
