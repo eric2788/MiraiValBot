@@ -178,8 +178,13 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 
 	totalShots, totalHeadShots := 0, 0
 	totalKills, totalDeaths := 0, 0
+	totalScores := 0
+	totalDamage, totalRounds := int64(0), 0
 
 	for _, match := range matches {
+
+		totalRounds += match.MetaData.RoundsPlayed
+
 		players := match.Players["all_players"]
 
 		for _, player := range players {
@@ -191,6 +196,9 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 				totalKills += player.Stats.Kills
 				totalDeaths += player.Stats.Deaths
 
+				totalScores += player.Stats.Score
+
+				totalDamage += player.DamageMade
 				break
 			}
 		}
@@ -199,11 +207,14 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 	return &Statistics{
 		KDRatio:      float64(totalKills) / float64(totalDeaths),
 		HeadshotRate: float64(totalHeadShots) / float64(totalShots) * 100,
+		AvgScore: float64(totalScores) / float64(len(matches)),
+		DamagePerRounds: float64(totalDamage) / float64(totalRounds),
+		KillsPerRounds: float64(totalKills) / float64(totalRounds),
 	}, nil
 
 }
 
-var seasonRegex = regexp.MustCompile("^[e](\\d+)[a](\\d+)$")
+var seasonRegex = regexp.MustCompile(`^[e](\d+)[a](\d+)$`)
 
 func findEposideAct(season string) (ep int, act int) {
 	finds := seasonRegex.FindStringSubmatch(season)

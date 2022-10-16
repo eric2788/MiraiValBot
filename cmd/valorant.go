@@ -323,8 +323,11 @@ func stats(args []string, source *command.MessageSource) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在最近五场对战中的统计数据: ", args[0]))
-	msg.Append(qq.NewTextfLn("总爆头率: %.2f%%", stats.HeadshotRate))
-	msg.Append(qq.NewTextfLn("总KD比例: %.2f", stats.KDRatio))
+	msg.Append(qq.NewTextfLn("爆头率: %.2f%%", stats.HeadshotRate))
+	msg.Append(qq.NewTextfLn("KD比例: %.2f", stats.KDRatio))
+	msg.Append(qq.NewTextfLn("平均分数: %.1f", stats.AvgScore))
+	msg.Append(qq.NewTextfLn("每回合平均伤害: %.1f", stats.DamagePerRounds))
+	msg.Append(qq.NewTextfLn("每回合平均击杀: %.1f", stats.KillsPerRounds))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
 }

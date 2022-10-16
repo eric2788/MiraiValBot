@@ -340,6 +340,9 @@ type (
 	Statistics struct {
 		KDRatio float64
 		HeadshotRate float64
+		AvgScore float64
+		DamagePerRounds float64
+		KillsPerRounds float64
 	}
 )
 
