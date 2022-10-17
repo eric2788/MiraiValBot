@@ -27,13 +27,19 @@ func OnMatchesUpdated(_ *bot.Bot, data *valorant.MatchMetaDataSub) error {
 		shortHint = fmt.Sprintf(" (短号: %d)", short)
 	}
 
+	cmdId := metaData.MatchId
+
+	if short > -1 {
+		cmdId = fmt.Sprintf("%d", short)
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 的最新对战信息已更新👇", displayName))
 	msg.Append(qq.NewTextfLn("对战ID: %s%s", metaData.MatchId, shortHint))
 	msg.Append(qq.NewTextfLn("对战模式: %s", metaData.Mode))
 	msg.Append(qq.NewTextfLn("对战开始时间: %s", datetime.FormatSeconds(metaData.GameStart)))
 	msg.Append(qq.NewTextfLn("对战地图: %s", metaData.Map))
-	msg.Append(qq.NewTextfLn("输入 !val match %s 查看更详细资讯。", metaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val match %s 查看更详细资讯。", cmdId))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
 }

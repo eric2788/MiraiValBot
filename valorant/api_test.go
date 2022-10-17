@@ -49,7 +49,7 @@ func formatTime(timeStr string) string {
 		logger.Errorf("无法解析时间: %s, 将返回厡讯息", timeStr)
 		return timeStr
 	}
-	return datetime.FormatISO(ti)
+	return ti.Format(datetime.TimeFormat)
 }
 
 func TestGetGameStatus(t *testing.T) {

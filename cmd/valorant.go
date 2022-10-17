@@ -194,7 +194,13 @@ func match(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	shortHint := getShortIdHint(match.MetaData.MatchId)
+	shortHint, short := getShortIdHint(match.MetaData.MatchId)
+
+	cmdId := match.MetaData.MatchId
+
+	if short > -1 {
+		cmdId = fmt.Sprintf("%d", short)
+	}
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("对战ID: %s%s", match.MetaData.MatchId, shortHint))
@@ -205,9 +211,9 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("回合总数: %d", match.MetaData.RoundsPlayed))
 	msg.Append(qq.NewTextfLn("服务器节点: %s", match.MetaData.Cluster))
 	msg.Append(qq.NewTextfLn("对战结果: %s", formatResultObjective(match)))
-	msg.Append(qq.NewTextfLn("输入 !val leaderboard %s 查看排行榜", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("输入 !val players %s 查看对战玩家", match.MetaData.MatchId))
-	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看对战回合", match.MetaData.MatchId))
+	msg.Append(qq.NewTextfLn("输入 !val leaderboard %s 查看排行榜", cmdId))
+	msg.Append(qq.NewTextfLn("输入 !val players %s 查看对战玩家", cmdId))
+	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看对战回合", cmdId))
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
@@ -685,7 +691,7 @@ func formatTime(timeStr string) string {
 		logger.Errorf("无法解析时间: %s, 将返回厡讯息", timeStr)
 		return timeStr
 	}
-	return datetime.FormatISO(ti)
+	return ti.Format(datetime.TimeFormat)
 }
 
 func formatDuration(milis int64) string {
@@ -821,7 +827,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 	return img, nil
 }
 
-func getShortIdHint(uuid string) string {
+func getShortIdHint(uuid string) (string, int64) {
 	shortHint := ""
 	short, err := valorant.ShortenUUID(uuid)
 	if err != nil {
@@ -829,7 +835,7 @@ func getShortIdHint(uuid string) string {
 	} else {
 		shortHint = fmt.Sprintf(" (短号: %d)", short)
 	}
-	return shortHint
+	return shortHint, short
 }
 
 func getShortIdsHint(uuids []string) map[string]string {
