@@ -77,9 +77,9 @@ func yListening(args []string, source *command.MessageSource) error {
 			}
 		}
 
-		reply.Append(qq2.NewTextf("正在监听的房间号: %v", channelNames))
+		reply.Append(qq2.NewTextf("正在监听的频道: %v", channelNames))
 	} else {
-		reply.Append(qq2.NewTextf("没有监听的房间号"))
+		reply.Append(qq2.NewTextf("没有监听的频道"))
 	}
 
 	return qq2.SendWithRandomRiskyStrategy(reply)
