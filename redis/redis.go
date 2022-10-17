@@ -101,6 +101,15 @@ func ListPos(key, value string) (int64, error) {
 	}
 }
 
+func GetMapValue(key, mapKey string) (string, error){
+	value, err := rdb.HGet(ctx, key, mapKey).Result()
+	if err == rgo.Nil {
+		return "", nil
+	} else {
+		return value, err
+	}
+}
+
 var ListExists = errors.New("this key in list exists")
 
 func ListAdd(key, value string) error {
