@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -71,10 +69,10 @@ func yListening(args []string, source *command.MessageSource) error {
 			if err != nil {
 				logger.Errorf("從 redis 獲取 頻道 %s 的顯示名稱時出現錯誤: %v, 將返回頻道ID", channelID, err)
 				channelNames[i] = channelID
-			}else if s == "" {
+			} else if s == "" {
 				logger.Warnf("找不到頻道 %s 的顯示名稱, 將返回頻道ID", channelID)
 				channelNames[i] = channelID
-			}else{
+			} else {
 				channelNames[i] = s
 			}
 		}
