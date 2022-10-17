@@ -25,6 +25,10 @@ var defaultStorageData = storageData{
 	Bilibili: &bilibiliSettings{
 		HighLightedUsers: []int64{},
 	},
+	Youtube: &youtubeSettings{
+		BroadcastIdle: true,
+		AntiDuplicate: false,
+	},
 	Twitter: &twitterSettings{
 		ShowReply: true,
 	},
