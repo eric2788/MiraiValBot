@@ -124,7 +124,7 @@ func tracking(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 	listening := v.GetListening()
 	if len(listening) > 0 {
-		reply.Append(qq.NewTextf("正在监听的玩家: %v", listening))
+		reply.Append(qq.NewTextf("正在监听的玩家: %v", strings.Join(listening, ", ")))
 	} else {
 		reply.Append(message.NewText("没有正在监听的玩家"))
 	}

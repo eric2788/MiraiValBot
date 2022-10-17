@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -60,7 +62,7 @@ func tListening(args []string, source *command.MessageSource) error {
 	reply := qq2.CreateReply(source.Message)
 
 	if listening.Size() > 0 {
-		reply.Append(qq2.NewTextf("正在监听的推特用户: %v", listening.ToArr()))
+		reply.Append(qq2.NewTextf("正在监听的推特用户: %v", strings.Join(listening.ToArr(), ", ")))
 	} else {
 		reply.Append(message.NewText("没有在监听的推特用户"))
 	}
