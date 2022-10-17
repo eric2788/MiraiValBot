@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -73,11 +76,11 @@ func yListening(args []string, source *command.MessageSource) error {
 				logger.Warnf("找不到頻道 %s 的顯示名稱, 將返回頻道ID", channelID)
 				channelNames[i] = channelID
 			} else {
-				channelNames[i] = s
+				channelNames[i] = fmt.Sprintf("%s (%s)", s, channelID)
 			}
 		}
 
-		reply.Append(qq2.NewTextf("正在监听的频道: %v", channelNames))
+		reply.Append(qq2.NewTextf("正在监听的频道: %v", strings.Join(channelNames, ", ")))
 	} else {
 		reply.Append(qq2.NewTextf("没有监听的频道"))
 	}
