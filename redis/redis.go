@@ -6,9 +6,10 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/eric2788/MiraiValBot/file"
 	rgo "github.com/go-redis/redis/v8"
-	"time"
 )
 
 var rdb *rgo.Client
@@ -17,7 +18,7 @@ var ctx = context.Background()
 var posArg rgo.LPosArgs
 
 const (
-	Permanent   = time.Hour * 86400
+	Permanent   = time.Duration(0)
 	ShortMoment = time.Minute * 10
 	OneDay      = time.Hour * 24
 )
@@ -101,7 +102,7 @@ func ListPos(key, value string) (int64, error) {
 	}
 }
 
-func GetMapValue(key, mapKey string) (string, error){
+func GetMapValue(key, mapKey string) (string, error) {
 	value, err := rdb.HGet(ctx, key, mapKey).Result()
 	if err == rgo.Nil {
 		return "", nil
