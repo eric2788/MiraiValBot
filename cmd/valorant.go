@@ -261,7 +261,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 		players := valorant.GetDeathMatchRanking(match)
 		for i, player := range players {
 			msg.Append(qq.NewTextLn("===================="))
-			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
+			msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 		}
@@ -288,7 +288,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 		for i, player := range players {
 			totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
 			msg.Append(qq.NewTextLn("===================="))
-			msg.Append(qq.NewTextfLn("%d. - %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
+			msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
 
 			// 如果是競技模式，則顯示段位
 			if strings.ToLower(match.MetaData.Mode) == "competitive" {
