@@ -568,6 +568,35 @@ func mmrActs(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
+func weapons(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+	if !valorant.LangAvailable.Contains(args[0]) {
+		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
+		return qq.SendGroupMessage(msg)
+	}
+
+	weapons, err := valorant.GetWeapons(valorant.AllWeapons, valorant.Language(args[0]))
+	if err != nil {
+		return err
+	}
+
+	for _, weapon := range weapons {
+		msg.Append(qq.NewTextLn("=========================="))
+		msg.Append(qq.NewTextfLn("武器名称: %s", weapon.DisplayName))
+		msg.Append(qq.NewTextfLn("武器类型: %s", weapon.ShopData.CategoryText))
+		msg.Append(qq.NewTextfLn("武器价格: $%d", weapon.ShopData.Cost))
+		img, err := qq.NewImageByUrl(weapon.DisplayIcon)
+		if err != nil {
+			logger.Errorf("获取武器 %s 图片时出现错误: %v", weapon.DisplayName, err)
+			msg.Append(qq.NewTextf("[图片]"))
+		} else {
+			msg.Append(img)
+		}
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
 func localize(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
 }
@@ -589,6 +618,7 @@ var (
 	mmrHistoriesCommand = command.NewNode([]string{"mmrhist", "段位历史"}, "查询段位历史", false, mmrHistories, "<名称#Tag>")
 	mmrBySeasonCommand  = command.NewNode([]string{"season", "赛季段位"}, "查询赛季段位", false, mmrBySeason, "<名称#Tag>", "<赛季>")
 	mmrActsCommand      = command.NewNode([]string{"mmracts", "赛季段位历史"}, "查询赛季段位历史", false, mmrActs, "<名称#Tag>")
+	weaponsCommand      = command.NewNode([]string{"weapons", "武器", "武器列表"}, "查询武器名称", false, weapons, "<语言区域>")
 	localizeCommand     = command.NewNode([]string{"localize", "本地化"}, "更新i18n内容", true, localize)
 )
 
@@ -609,6 +639,7 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	mmrHistoriesCommand,
 	mmrBySeasonCommand,
 	mmrActsCommand,
+	weaponsCommand,
 	localizeCommand,
 )
 

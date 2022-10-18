@@ -2,9 +2,9 @@ package valorant
 
 import (
 	"fmt"
-	"github.com/eric2788/MiraiValBot/redis"
 	"testing"
 
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/stretchr/testify/assert"
 )
 

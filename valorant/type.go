@@ -18,6 +18,11 @@ type (
 		Details string `json:"details"`
 	}
 
+	ResourceResp struct {
+		Resp
+		Error string `json:"error"`
+	}
+
 	Resp struct {
 		Status int         `json:"status"`
 		Data   interface{} `json:"data"`
@@ -338,11 +343,48 @@ type (
 	}
 
 	Statistics struct {
-		KDRatio float64
-		HeadshotRate float64
-		AvgScore float64
+		KDRatio         float64
+		HeadshotRate    float64
+		AvgScore        float64
 		DamagePerRounds float64
-		KillsPerRounds float64
+		KillsPerRounds  float64
+	}
+
+	AgentData struct {
+		Entity
+		CharacterTags    *[]string `json:"characterTags"`
+		DisplayIconSmall string    `json:"displayIconSmall"`
+		BustPortrait     string    `json:"bustPortrait"`
+		FullPortrait     string    `json:"fullPortrait"`
+		FullPortraitV2   string    `json:"fullPortraitV2"`
+		KillfeedPortrait string    `json:"killfeedPortrait"`
+		Role             Entity    `json:"role"`
+		Abilities        []struct {
+			Slot        AblitiySlot `json:"slot"`
+			DisplayName string      `json:"displayName"`
+			Description string      `json:"description"`
+			DisplayIcon string      `json:"displayIcon"`
+		} `json:"abilities"`
+	}
+
+	Entity struct {
+		Uuid        string `json:"uuid"`
+		DisplayName string `json:"displayName"`
+		Description string `json:"description"`
+		DisplayIcon string `json:"displayIcon"`
+	}
+
+	WeaponData struct {
+		Uuid           string     `json:"uuid"`
+		DisplayName    string     `json:"displayName"`
+		DisplayIcon    string     `json:"displayIcon"`
+		Category       WeaponType `json:"category"`
+		KillStreamIcon string     `json:"killStreamIcon"`
+		ShopData       struct {
+			Cost         int    `json:"cost"`
+			Category     string `json:"category"`
+			CategoryText string `json:"categoryText"`
+		} `json:"shopData"`
 	}
 )
 
