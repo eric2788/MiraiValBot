@@ -581,24 +581,62 @@ func weapons(args []string, source *command.MessageSource) error {
 	}
 
 	for _, weapon := range weapons {
-		msg.Append(qq.NewTextLn("=========================="))
+		msg.Append(qq.NewTextLn("===================="))
 		msg.Append(qq.NewTextfLn("武器名称: %s", weapon.DisplayName))
 		msg.Append(qq.NewTextfLn("武器类型: %s", weapon.ShopData.CategoryText))
 		msg.Append(qq.NewTextfLn("武器价格: $%d", weapon.ShopData.Cost))
 		img, err := qq.NewImageByUrl(weapon.DisplayIcon)
 		if err != nil {
 			logger.Errorf("获取武器 %s 图片时出现错误: %v", weapon.DisplayName, err)
-			msg.Append(qq.NewTextf("[图片]"))
+			msg.Append(qq.NewTextfLn("[图片]"))
 		} else {
 			msg.Append(img)
+			msg.Append(qq.NextLn())
 		}
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
-func localize(args []string, source *command.MessageSource) error {
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextLn("此指令暂不可用")))
+func agents(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+	if !valorant.LangAvailable.Contains(args[0]) {
+		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
+		return qq.SendGroupMessage(msg)
+	}
+
+	agents, err := valorant.GetAgents(valorant.AllAgents, valorant.Language(args[0]))
+	if err != nil {
+		return err
+	}
+
+	for _, agent := range agents {
+		msg.Append(qq.NewTextLn("===================="))
+		msg.Append(qq.NewTextfLn("角色名称: %s", agent.DisplayName))
+		msg.Append(qq.NewTextfLn("角色类型: %s", agent.Role.DisplayName))
+		msg.Append(qq.NewTextfLn("简介: %s", agent.Description))
+		if agent.CharacterTags != nil {
+			msg.Append(qq.NewTextfLn("标签: %s", strings.Join(*agent.CharacterTags, ", ")))
+		}
+
+		skills := make([]string, 0)
+
+		for _, skill := range agent.Abilities {
+			skills = append(skills, skill.DisplayName)
+		}
+
+		msg.Append(qq.NewTextfLn("技能: %s", strings.Join(skills, ", ")))
+		img, err := qq.NewImageByUrl(agent.KillfeedPortrait)
+		if err != nil {
+			logger.Errorf("获取角色 %s 图片时出现错误: %v", agent.DisplayName, err)
+			msg.Append(qq.NewTextfLn("[图片]"))
+		} else {
+			msg.Append(img)
+			msg.Append(qq.NextLn())
+		}
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
 var (
@@ -619,7 +657,7 @@ var (
 	mmrBySeasonCommand  = command.NewNode([]string{"season", "赛季段位"}, "查询赛季段位", false, mmrBySeason, "<名称#Tag>", "<赛季>")
 	mmrActsCommand      = command.NewNode([]string{"mmracts", "赛季段位历史"}, "查询赛季段位历史", false, mmrActs, "<名称#Tag>")
 	weaponsCommand      = command.NewNode([]string{"weapons", "武器", "武器列表"}, "查询武器名称", false, weapons, "<语言区域>")
-	localizeCommand     = command.NewNode([]string{"localize", "本地化"}, "更新i18n内容", true, localize)
+	agentCommand        = command.NewNode([]string{"agents", "角色", "特务", "角色列表", "特务列表"}, "查询角色名称", false, agents, "<语言区域>")
 )
 
 var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰", "瓦"}, "valorant指令",
@@ -640,7 +678,7 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	mmrBySeasonCommand,
 	mmrActsCommand,
 	weaponsCommand,
-	localizeCommand,
+	agentCommand,
 )
 
 func init() {
