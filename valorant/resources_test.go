@@ -9,6 +9,9 @@ import (
 func TestGetAgents(t *testing.T) {
 	agents, err := GetAgents(AllAgents, EN)
 	if err != nil {
+		if isAllowedStatus(err){
+			return
+		}
 		t.Fatal(err)
 	}
 
@@ -22,6 +25,9 @@ func TestGetAgents(t *testing.T) {
 func TestGetWeapons(t *testing.T) {
 	weapons, err := GetWeapons(AllWeapons, EN)
 	if err != nil {
+		if isAllowedStatus(err){
+			return
+		}
 		t.Fatal(err)
 	}
 
