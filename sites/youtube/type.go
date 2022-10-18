@@ -7,11 +7,11 @@ const (
 )
 
 type LiveInfo struct {
+	Duplicate   bool   `json:"duplicate"` // whether the video id is same as latest checked
 	ChannelId   string `json:"channelId"`
 	ChannelName string `json:"channelName"`
 	Status      string `json:"status"`
-
-	Info *struct {
+	Info        *struct {
 		Cover       *string `json:"cover"`
 		Title       string  `json:"title"`
 		Id          string  `json:"id"`

@@ -12,6 +12,36 @@ import (
 	"github.com/eric2788/MiraiValBot/sites/youtube"
 )
 
+func yBroadcastIdle(args []string, source *command.MessageSource) error {
+
+	file.UpdateStorage(func() {
+		file.DataStorage.Youtube.BroadcastIdle = !file.DataStorage.Youtube.BroadcastIdle
+	})
+
+	reply := qq2.CreateReply(source.Message)
+	if file.DataStorage.Youtube.BroadcastIdle {
+		reply.Append(qq2.NewTextf("已开启直播结束广播。"))
+	} else {
+		reply.Append(qq2.NewTextf("已关闭直播结束广播。"))
+	}
+
+	return qq2.SendGroupMessage(reply)
+}
+
+func yAntiDuplicate(args []string, source *command.MessageSource) error {
+	file.UpdateStorage(func() {
+		file.DataStorage.Youtube.AntiDuplicate = !file.DataStorage.Youtube.AntiDuplicate
+	})
+
+	reply := qq2.CreateReply(source.Message)
+	if file.DataStorage.Youtube.AntiDuplicate {
+		reply.Append(qq2.NewTextf("已开启重复广播过滤。"))
+	} else {
+		reply.Append(qq2.NewTextf("已关闭重复广播过滤。"))
+	}
+	return qq2.SendGroupMessage(reply)
+}
+
 func yConvert(args []string, source *command.MessageSource) error {
 	url := args[0]
 	id, err := youtube.GetChannelId(url)
@@ -89,10 +119,12 @@ func yListening(args []string, source *command.MessageSource) error {
 }
 
 var (
-	convertCommand    = command.NewNode([]string{"convert", "转换"}, "从用户名转换成频道ID", true, yConvert, "<用户名>")
-	yListenCommand    = command.NewNode([]string{"listen", "监听", "启动监听", "启动"}, "启动频道监听", true, yListen, "<频道ID>")
-	yTerminateCommand = command.NewNode([]string{"terminate", "中止", "取消"}, "中止监听频道", true, yTerminate, "<频道ID>")
-	yListeningCommand = command.NewNode([]string{"listening", "监听中", "正在监听"}, "获取正在监听的频道 id", false, yListening)
+	convertCommand        = command.NewNode([]string{"convert", "转换"}, "从用户名转换成频道ID", true, yConvert, "<用户名>")
+	yListenCommand        = command.NewNode([]string{"listen", "监听", "启动监听", "启动"}, "启动频道监听", true, yListen, "<频道ID>")
+	yTerminateCommand     = command.NewNode([]string{"terminate", "中止", "取消"}, "中止监听频道", true, yTerminate, "<频道ID>")
+	yListeningCommand     = command.NewNode([]string{"listening", "监听中", "正在监听"}, "获取正在监听的频道 id", false, yListening)
+	yAntiDuplicateCommand = command.NewNode([]string{"duplicate", "去重", "去重复"}, "开启/关闭重复广播过滤", true, yAntiDuplicate)
+	yBroadcastIdleCommand = command.NewNode([]string{"idle", "广播结束", "切换直播结束广播"}, "开启/关闭直播结束广播", true, yBroadcastIdle)
 )
 
 var youtubeCommand = command.NewParent([]string{"youtube"}, "油管指令",
@@ -100,6 +132,8 @@ var youtubeCommand = command.NewParent([]string{"youtube"}, "油管指令",
 	yListenCommand,
 	yListeningCommand,
 	yTerminateCommand,
+	yAntiDuplicateCommand,
+	yBroadcastIdleCommand,
 )
 
 func init() {

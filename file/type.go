@@ -8,9 +8,15 @@ type (
 		Answers   map[string]bool   `json:"answers"`
 		Responses map[string]string `json:"responses"`
 		Bilibili  *bilibiliSettings `json:"bilibili"`
+		Youtube   *youtubeSettings  `json:"youtube"`
 		Twitter   *twitterSettings  `json:"twitter"`
 		Setting   *setting          `json:"setting"`
 		Listening *listening        `json:"listening"`
+	}
+
+	youtubeSettings struct {
+		BroadcastIdle bool `json:"broadcastIdle"`
+		AntiDuplicate bool `json:"antiDuplicate"`
 	}
 
 	bilibiliSettings struct {
@@ -44,9 +50,15 @@ type (
 		Answers   map[string]bool
 		Responses map[string]string
 		Bilibili  *BilibiliSettings
+		Youtube   *YoutubeSettings
 		Twitter   *TwitterSettings
 		Setting   *Setting
 		Listening *Listening
+	}
+
+	YoutubeSettings struct {
+		BroadcastIdle bool
+		AntiDuplicate bool
 	}
 
 	BilibiliSettings struct {
@@ -77,6 +89,10 @@ func (s *StorageData) toRealStorageData() *storageData {
 	return &storageData{
 		Answers:   s.Answers,
 		Responses: s.Responses,
+		Youtube: &youtubeSettings{
+			BroadcastIdle: s.Youtube.BroadcastIdle,
+			AntiDuplicate: s.Youtube.AntiDuplicate,
+		},
 		Bilibili: &bilibiliSettings{
 			HighLightedUsers: s.Bilibili.HighLightedUsers.ToArr(),
 		},
@@ -104,6 +120,10 @@ func (s *StorageData) parse(sd *storageData) {
 	s.Responses = sd.Responses
 	s.Bilibili = &BilibiliSettings{
 		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
+	}
+	s.Youtube = &YoutubeSettings{
+		BroadcastIdle: sd.Youtube.BroadcastIdle,
+		AntiDuplicate: sd.Youtube.AntiDuplicate,
 	}
 	s.Twitter = &TwitterSettings{
 		ShowReply: sd.Twitter.ShowReply,
