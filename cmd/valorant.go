@@ -581,7 +581,7 @@ func weapons(args []string, source *command.MessageSource) error {
 	}
 
 	for _, weapon := range weapons {
-		msg.Append(qq.NewTextLn("=========================="))
+		msg.Append(qq.NewTextLn("===================="))
 		msg.Append(qq.NewTextfLn("武器名称: %s", weapon.DisplayName))
 		msg.Append(qq.NewTextfLn("武器类型: %s", weapon.ShopData.CategoryText))
 		msg.Append(qq.NewTextfLn("武器价格: $%d", weapon.ShopData.Cost))
@@ -611,7 +611,7 @@ func agents(args []string, source *command.MessageSource) error {
 	}
 
 	for _, agent := range agents {
-		msg.Append(qq.NewTextLn("=========================="))
+		msg.Append(qq.NewTextLn("===================="))
 		msg.Append(qq.NewTextfLn("角色名称: %s", agent.DisplayName))
 		msg.Append(qq.NewTextfLn("角色类型: %s", agent.Role.DisplayName))
 		msg.Append(qq.NewTextfLn("简介: %s", agent.Description))

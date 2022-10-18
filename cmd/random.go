@@ -155,7 +155,6 @@ func randomAgent(args []string, source *command.MessageSource) error {
 	random := agents[rand.Intn(len(agents))]
 
 	msg := qq.CreateReply(source.Message)
-	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextfLn("选中角色: %s", random.DisplayName))
 	msg.Append(qq.NewTextfLn("类型: %s", random.Role.DisplayName))
 	msg.Append(qq.NewTextfLn("简介: %s", random.Description))
@@ -219,7 +218,6 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 	random := weapons[rand.Intn(len(weapons))]
 
 	msg := qq.CreateReply(source.Message)
-	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextfLn("选中枪械: %s", random.DisplayName))
 	msg.Append(qq.NewTextfLn("类型: %s", random.ShopData.CategoryText))
 	msg.Append(qq.NewTextfLn("价格: $%d", random.ShopData.Cost))
