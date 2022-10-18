@@ -100,10 +100,12 @@ func getRequestCustom(path string, response interface{}) error {
 
 			if b, err := io.ReadAll(httpErr.Response.Body); err != nil {
 				logger.Warnf("cannot read response body: %v", err)
+				httpErr.Status = string(b)
 				return httpErr
 			} else if err = json.Unmarshal(b, response); err != nil {
 				logger.Warnf("cannot parse http error response to Resp: %v", err)
-				return fmt.Errorf("%d: %s", httpErr.Code, string(b))
+				httpErr.Status = string(b)
+				return httpErr
 			} else {
 				return nil
 			}
