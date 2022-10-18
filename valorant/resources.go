@@ -85,7 +85,7 @@ func (r *ResourceSchema) DoRequest(arg interface{}) error {
 	for key, value := range r.query {
 		query.Add(key, value)
 	}
-	query.Add("Language", string(r.language))
+	query.Add("language", string(r.language))
 	url.RawQuery = query.Encode()
 	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
 	if err != nil {
