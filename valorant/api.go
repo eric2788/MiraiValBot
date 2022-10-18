@@ -1,6 +1,7 @@
 package valorant
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,9 +20,9 @@ type Region string
 
 const (
 	HenrikBaseUrl = "https://api.henrikdev.xyz/valorant"
-	V1      = "/v1"
-	V2      = "/v2"
-	V3      = "/v3"
+	V1            = "/v1"
+	V2            = "/v2"
+	V3            = "/v3"
 
 	Europe       Region = "eu"
 	NorthAmerica Region = "na"
@@ -94,17 +95,19 @@ func getRequestCustom(path string, response interface{}) error {
 	res, err := doRequest(req)
 	if err != nil {
 		if httpErr, ok := err.(*request.HttpError); ok {
-			if err := request.Read(httpErr.Response, response); err == nil {
+
+			defer httpErr.Response.Body.Close()
+
+			if b, err := io.ReadAll(httpErr.Response.Body); err != nil {
+				logger.Warnf("cannot read response body: %v", err)
+				return httpErr
+			} else if err = json.Unmarshal(b, response); err != nil {
+				logger.Warnf("cannot parse http error response to Resp: %v", err)
+				return fmt.Errorf("%d: %s", httpErr.Code, string(b))
+			} else {
 				return nil
-			}else{
-				logger.Warnf("cannot parse http error response to Resp: %v, use back http error as error.", err)
-				if b, err := io.ReadAll(httpErr.Response.Body); err == nil {
-					logger.Debugf("response body: %q", string(b))
-				}else{
-					logger.Debugf("cannot print response body: %v", err)
-				}
-				
 			}
+
 		}
 		return err
 	}

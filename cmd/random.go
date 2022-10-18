@@ -134,7 +134,7 @@ func randomAgent(args []string, source *command.MessageSource) error {
 		case "控场", "控場", "controller":
 			agentType = valorant.Controller
 		case "先鋒", "先锋", "inititator":
-			agentType = valorant.Inititator
+			agentType = valorant.Initiator
 		default:
 			return errors.New("无效的 Agent 类型")
 		}
