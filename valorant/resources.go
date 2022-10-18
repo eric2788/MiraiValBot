@@ -17,14 +17,14 @@ type (
 )
 
 var LangAvailable = set.FromStrArr([]string{
-	string(EN), 
-	string(TC), 
-	string(SC), 
+	string(EN),
+	string(TC),
+	string(SC),
 	string(JP),
 })
 
 const (
-	ResourceBaseUrl = "https://valorant-api.com/v1/"
+	ResourceBaseUrl = "https://valorant-api.com/v1"
 
 	Inititator AgentType = "1b47567f-8f7b-444b-aae3-b0c634622d10"
 	Guard      AgentType = "5fc02f99-4091-4486-a531-98459a3e95e9"
