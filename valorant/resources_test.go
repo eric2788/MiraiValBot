@@ -23,7 +23,7 @@ func TestGetAgents(t *testing.T) {
 }
 
 func TestGetWeapons(t *testing.T) {
-	weapons, err := GetWeapons(AllWeapons, EN)
+	weapons, err := GetWeapons(AllWeapons, TC)
 	if err != nil {
 		if isAllowedStatus(err){
 			return
