@@ -147,7 +147,7 @@ func randomAgent(args []string, source *command.MessageSource) error {
 
 	// impossible
 	if len(agents) == 0 {
-		return errors.New("Agents 列表为空")
+		return errors.New("角色列表为空")
 	}
 
 	rand.Seed(time.Now().UnixMilli())
@@ -155,6 +155,7 @@ func randomAgent(args []string, source *command.MessageSource) error {
 	random := agents[rand.Intn(len(agents))]
 
 	msg := qq.CreateReply(source.Message)
+	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextfLn("选中角色: %s", random.DisplayName))
 	msg.Append(qq.NewTextfLn("类型: %s", random.Role.DisplayName))
 	msg.Append(qq.NewTextfLn("简介: %s", random.Description))
@@ -162,7 +163,16 @@ func randomAgent(args []string, source *command.MessageSource) error {
 	if random.CharacterTags != nil {
 		msg.Append(qq.NewTextfLn("标签: %s", strings.Join(*random.CharacterTags, ", ")))
 	}
-	img, err := qq.NewImageByUrl(random.DisplayIcon)
+
+	skills := make([]string, 0)
+
+	for _, skill := range random.Abilities {
+		skills = append(skills, skill.DisplayName)
+	}
+
+	msg.Append(qq.NewTextfLn("技能: %s", strings.Join(skills, ", ")))
+
+	img, err := qq.NewImageByUrl(random.FullPortrait)
 	if err != nil {
 		logger.Errorf("尝试获取角色 %s 图片时出现错误: %v", random.DisplayName, err)
 	} else {
@@ -194,9 +204,14 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 		}
 	}
 
-	weapons, err := valorant.GetWeapons(weaponType, valorant.TC)
+	weapons, err := valorant.GetWeapons(weaponType, valorant.SC)
 	if err != nil {
 		return err
+	}
+
+	// impossible
+	if len(weapons) == 0 {
+		return errors.New("武器列表为空")
 	}
 
 	rand.Seed(time.Now().UnixMilli())
@@ -204,6 +219,7 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 	random := weapons[rand.Intn(len(weapons))]
 
 	msg := qq.CreateReply(source.Message)
+	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextfLn("选中枪械: %s", random.DisplayName))
 	msg.Append(qq.NewTextfLn("类型: %s", random.ShopData.CategoryText))
 	msg.Append(qq.NewTextfLn("价格: $%d", random.ShopData.Cost))
