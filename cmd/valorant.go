@@ -569,11 +569,16 @@ func mmrActs(args []string, source *command.MessageSource) error {
 }
 
 func weapons(args []string, source *command.MessageSource) error {
-	msg := qq.CreateReply(source.Message)
+
 	if !valorant.LangAvailable.Contains(args[0]) {
+		msg := qq.CreateReply(source.Message)
 		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
 		return qq.SendGroupMessage(msg)
 	}
+
+	presend := qq.CreateReply(source.Message)
+	presend.Append(qq.NewTextf("正在索取瓦武器列表资料..."))
+	_ = qq.SendGroupMessage(presend)
 
 	weapons, err := valorant.GetWeapons(valorant.AllWeapons, valorant.Language(args[0]))
 	if err != nil {
@@ -581,7 +586,8 @@ func weapons(args []string, source *command.MessageSource) error {
 	}
 
 	for _, weapon := range weapons {
-		msg.Append(qq.NewTextLn("===================="))
+		msg := message.NewSendingMessage()
+
 		msg.Append(qq.NewTextfLn("武器名称: %s", weapon.DisplayName))
 		msg.Append(qq.NewTextfLn("武器类型: %s", weapon.ShopData.CategoryText))
 		msg.Append(qq.NewTextfLn("武器价格: $%d", weapon.ShopData.Cost))
@@ -591,19 +597,25 @@ func weapons(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("[图片]"))
 		} else {
 			msg.Append(img)
-			msg.Append(qq.NextLn())
 		}
+
+		qq.SendWithRandomRiskyStrategy(msg)
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return nil
 }
 
 func agents(args []string, source *command.MessageSource) error {
-	msg := qq.CreateReply(source.Message)
+
 	if !valorant.LangAvailable.Contains(args[0]) {
+		msg := qq.CreateReply(source.Message)
 		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
 		return qq.SendGroupMessage(msg)
 	}
+
+	presend := qq.CreateReply(source.Message)
+	presend.Append(qq.NewTextf("正在索取瓦角色列表资料..."))
+	_ = qq.SendGroupMessage(presend)
 
 	agents, err := valorant.GetAgents(valorant.AllAgents, valorant.Language(args[0]))
 	if err != nil {
@@ -611,7 +623,8 @@ func agents(args []string, source *command.MessageSource) error {
 	}
 
 	for _, agent := range agents {
-		msg.Append(qq.NewTextLn("===================="))
+
+		msg := message.NewSendingMessage()
 		msg.Append(qq.NewTextfLn("角色名称: %s", agent.DisplayName))
 		msg.Append(qq.NewTextfLn("角色类型: %s", agent.Role.DisplayName))
 		msg.Append(qq.NewTextfLn("简介: %s", agent.Description))
@@ -632,11 +645,13 @@ func agents(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("[图片]"))
 		} else {
 			msg.Append(img)
-			msg.Append(qq.NextLn())
 		}
+
+		qq.SendWithRandomRiskyStrategy(msg)
+
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return nil
 }
 
 var (
