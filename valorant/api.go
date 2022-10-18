@@ -18,7 +18,7 @@ import (
 type Region string
 
 const (
-	BaseUrl = "https://api.henrikdev.xyz/valorant"
+	HenrikBaseUrl = "https://api.henrikdev.xyz/valorant"
 	V1      = "/v1"
 	V2      = "/v2"
 	V3      = "/v3"
@@ -86,8 +86,8 @@ func getRequest(path string) (*Resp, error) {
 }
 
 func getRequestCustom(path string, response interface{}) error {
-	logger.Debugf("preparing to do get request: %v", BaseUrl+path)
-	req, err := http.NewRequest(http.MethodGet, BaseUrl+path, nil)
+	logger.Debugf("preparing to do get request: %v", HenrikBaseUrl+path)
+	req, err := http.NewRequest(http.MethodGet, HenrikBaseUrl+path, nil)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func getRequestCustom(path string, response interface{}) error {
 		}
 		return err
 	}
-	logger.Debugf("response status for %v: %v", BaseUrl+path, res.Status)
+	logger.Debugf("response status for %v: %v", HenrikBaseUrl+path, res.Status)
 	return request.Read(res, response)
 }
 
