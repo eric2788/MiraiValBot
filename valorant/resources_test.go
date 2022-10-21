@@ -3,6 +3,7 @@ package valorant
 import (
 	"testing"
 
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,4 +37,8 @@ func TestGetWeapons(t *testing.T) {
 	for _, weapon := range weapons {
 		t.Log(weapon.DisplayName)
 	}
+}
+
+func init(){
+	redis.Init()
 }
