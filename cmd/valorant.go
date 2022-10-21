@@ -661,7 +661,7 @@ var (
 	trackCommand        = command.NewNode([]string{"track", "追踪玩家"}, "追踪玩家最新对战", false, track, "<名称#Tag>")
 	untrackCommand      = command.NewNode([]string{"untrack", "取消追踪玩家"}, "取消追踪玩家最新对战", false, untrack, "<名称#Tag>")
 	trackingCommand     = command.NewNode([]string{"tracking", "追踪中"}, "查询追踪中的玩家", false, tracking)
-	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches)
+	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches, "<名称#Tag>")
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
 	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>")
