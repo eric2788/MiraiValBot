@@ -2,9 +2,12 @@ package valorant
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/common-utils/request"
 	"github.com/eric2788/common-utils/set"
 )
@@ -118,12 +121,12 @@ func GetAgents(agentType AgentType, lang Language) ([]AgentData, error) {
 	req := NewResourceRequest("/agents")
 	req.SetLanguage(lang)
 	req.AddQuery("isPlayableCharacter", "true")
-
 	var agents []AgentData
-	if err := req.DoRequest(&agents); err != nil {
+
+	if err := getResources("agents", req, &agents); err != nil {
 		return nil, err
 	}
-
+	
 	if agentType == AllAgents {
 		return agents, nil
 	}
@@ -137,11 +140,50 @@ func GetAgents(agentType AgentType, lang Language) ([]AgentData, error) {
 	return filtered, nil
 }
 
+func getResources(id string, req *ResourceSchema, arg interface{}) error {
+
+	key := fmt.Sprintf("valorant:%s:%s", id, req.language)
+
+	if err := req.DoRequest(arg); err != nil {
+
+		logger.Errorf("获取 %s 列表时出现错误: %v, 将尝试从 Redis 获取", id, err)
+
+		if ok, rerr := redis.Get(key, arg); rerr != nil {
+			logger.Errorf("从 Redis 获取%s列表出现错误: %v", rerr, id)
+		} else if !ok {
+			logger.Warnf("Redis 获取失败。")
+			return err
+		}
+
+	} else {
+
+		// non-blocking store
+		go func(){
+			if err := redis.Store(key, arg); err != nil {
+				logger.Errorf("储存%s列表到 Redis 失败: %v", id, err)
+			}
+		}()
+		
+	}
+
+	return nil
+}
+
+func GetWeapon(weapons []WeaponData, name string) *WeaponData {
+	for _, weapon := range weapons {
+		if strings.ToLower(weapon.DisplayName) == name {
+			return &weapon
+		}
+	}
+	return nil
+}
+
 func GetWeapons(weaponType WeaponType, lang Language) ([]WeaponData, error) {
 	req := NewResourceRequest("/weapons")
 	req.SetLanguage(lang)
 	var weapons []WeaponData
-	if err := req.DoRequest(&weapons); err != nil {
+
+	if err := getResources("weapons", req, &weapons); err != nil {
 		return nil, err
 	}
 
@@ -156,4 +198,16 @@ func GetWeapons(weaponType WeaponType, lang Language) ([]WeaponData, error) {
 		}
 	}
 	return filtered, nil
+}
+
+func GetBundles(lang Language) ([]BundleData, error){
+	req := NewResourceRequest("/bundles")
+	req.SetLanguage(lang)
+	var bundles []BundleData
+
+	if err := getResources("bundles", req, &bundles); err != nil {
+		return nil, err
+	}
+
+	return bundles, nil
 }

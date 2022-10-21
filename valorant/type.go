@@ -370,14 +370,12 @@ type (
 	Entity struct {
 		Uuid        string `json:"uuid"`
 		DisplayName string `json:"displayName"`
-		Description string `json:"description"`
+		Description string `json:"description,omitempty"` // optional
 		DisplayIcon string `json:"displayIcon"`
 	}
 
 	WeaponData struct {
-		Uuid           string     `json:"uuid"`
-		DisplayName    string     `json:"displayName"`
-		DisplayIcon    string     `json:"displayIcon"`
+		Entity
 		Category       WeaponType `json:"category"`
 		KillStreamIcon string     `json:"killStreamIcon"`
 		ShopData       struct {
@@ -385,6 +383,36 @@ type (
 			Category     string `json:"category"`
 			CategoryText string `json:"categoryText"`
 		} `json:"shopData"`
+
+		Skins []WeaponSkinData `json:"skins"`
+	}
+
+	WeaponSkinData struct {
+		Entity
+		ThemeUuid string `json:"themeUuid"`
+		ContentTiderUuid string `json:"contentTierUuid"`
+		WallPaper string `json:"wallPaper"`
+
+		Chromas []struct{
+			Entity
+			FullRender string `json:"fullRender"`
+			Swatch string `json:"swatch"`
+			StreamedVideo string `json:"streamedVideo"`
+		} `json:"chromas"`
+
+		Levels []struct{
+			Entity 
+			LevelItem string `json:"levelItem"`
+			StreamedVideo string `json:"streamedVideo"`
+		} `json:"levels"`
+	}
+
+	BundleData struct {
+		Entity
+		DisplayIcon2 string `json:"displayIcon2"`
+		ExtraDescription string `json:"extraDescription"`
+		PromoDescription string `json:"promoDescription"`
+		VerticalPromoImage string `json:"verticalPromoImage"`
 	}
 )
 

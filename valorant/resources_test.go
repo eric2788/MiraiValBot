@@ -3,13 +3,14 @@ package valorant
 import (
 	"testing"
 
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGetAgents(t *testing.T) {
 	agents, err := GetAgents(AllAgents, EN)
 	if err != nil {
-		if isAllowedStatus(err){
+		if isAllowedStatus(err) {
 			return
 		}
 		t.Fatal(err)
@@ -25,7 +26,7 @@ func TestGetAgents(t *testing.T) {
 func TestGetWeapons(t *testing.T) {
 	weapons, err := GetWeapons(AllWeapons, TC)
 	if err != nil {
-		if isAllowedStatus(err){
+		if isAllowedStatus(err) {
 			return
 		}
 		t.Fatal(err)
@@ -36,4 +37,23 @@ func TestGetWeapons(t *testing.T) {
 	for _, weapon := range weapons {
 		t.Log(weapon.DisplayName)
 	}
+}
+
+func TestGetBundles(t *testing.T) {
+	bundles, err := GetBundles(TC)
+	if err != nil {
+		if isAllowedStatus(err) {
+			return
+		}
+		t.Fatal(err)
+	}
+
+	for _, bundle := range bundles {
+		t.Log(bundle.DisplayName)
+	}
+}
+
+
+func init() {
+	redis.Init()
 }

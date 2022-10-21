@@ -26,8 +26,27 @@ func randomMember(args []string, source *command.MessageSource) error {
 	}
 
 	chosen := members[rand.Intn(len(members))]
-	reply := message.NewSendingMessage().Append(message.NewAt(chosen.Uin))
+	at := message.NewAt(chosen.Uin)
+	at.Display = chosen.Nickname
+	reply := message.NewSendingMessage().Append(at)
 	return qq.SendGroupMessage(reply)
+}
+
+func randomChoice(args []string, source *command.MessageSource) error {
+
+	msg := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		msg.Append(message.NewText("选项不得为空。"))
+		return qq.SendGroupMessage(msg)
+	}
+
+	rand.Seed(time.Now().UnixMicro())
+	chosen := args[rand.Intn(len(args))]
+
+	msg.Append(qq.NewTextf(chosen))
+
+	return qq.SendGroupMessage(msg)
 }
 
 func randomMessage(args []string, source *command.MessageSource) error {
@@ -231,20 +250,134 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
+func randomBundle(args []string, source *command.MessageSource) error {
+
+	rand.Seed(time.Now().UnixMicro())
+
+	bundles, err := valorant.GetBundles(valorant.SC)
+	if err != nil {
+		return err
+	}
+
+	chosen := bundles[rand.Intn(len(bundles))]
+
+	msg := qq.CreateReply(source.Message)
+
+	msg.Append(qq.NewTextfLn("选中套装: %s", chosen.DisplayName))
+	if chosen.ExtraDescription != "" {
+		msg.Append(qq.NewTextfLn("简介: %s", chosen.ExtraDescription))
+	}
+	if chosen.PromoDescription != "" {
+		msg.Append(qq.NewTextfLn("推广: %s", chosen.PromoDescription))
+	}
+
+	img, err := qq.NewImageByUrl(chosen.DisplayIcon)
+	if err != nil {
+		img, err = qq.NewImageByUrl(chosen.DisplayIcon2)
+	}
+
+	if err != nil {
+		logger.Errorf("索取套装图片时出现错误: %v", err)
+		msg.Append(qq.NewTextf("[图片]"))
+	} else {
+		msg.Append(img)
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
+func randomSkin(args []string, source *command.MessageSource) error {
+
+	name := strings.ToLower(args[0])
+
+	weapons, err := valorant.GetWeapons(valorant.AllWeapons, valorant.SC)
+	if err != nil {
+		return err
+	}
+
+	weapon := valorant.GetWeapon(weapons, name)
+	msg := qq.CreateReply(source.Message)
+
+	if weapon == nil {
+		msg.Append(qq.NewTextf("没有此武器: %s, 请使用简中武器名称。", name))
+		return qq.SendGroupMessage(msg)
+	}
+
+	rand.Seed(time.Now().UnixMicro())
+
+	skin := weapon.Skins[rand.Intn(len(weapon.Skins))]
+
+	if len(skin.Chromas) == 0 {
+		msg.Append(qq.NewTextfLn("选中皮肤: %s", skin.DisplayName))
+		img, err := qq.NewImageByUrl(skin.DisplayIcon)
+		if err != nil {
+			logger.Errorf("索取皮肤图片时错误: %v", err)
+			msg.Append(qq.NewTextf("[图片]"))
+		} else {
+			msg.Append(img)
+		}
+	} else {
+
+		rand.Seed(time.Now().UnixMicro())
+
+		chroma := skin.Chromas[rand.Intn(len(skin.Chromas))]
+
+		msg.Append(qq.NewTextfLn("选中皮肤: %s", chroma.DisplayName))
+
+		icon := chroma.FullRender
+		if icon == "" {
+			icon = chroma.DisplayIcon
+		}
+
+		if icon != "" {
+			img, err := qq.NewImageByUrl(icon)
+			if err != nil {
+				logger.Errorf("索取皮肤图片时错误: %v", err)
+				msg.Append(qq.NewTextf("[图片]"))
+			} else {
+				msg.Append(img)
+			}
+		}
+
+		if chroma.StreamedVideo != "" {
+
+			if err := qq.SendGroupMessage(msg); err != nil {
+				return err
+			}
+
+			msg := message.NewSendingMessage()
+			if video, err := qq.NewVideoByUrl(chroma.StreamedVideo, icon); err != nil {
+				logger.Error(err)
+			} else {
+				msg.Append(video)
+				return qq.SendGroupMessage(msg)
+			}
+
+		}
+	}
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
 var (
 	randomEssenceCommand = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
 	randomMemberCommand  = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
 	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage)
+	randomChoiceCommand  = command.NewNode([]string{"choice", "选项"}, "随机选项指令", false, randomChoice)
 	randomAgentCommand   = command.NewNode([]string{"agent", "特务", "角色"}, "随机抽选一个瓦角色", false, randomAgent, "[角色类型]")
 	randomWeaponCommand  = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
+	randomBundleCommand  = command.NewNode([]string{"bundle", "套装"}, "随机抽选一个瓦套装", false, randomBundle)
+	randomSkinCommand    = command.NewNode([]string{"skin", "皮肤"}, "随机抽选一个瓦皮肤", false, randomSkin, "<武器名称>")
 )
 
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
 	randomMemberCommand,
 	randomEssenceCommand,
+	randomChoiceCommand,
 	randomMessageCommand,
 	randomAgentCommand,
 	randomWeaponCommand,
+	randomBundleCommand,
+	randomSkinCommand,
 )
 
 func init() {
