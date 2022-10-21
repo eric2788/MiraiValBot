@@ -156,9 +156,14 @@ func getResources(id string, req *ResourceSchema, arg interface{}) error {
 		}
 
 	} else {
-		if err := redis.Store(key, arg); err != nil {
-			logger.Errorf("储存%s列表到 Redis 失败: %v", id, err)
-		}
+
+		// non-blocking store
+		go func(){
+			if err := redis.Store(key, arg); err != nil {
+				logger.Errorf("储存%s列表到 Redis 失败: %v", id, err)
+			}
+		}()
+		
 	}
 
 	return nil
