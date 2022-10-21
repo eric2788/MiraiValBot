@@ -26,8 +26,27 @@ func randomMember(args []string, source *command.MessageSource) error {
 	}
 
 	chosen := members[rand.Intn(len(members))]
-	reply := message.NewSendingMessage().Append(message.NewAt(chosen.Uin))
+	at := message.NewAt(chosen.Uin)
+	at.Display = chosen.Nickname
+	reply := message.NewSendingMessage().Append(at)
 	return qq.SendGroupMessage(reply)
+}
+
+func randomChoice(args []string, source *command.MessageSource) error {
+
+	msg := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		msg.Append(message.NewText("选项不得为空。"))
+		return qq.SendGroupMessage(msg)
+	}
+
+	rand.Seed(time.Now().UnixMicro())
+	chosen := args[rand.Intn(len(args))]
+
+	msg.Append(qq.NewTextf(chosen))
+
+	return qq.SendGroupMessage(msg)
 }
 
 func randomMessage(args []string, source *command.MessageSource) error {
@@ -235,6 +254,7 @@ var (
 	randomEssenceCommand = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
 	randomMemberCommand  = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
 	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage)
+	randomChoiceCommand = command.NewNode([]string{"choice", "选项"}, "随机选项指令", false, randomChoice)
 	randomAgentCommand   = command.NewNode([]string{"agent", "特务", "角色"}, "随机抽选一个瓦角色", false, randomAgent, "[角色类型]")
 	randomWeaponCommand  = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
 )
@@ -242,6 +262,7 @@ var (
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
 	randomMemberCommand,
 	randomEssenceCommand,
+	randomChoiceCommand,
 	randomMessageCommand,
 	randomAgentCommand,
 	randomWeaponCommand,
