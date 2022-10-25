@@ -380,7 +380,7 @@ func stats(args []string, source *command.MessageSource) error {
 	}
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 在最近十场对战中的统计数据: ", args[0]))
+	msg.Append(qq.NewTextfLn("%s 在最近 %d 场对战中的统计数据: ", args[0], stats.TotalMatches))
 	msg.Append(qq.NewTextfLn("爆头率: %.2f%%", stats.HeadshotRate))
 	msg.Append(qq.NewTextfLn("胜率: %.f%%", stats.WinRate))
 	msg.Append(qq.NewTextfLn("KD比例: %.2f", stats.KDRatio))

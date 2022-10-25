@@ -217,7 +217,7 @@ func GetStatistics(name, tag, filter string, region Region) (*Statistics, error)
 	for _, match := range matches {
 
 		// have filter and the mode of match data is not matched
-		if filter != "" && !strings.EqualFold(match.MetaData.Mode, filter) {
+		if filter != "" && !strings.EqualFold(strings.ReplaceAll(match.MetaData.Mode, " ", ""), filter) {
 			continue
 		}
 
@@ -308,6 +308,7 @@ func GetStatistics(name, tag, filter string, region Region) (*Statistics, error)
 		TotalFriendlyDamage: ffDamage,
 		TotalFriendlyKills:  ffKills,
 		MostUsedWeapon:      mostUsedWeapon,
+		TotalMatches:        totalMatches,
 	}, nil
 }
 
