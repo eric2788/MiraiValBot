@@ -29,7 +29,40 @@ func TestGetDeathMatchRanking(t *testing.T) {
 	assert.Equal(t, 12, len(players))
 }
 
-func aTestShortenUUIDs(t *testing.T) {
+func TestGetPerformance(t *testing.T) {
+	match, err := GetMatchDetailsAPI("c82f5416-a4b6-4720-be13-a05414049210")
+	if err != nil {
+		if isAllowedStatus(err) {
+			return
+		}
+		t.Fatal(err)
+	}
+	performances, err := GetPerformances(match, "麻將", "4396")
+	if err != nil {
+		if isAllowedStatus(err) {
+			return
+		}
+		t.Fatal(err)
+	}
+
+	if len(performances) == 0 {
+		t.Log("target is not in this match.")
+		return
+	}
+
+	for i, perfor := range performances {
+		t.Logf("%d.\t%s\tK:%d\tD:%d\tA:%d\t(%s)\t(%s)", i+1,
+			perfor.UserName,
+			perfor.Killed,
+			perfor.Deaths,
+			perfor.Assists,
+			perfor.CurrentTier,
+			perfor.Character,
+		)
+	}
+}
+
+func TestShortenUUIDs(t *testing.T) {
 	redis.Init()
 	matches, err := GetMatchHistories("suou", "9035", AsiaSpecific)
 	if err != nil {
@@ -49,11 +82,6 @@ func aTestShortenUUIDs(t *testing.T) {
 			t.Logf("%s -> %d", id, result)
 		}
 	}
-}
-
-func TestPercentageDisplay(t *testing.T) {
-	total, a, b := 23, 11, 12
-	t.Logf("A %.1f%% (%d) B %.1f%% (%d) - %.0f", float64(a)/float64(total)*100, a, float64(b)/float64(total)*100, b, float64(b)/float64(total))
 }
 
 func TestSortSeason(t *testing.T) {

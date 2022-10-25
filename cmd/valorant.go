@@ -178,6 +178,7 @@ func matches(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val leaderboard <对战ID> 查看排行榜"))
 	msg.Append(qq.NewTextfLn("输入 !val players <对战ID> 查看对战玩家"))
 	msg.Append(qq.NewTextfLn("输入 !val rounds <对战ID> 查看对战回合"))
+	msg.Append(qq.NewTextfLn("输入 !val performance <对战ID> <名称#Tag> 查看对战玩家表现"))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
@@ -214,6 +215,7 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val leaderboard %s 查看排行榜", cmdId))
 	msg.Append(qq.NewTextfLn("输入 !val players %s 查看对战玩家", cmdId))
 	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看对战回合", cmdId))
+	msg.Append(qq.NewTextfLn("输入 !val performance %s <名称#Tag> 查看对战玩家表现", cmdId))
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
@@ -308,6 +310,53 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
 			msg.Append(qq.NewTextfLn("拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
 		}
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
+func performances(args []string, source *command.MessageSource) error {
+
+	name, tag, err := valorant.ParseNameTag(args[1])
+	if err != nil {
+		return err
+	}
+
+	id, err := valorant.GetRealId(args[0])
+	if err != nil {
+		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("正在索取玩家 %s 在该对战的表现..", args[1])))
+
+	match, err := valorant.GetMatchDetails(id)
+	if err != nil {
+		return err
+	}
+
+	msg := message.NewSendingMessage()
+
+	performances, err := valorant.GetPerformances(match, name, tag)
+	if err != nil {
+		return err
+	} else if len(performances) == 0 {
+		msg.Append(qq.NewTextf("%s 并不在对战 %s 之中。", args[1], args[0]))
+		return qq.SendGroupMessage(msg)
+	}
+
+	msg.Append(qq.NewTextfLn("玩家 %s 在对战 %s 中的击杀表现 (由高到低):"))
+
+	for i, performance := range performances {
+		msg.Append(qq.NewTextLn("==================="))
+		msg.Append(qq.NewTextfLn("%d. %s (%s)", i+1, performance.UserName, performance.Character))
+
+		if strings.ToLower(match.MetaData.Mode) == "competitive" {
+			msg.Append(qq.NewTextfLn("段位: %s", performance.CurrentTier))
+		}
+
+		msg.Append(qq.NewTextfLn("击杀次数: %d", performance.Killed))
+		msg.Append(qq.NewTextfLn("被击杀次数: %d", performance.Deaths))
+		msg.Append(qq.NewTextfLn("助攻次数: %d", performance.Assists))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -664,6 +713,7 @@ var (
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches, "<名称#Tag>")
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
+	performanceCommand  = command.NewNode([]string{"performance", "表现", "击杀表现"}, "查询对战玩家的击杀表现", false, performances, "<对战ID>", "<名称#Tag>")
 	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>")
 	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
 	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
@@ -685,6 +735,7 @@ var valorantCommand = command.NewParent([]string{"valorant", "val", "瓦罗兰",
 	matchesCommand,
 	matchCommand,
 	leaderboardCommand,
+	performanceCommand,
 	statsCommand,
 	matchPlayerscommand,
 	matchRoundsCommand,

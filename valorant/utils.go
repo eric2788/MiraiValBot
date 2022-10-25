@@ -2,30 +2,50 @@ package valorant
 
 import (
 	"fmt"
-	"github.com/eric2788/MiraiValBot/redis"
-	"github.com/google/uuid"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/eric2788/MiraiValBot/redis"
+	"github.com/google/uuid"
 )
 
 const shortenPuuidKey = "valorant:puuid_short_list"
 
 var uuidCache = make(map[string]*AccountInfo)
 
-type AccountInfo struct {
-	Name    string
-	Tag     string
-	PUuid   string
-	Display string
-}
+type (
+	AccountInfo struct {
+		Name    string
+		Tag     string
+		PUuid   string
+		Display string
+	}
 
-type FriendlyFireInfo struct {
-	FriendlyFire
-	Deaths int
-	Kills  int
-}
+	Statistics struct {
+		KDRatio         float64
+		HeadshotRate    float64
+		AvgScore        float64
+		DamagePerRounds float64
+		KillsPerRounds  float64
+	}
+
+	FriendlyFireInfo struct {
+		FriendlyFire
+		Deaths int
+		Kills  int
+	}
+
+	Performance struct {
+		UserName    string
+		Character   string
+		CurrentTier string
+		Killed      int
+		Deaths      int
+		Assists     int
+	}
+)
 
 func GetFriendlyFireInfo(data *MatchData) map[string]*FriendlyFireInfo {
 	var infoMap = make(map[string]*FriendlyFireInfo)
@@ -205,13 +225,12 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 	}
 
 	return &Statistics{
-		KDRatio:      float64(totalKills) / float64(totalDeaths),
-		HeadshotRate: float64(totalHeadShots) / float64(totalShots) * 100,
-		AvgScore: float64(totalScores) / float64(len(matches)),
+		KDRatio:         float64(totalKills) / float64(totalDeaths),
+		HeadshotRate:    float64(totalHeadShots) / float64(totalShots) * 100,
+		AvgScore:        float64(totalScores) / float64(len(matches)),
 		DamagePerRounds: float64(totalDamage) / float64(totalRounds),
-		KillsPerRounds: float64(totalKills) / float64(totalRounds),
+		KillsPerRounds:  float64(totalKills) / float64(totalRounds),
 	}, nil
-
 }
 
 var seasonRegex = regexp.MustCompile(`^[e](\d+)[a](\d+)$`)
@@ -309,4 +328,90 @@ func SortSeason(seasons map[string]MMRV2SeasonDetails) []string {
 	})
 
 	return keys
+}
+
+func GetPerformances(data *MatchData, name, tag string) ([]Performance, error) {
+
+	ac, err := GetAccountDetails(name, tag)
+	if err != nil {
+		return nil, err
+	}
+
+	exist := false
+	for _, player := range data.Players["all_players"] {
+		if player.PUuid == ac.PUuid {
+			exist = true
+			break
+		}
+	}
+
+	if !exist {
+		return []Performance{}, nil
+	}
+
+	performanceMap := make(map[string]*Performance)
+
+	getPerformanceMap := func(id, name string) *Performance {
+		if d, ok := performanceMap[id]; ok {
+			return d
+		} else {
+			d := &Performance{Killed: 0, CurrentTier: "Unrated", Deaths: 0, Assists: 0, UserName: name}
+			performanceMap[id] = d
+			return d
+		}
+	}
+
+	for _, round := range data.Rounds {
+		for _, pStats := range round.PlayerStats {
+			for _, kEvent := range pStats.KillEvents {
+
+				// ignore friendly kills
+				if kEvent.VictimTeam == kEvent.KillerTeam {
+					continue
+				}
+
+				// killer is target
+				if kEvent.KillerPUuid == ac.PUuid {
+					per := getPerformanceMap(kEvent.VictimPUuid, kEvent.VictimDisplayName)
+					per.Killed += 1
+				} else if kEvent.VictimPUuid == ac.PUuid { // victim target
+					per := getPerformanceMap(kEvent.KillerPUuid, kEvent.KillerDisplayName)
+					per.Deaths += 1
+				} else {
+
+					for _, assistant := range kEvent.Assistants {
+
+						// target is assistant
+						if assistant.AssistantPUuid == ac.PUuid {
+							per := getPerformanceMap(kEvent.VictimPUuid, kEvent.VictimDisplayName)
+							per.Assists += 1
+							break
+						}
+
+					}
+				}
+
+			}
+		}
+	}
+
+	for _, player := range data.Players["all_players"] {
+		if per, ok := performanceMap[player.PUuid]; ok {
+			per.CurrentTier = player.CurrentTierPatched
+			per.Character = player.Character
+		}
+	}
+
+	performances := make([]Performance, 0)
+
+	for _, per := range performanceMap {
+		performances = append(performances, *per)
+	}
+
+	sort.Slice(performances, func(i, j int) bool {
+		pi, pj := performances[i], performances[j]
+		return ((pi.Killed + pi.Assists/2) - pi.Deaths) > ((pj.Killed + pi.Assists/2) - pj.Deaths)
+	})
+
+	return performances, nil
 }
