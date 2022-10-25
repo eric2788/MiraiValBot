@@ -342,13 +342,8 @@ type (
 		BySeason map[string]MMRV2SeasonDetails `json:"by_season"`
 	}
 
-	Statistics struct {
-		KDRatio         float64
-		HeadshotRate    float64
-		AvgScore        float64
-		DamagePerRounds float64
-		KillsPerRounds  float64
-	}
+
+	// Resource Types
 
 	AgentData struct {
 		Entity

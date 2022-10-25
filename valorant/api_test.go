@@ -1,9 +1,10 @@
 package valorant
 
 import (
-	"github.com/eric2788/common-utils/datetime"
 	"testing"
 	"time"
+
+	"github.com/eric2788/common-utils/datetime"
 
 	"github.com/eric2788/common-utils/request"
 	"github.com/sirupsen/logrus"
@@ -81,13 +82,18 @@ func TestGetAccountDetails(t *testing.T) {
 }
 
 func TestGetMatchHistories(t *testing.T) {
-	histories, err := GetMatchHistoriesAPI("勝たんしかrinrin", "JP1", AsiaSpecific)
+	histories, err := GetMatchHistoriesAPI("麻將", "4396", AsiaSpecific)
 	if err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
 		t.Fatal(err)
 	}
+
+	for _, hist := range histories {
+		t.Log(hist.MetaData.MatchId)
+	}
+
 	assert.Equal(t, 5, len(histories))
 }
 
