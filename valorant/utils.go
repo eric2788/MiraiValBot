@@ -33,6 +33,7 @@ type (
 		TotalFriendlyDamage int64
 		TotalFriendlyKills  int
 		WinRate             float64
+		TotalMatches        int
 	}
 
 	FriendlyFireInfo struct {
@@ -188,7 +189,11 @@ func GetPlantCount(data *MatchData, id string) int {
 	return plant
 }
 
-func GetStatistics(name, tag string, region Region) (*Statistics, error) {
+func GetStatistics(name, tag, filter string, region Region) (*Statistics, error) {
+
+	if filter != "" && !AllowedModes.Contains(strings.ToLower(filter)) {
+		return nil, fmt.Errorf("无效的模式: %s, 可用模式: %s", filter, strings.Join(AllowedModes.ToArr(), ", "))
+	}
 
 	ac, err := GetAccountDetails(name, tag)
 	if err != nil {
@@ -208,7 +213,13 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 	usedWeapons := make(map[string]int)
 	wins := 0
 
+	totalMatches := 0
 	for _, match := range matches {
+
+		// have filter and the mode of match data is not matched
+		if filter != "" && !strings.EqualFold(match.MetaData.Mode, filter) {
+			continue
+		}
 
 		// 👇 Friendly fire
 
@@ -228,7 +239,7 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 		for _, player := range players {
 			if player.PUuid == ac.PUuid {
 
-				totalShots += (player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots)
+				totalShots += player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
 				totalHeadShots += player.Stats.Headshots
 
 				totalKills += player.Stats.Kills
@@ -276,6 +287,8 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 				wins += 1
 			}
 		}
+
+		totalMatches++
 	}
 
 	mostUsedWeapon, t := "无", 0
@@ -291,7 +304,7 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 		AvgScore:            float64(totalScores) / float64(len(matches)),
 		DamagePerRounds:     float64(totalDamage) / float64(totalRounds),
 		KillsPerRounds:      float64(totalKills) / float64(totalRounds),
-		WinRate:             float64(wins) / 5 * 100,
+		WinRate:             float64(wins) / float64(len(matches)) * 100,
 		TotalFriendlyDamage: ffDamage,
 		TotalFriendlyKills:  ffKills,
 		MostUsedWeapon:      mostUsedWeapon,

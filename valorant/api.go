@@ -50,6 +50,14 @@ var (
 		"e1a2",
 		"e1a1",
 	})
+	AllowedModes = set.FromStrArr([]string{
+		"competitive",
+		"unrated",
+		"spikerush",
+		"deathmatch",
+		"escalation",
+		"replication",
+	})
 	client = &http.Client{Timeout: time.Minute}
 	logger = utils.GetModuleLogger("valorant.api")
 )
@@ -133,7 +141,7 @@ func GetAccountDetails(name, tag string) (*AccountDetails, error) {
 }
 
 func GetMatchHistoriesAPI(name, tag string, region Region) ([]MatchData, error) {
-	resp, err := getRequest(fmt.Sprintf("%v/matches/%s/%s/%s", V3, region, name, tag))
+	resp, err := getRequest(fmt.Sprintf("%v/matches/%s/%s/%s?size=10", V3, region, name, tag))
 	if err != nil {
 		return nil, err
 	}

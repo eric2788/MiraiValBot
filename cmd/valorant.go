@@ -367,15 +367,20 @@ func stats(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取最近五场对战资料的统计数据...")))
+	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取最近十场对战资料的统计数据...")))
 
-	stats, err := valorant.GetStatistics(name, tag, valorant.AsiaSpecific)
+	filter := ""
+	if len(args) > 1 {
+		filter = args[1]
+	}
+
+	stats, err := valorant.GetStatistics(name, tag, filter, valorant.AsiaSpecific)
 	if err != nil {
 		return err
 	}
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 在最近五场对战中的统计数据: ", args[0]))
+	msg.Append(qq.NewTextfLn("%s 在最近十场对战中的统计数据: ", args[0]))
 	msg.Append(qq.NewTextfLn("爆头率: %.2f%%", stats.HeadshotRate))
 	msg.Append(qq.NewTextfLn("胜率: %.f%%", stats.WinRate))
 	msg.Append(qq.NewTextfLn("KD比例: %.2f", stats.KDRatio))
@@ -716,7 +721,7 @@ var (
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
 	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
 	performanceCommand  = command.NewNode([]string{"performance", "表现", "击杀表现"}, "查询对战玩家的击杀表现", false, performances, "<对战ID>", "<名称#Tag>")
-	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>")
+	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>", "[对战模式]")
 	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
 	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
 	mmrCommand          = command.NewNode([]string{"mmr", "段位"}, "查询段位", false, mmr, "<名称#Tag>")

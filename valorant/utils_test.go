@@ -31,7 +31,7 @@ func TestGetDeathMatchRanking(t *testing.T) {
 
 func TestGetStatistics(t *testing.T) {
 	name, tag := "麻將", "4396"
-	stats, err := GetStatistics(name, tag, AsiaSpecific)
+	stats, err := GetStatistics(name, tag, "", AsiaSpecific)
 	if err != nil {
 		if isAllowedStatus(err) {
 			return

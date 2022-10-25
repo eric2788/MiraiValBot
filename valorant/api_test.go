@@ -94,7 +94,7 @@ func TestGetMatchHistories(t *testing.T) {
 		t.Log(hist.MetaData.MatchId)
 	}
 
-	assert.Equal(t, 5, len(histories))
+	assert.Equal(t, 10, len(histories))
 }
 
 func TestGetMatchDetails(t *testing.T) {
