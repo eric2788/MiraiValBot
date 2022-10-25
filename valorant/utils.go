@@ -24,11 +24,15 @@ type (
 	}
 
 	Statistics struct {
-		KDRatio         float64
-		HeadshotRate    float64
-		AvgScore        float64
-		DamagePerRounds float64
-		KillsPerRounds  float64
+		KDRatio             float64
+		HeadshotRate        float64
+		AvgScore            float64
+		DamagePerRounds     float64
+		KillsPerRounds      float64
+		MostUsedWeapon      string
+		TotalFriendlyDamage int64
+		TotalFriendlyKills  int
+		WinRate             float64
 	}
 
 	FriendlyFireInfo struct {
@@ -200,10 +204,24 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 	totalKills, totalDeaths := 0, 0
 	totalScores := 0
 	totalDamage, totalRounds := int64(0), 0
+	ffDamage, ffKills := int64(0), 0
+	usedWeapons := make(map[string]int)
+	wins := 0
 
 	for _, match := range matches {
 
+		// 👇 Friendly fire
+
+		info := GetFriendlyFireInfo(&match)
+
+		if ff, ok := info[ac.PUuid]; ok {
+			ffDamage += int64(ff.Outgoing)
+			ffKills += ff.Kills
+		}
+
 		totalRounds += match.MetaData.RoundsPlayed
+
+		// 👇 kda and hs rate
 
 		players := match.Players["all_players"]
 
@@ -222,14 +240,61 @@ func GetStatistics(name, tag string, region Region) (*Statistics, error) {
 				break
 			}
 		}
+
+		// 👇 most used weapons
+
+		for _, rounds := range match.Rounds {
+
+			for _, player := range rounds.PlayerStats {
+
+				if player.PlayerPUuid == ac.PUuid {
+
+					if count, ok := usedWeapons[player.Economy.Weapon.Name]; ok {
+						usedWeapons[player.Economy.Weapon.Name] = count + 1
+					} else {
+						usedWeapons[player.Economy.Weapon.Name] = 1
+					}
+
+					break
+				}
+
+			}
+		}
+
+		// 👇 win rates
+
+		// if deathmatch and rank 1
+		if strings.ToLower(match.MetaData.Mode) == "deathmatch" && GetDeathMatchRanking(&match)[0].PUuid == ac.PUuid {
+			wins += 1
+		} else { // check team wins
+			red := match.Teams["red"]
+			blue := match.Teams["blue"]
+
+			if team, err := FoundPlayerInTeam(ac.PUuid, &match); err != nil {
+				return nil, fmt.Errorf("寻找 %s#%s 的队伍所属时出现错误: %v", ac.Name, ac.Tag, err)
+			} else if (red.HasWon && strings.ToLower(team) == "red") || (blue.HasWon && strings.ToLower(team) == "blue") {
+				wins += 1
+			}
+		}
+	}
+
+	mostUsedWeapon, t := "无", 0
+	for weapon, times := range usedWeapons {
+		if times > t {
+			mostUsedWeapon, t = weapon, times
+		}
 	}
 
 	return &Statistics{
-		KDRatio:         float64(totalKills) / float64(totalDeaths),
-		HeadshotRate:    float64(totalHeadShots) / float64(totalShots) * 100,
-		AvgScore:        float64(totalScores) / float64(len(matches)),
-		DamagePerRounds: float64(totalDamage) / float64(totalRounds),
-		KillsPerRounds:  float64(totalKills) / float64(totalRounds),
+		KDRatio:             float64(totalKills) / float64(totalDeaths),
+		HeadshotRate:        float64(totalHeadShots) / float64(totalShots) * 100,
+		AvgScore:            float64(totalScores) / float64(len(matches)),
+		DamagePerRounds:     float64(totalDamage) / float64(totalRounds),
+		KillsPerRounds:      float64(totalKills) / float64(totalRounds),
+		WinRate:             float64(wins) / 5 * 100,
+		TotalFriendlyDamage: ffDamage,
+		TotalFriendlyKills:  ffKills,
+		MostUsedWeapon:      mostUsedWeapon,
 	}, nil
 }
 
