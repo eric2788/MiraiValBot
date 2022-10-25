@@ -29,6 +29,27 @@ func TestGetDeathMatchRanking(t *testing.T) {
 	assert.Equal(t, 12, len(players))
 }
 
+func TestGetStatistics(t *testing.T) {
+	name, tag := "麻將", "4396"
+	stats, err := GetStatistics(name, tag, AsiaSpecific)
+	if err != nil {
+		if isAllowedStatus(err) {
+			return
+		}
+		t.Fatal(err)
+	}
+	t.Logf("%s#%s 在最近五场对战中的统计数据: ", name, tag)
+	t.Logf("爆头率: %.2f%%", stats.HeadshotRate)
+	t.Logf("胜率: %.f%%", stats.WinRate)
+	t.Logf("KD比例: %.2f", stats.KDRatio)
+	t.Logf("最常使用武器: %s", stats.MostUsedWeapon)
+	t.Logf("平均分数: %.1f", stats.AvgScore)
+	t.Logf("每回合平均伤害: %.1f", stats.DamagePerRounds)
+	t.Logf("每回合平均击杀: %.1f", stats.KillsPerRounds)
+	t.Logf("总队友伤害: %d", stats.TotalFriendlyDamage)
+	t.Logf("总队友击杀: %d", stats.TotalFriendlyKills)
+}
+
 func TestGetPerformance(t *testing.T) {
 	match, err := GetMatchDetailsAPI("c82f5416-a4b6-4720-be13-a05414049210")
 	if err != nil {
