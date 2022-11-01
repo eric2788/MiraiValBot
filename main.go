@@ -34,6 +34,9 @@ import (
 	_ "github.com/eric2788/MiraiValBot/modules/response"
 	_ "github.com/eric2788/MiraiValBot/modules/timer"
 	_ "github.com/eric2788/MiraiValBot/modules/verbose"
+
+	// 注册其他事件挂鈎
+	_ "github.com/eric2788/MiraiValBot/chat_reply"
 )
 
 func init() {
