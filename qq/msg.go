@@ -38,6 +38,26 @@ func NewTts(text string) (*message.GroupVoiceElement, error) {
 	return NewTtsWithGroup(ValGroupInfo.Uin, text)
 }
 
+func NewVoiceByUrl(url string) (*message.GroupVoiceElement, error){
+	return NewVoiceByUrlWithGroup(ValGroupInfo.Uin, url)
+}
+
+func NewVoiceByBytes(b []byte) (*message.GroupVoiceElement, error){
+	return NewVoiceByBytesWithGroup(ValGroupInfo.Uin, b)
+}
+
+func NewVoiceByBytesWithGroup(gp int64, b []byte) (*message.GroupVoiceElement, error){
+	return bot.Instance.UploadGroupPtt(gp, bytes.NewReader(b))
+}
+
+func NewVoiceByUrlWithGroup(gp int64, url string) (*message.GroupVoiceElement, error){
+	b, err := request.GetBytesByUrl(url)
+	if err != nil {
+		return nil, err
+	}
+	return NewVoiceByBytesWithGroup(gp, b)
+}
+
 func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, err error) {
 
 	key := GroupKey(gp, fmt.Sprintf("tts:%x", md5.Sum([]byte(text))))
