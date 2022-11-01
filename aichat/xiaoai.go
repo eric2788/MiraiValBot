@@ -2,16 +2,18 @@ package aichat
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 )
 
 const (
-	xiaoAiURL        = "http://jintia.jintias.cn/api/xatx.php?type=text&msg=%v"
+	xiaoAiURL = "http://jintia.jintias.cn/api/xatx.php?type=text&msg=%v"
 )
 
-var xiaoAiWarningMsg = regexp.MustCompile(`(?s)<br.+/>`)
+var xiaoAiWarningMsg = regexp.MustCompile(`(?s)<.+>`)
 
 type XiaoAi struct {
 }
@@ -28,13 +30,18 @@ func (ai *XiaoAi) Reply(msg string) (string, error) {
 		nick = bot.Instance.Nickname
 	}
 
-	replaced := xiaoAiWarningMsg.ReplaceAll(data, []byte(""))
+	plain := strings.ReplaceAll(string(data), "\r\n", "")
+
+	replaced := xiaoAiWarningMsg.ReplaceAll([]byte(plain), []byte(""))
+
+	fmt.Printf("before: %q, after: %q", string(plain), string(replaced))
+
 	reply := replaces(string(replaced), map[string]string{
-		"\n": "",
-		"小爱": nick,
+		"\n":     "",
+		"小爱":     nick,
 		"小米智能助理": "爹",
 	})
-	if reply == "" {
+	if reply == "" || reply == "<html>" {
 		return "", errors.New("无法获取回复讯息")
 	}
 	return reply, nil
@@ -43,5 +50,3 @@ func (ai *XiaoAi) Reply(msg string) (string, error) {
 func (ai *XiaoAi) Name() string {
 	return "xiaoai"
 }
-
-
