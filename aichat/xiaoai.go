@@ -29,13 +29,9 @@ func (ai *XiaoAi) Reply(msg string) (string, error) {
 	if bot.Instance != nil {
 		nick = bot.Instance.Nickname
 	}
-
+	
 	plain := strings.ReplaceAll(string(data), "\r\n", "")
-
 	replaced := xiaoAiWarningMsg.ReplaceAll([]byte(plain), []byte(""))
-
-	fmt.Printf("before: %q, after: %q", string(plain), string(replaced))
-
 	reply := replaces(string(replaced), map[string]string{
 		"\n":     "",
 		"小爱":     nick,
