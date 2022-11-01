@@ -35,27 +35,24 @@ func voiceQQ(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
 }
 
-func voiceGenshin(args []string, source *command.MessageSource) error{
+func voiceGenshin(args []string, source *command.MessageSource) error {
 	actor, content := args[0], strings.Join(args[1:], " ")
 	data, err := aivoice.GetGenshinVoice(content, actor)
 	if err != nil {
 		return err
 	}
-	voice, err := qq.NewVoiceByBytes(data)
-	if err != nil {
-		return err
-	}
+	voice := &message.GroupVoiceElement{Data: data}
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voice))
 }
 
 var (
-	voiceQQCommand = command.NewNode([]string{"qq", "腾讯"}, "腾讯QQ的语音", false, voiceQQ, "<讯息>")
+	voiceQQCommand      = command.NewNode([]string{"qq", "腾讯"}, "腾讯QQ的语音", false, voiceQQ, "<讯息>")
 	voiceGenshinCommand = command.NewNode([]string{"genshin", "原神", "ys"}, "原神角色语音", false, voiceGenshin, "<角色>", "<讯息>")
 )
 
 var voiceCommand = command.NewParent(
-	[]string{"voice", "speak", "语音"}, 
-	"语音指令", 
+	[]string{"voice", "speak", "语音"},
+	"语音指令",
 	voiceQQCommand,
 	voiceGenshinCommand,
 )
