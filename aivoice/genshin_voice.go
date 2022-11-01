@@ -2,8 +2,7 @@ package aivoice
 
 import (
 	"fmt"
-	"io"
-	"net/http"
+	"github.com/eric2788/common-utils/request"
 	"net/url"
 )
 
@@ -73,11 +72,6 @@ func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	if id, ok := actors[actor]; !ok {
 		return nil, fmt.Errorf("未知的角色: %s", actor)
 	} else {
-		res, err := http.Get(fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id))
-		if err != nil {
-			return nil, err
-		}
-		defer res.Body.Close()
-		return io.ReadAll(res.Body)
+		return request.GetBytesByUrl(fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id))
 	}
 }
