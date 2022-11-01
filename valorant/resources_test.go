@@ -8,8 +8,12 @@ import (
 )
 
 func TestGetAgents(t *testing.T) {
-	agents, err := GetAgents(AllAgents, EN)
-	if err != nil {
+	req := NewResourceRequest("/agents")
+	req.SetLanguage(TC)
+	req.AddQuery("isPlayableCharacter", "true")
+	var agents []AgentData
+
+	if err := req.DoRequest(&agents); err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
@@ -24,8 +28,11 @@ func TestGetAgents(t *testing.T) {
 }
 
 func TestGetWeapons(t *testing.T) {
-	weapons, err := GetWeapons(AllWeapons, TC)
-	if err != nil {
+	req := NewResourceRequest("/weapons")
+	req.SetLanguage(TC)
+	var weapons []WeaponData
+
+	if err := req.DoRequest(&weapons); err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
@@ -40,8 +47,11 @@ func TestGetWeapons(t *testing.T) {
 }
 
 func TestGetBundles(t *testing.T) {
-	bundles, err := GetBundles(TC)
-	if err != nil {
+	req := NewResourceRequest("/bundles")
+	req.SetLanguage(TC)
+	var bundles []BundleData
+
+	if err := req.DoRequest(&bundles); err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
@@ -52,7 +62,6 @@ func TestGetBundles(t *testing.T) {
 		t.Log(bundle.DisplayName)
 	}
 }
-
 
 func init() {
 	redis.Init()
