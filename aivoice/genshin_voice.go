@@ -1,7 +1,6 @@
 package aivoice
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,16 +78,16 @@ func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	} else {
 		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id), nil)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("http_error: %v", err)
 		}
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 		res, err := client.Do(req)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("http_error: %v", err)
 		}
 		defer res.Body.Close()
 		if res.StatusCode != 200 {
-			return nil, errors.New(res.Status)
+			return nil, fmt.Errorf("http_error: %v", res.Status)
 		}
 		b, err := io.ReadAll(res.Body)
 		if err != nil {

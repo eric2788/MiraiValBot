@@ -9,7 +9,7 @@ import (
 func TestGetGenshinVoice(t *testing.T) {
 	b, err := GetGenshinVoice("別狗叫", "派蒙")
 	if err != nil {
-		if strings.HasPrefix(err.Error(), "500") {
+		if strings.HasPrefix(err.Error(), "http_error") {
 			return
 		}
 		t.Fatal(err)
