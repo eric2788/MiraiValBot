@@ -10,12 +10,14 @@ func TestGetGenshinVoice(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(b)
+	if len(b) == 0 {
+		t.Fatal("empty voice")
+	}
 	err = os.MkdirAll("data", os.ModePerm)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = os.WriteFile("data/別狗叫.mp3", b, os.ModePerm)
+	err = os.WriteFile("data/別狗叫.amr", b, os.ModePerm)
 	if err != nil {
 		t.Fatal(err)
 	}

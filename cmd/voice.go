@@ -36,12 +36,15 @@ func voiceQQ(args []string, source *command.MessageSource) error {
 }
 
 func voiceGenshin(args []string, source *command.MessageSource) error {
-	actor, content := args[0], strings.Join(args[1:], " ")
+	actor, content := args[0], strings.Join(args[1:], "，")
 	data, err := aivoice.GetGenshinVoice(content, actor)
 	if err != nil {
 		return err
 	}
-	voice := &message.GroupVoiceElement{Data: data}
+	voice, err := qq.NewVoiceByBytes(data)
+	if err != nil {
+		return err
+	}
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voice))
 }
 

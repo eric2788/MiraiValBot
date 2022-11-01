@@ -65,13 +65,17 @@ var (
 )
 
 const (
-	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=mp3&text=%s&id=%d"
+	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=%d"
 )
 
 func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	if id, ok := actors[actor]; !ok {
 		return nil, fmt.Errorf("未知的角色: %s", actor)
 	} else {
-		return request.GetBytesByUrl(fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id))
+		b, err := request.GetBytesByUrl(fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id))
+		if err != nil {
+			return nil, err
+		}
+		return WavToAmr(b)
 	}
 }
