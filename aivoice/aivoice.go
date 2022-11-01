@@ -4,9 +4,9 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	ffmpeg_go "github.com/u2takey/ffmpeg-go"
 	"log"
 	"os"
-	"os/exec"
 )
 
 const (
@@ -23,21 +23,23 @@ func WavToAmr(b []byte) (data []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("writing file", f.Name())
+	log.Println("writing file: ", f.Name())
 	_, err = f.Write(b)
 	f.Close()
 	defer removeFile(f.Name())
 	if err != nil {
 		return nil, err
 	}
-	log.Println("converting to amr", f.Name())
+	log.Println("converting to amr: ", f.Name())
 	// Convert to AMR
-	comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ac", NumberOfAudioChannels, "-ar", AudioSamplingRateAMR, name+".amr")
+	comm := ffmpeg_go.Input(name+".wav").Output(name+".amr", ffmpeg_go.KwArgs{"ar": AudioSamplingRateAMR, "ac": NumberOfAudioChannels, "ab": AudioBitRate})
+	//comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ac", NumberOfAudioChannels, "-ar", AudioSamplingRateAMR, name+".amr")
 	if err = comm.Run(); err != nil {
 		return nil, err
 	}
 	defer removeFile(name + ".amr")
 	data, err = os.ReadFile(name + ".amr")
+	log.Println("successfully converted to amr")
 	return
 }
 

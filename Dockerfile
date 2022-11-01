@@ -13,7 +13,8 @@ RUN go build -v -o /go/bin/valbot
 
 FROM alpine:latest
 
-RUN apk add --no-cache ffmpeg
+RUN apt-get -y update
+RUN apt-get install -y ffmpeg
 
 # copy timezone info from builder
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
