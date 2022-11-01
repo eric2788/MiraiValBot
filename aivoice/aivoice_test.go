@@ -1,13 +1,12 @@
 package aivoice
 
 import (
-	"net/url"
 	"os"
 	"testing"
 )
 
 func TestGetGenshinVoice(t *testing.T) {
-	b, err := GetGenshinVoice(url.QueryEscape("別狗叫"), "派蒙")
+	b, err := GetGenshinVoice("別狗叫", "派蒙")
 	if err != nil {
 		t.Fatal(err)
 	}
