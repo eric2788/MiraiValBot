@@ -1,9 +1,12 @@
 package aivoice
 
 import (
+	"errors"
 	"fmt"
-	"github.com/eric2788/common-utils/request"
+	"io"
+	"net/http"
 	"net/url"
+	"time"
 )
 
 var (
@@ -68,11 +71,26 @@ const (
 	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=%d"
 )
 
+var client = &http.Client{Timeout: time.Second * 30}
+
 func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	if id, ok := actors[actor]; !ok {
 		return nil, fmt.Errorf("未知的角色: %s", actor)
 	} else {
-		b, err := request.GetBytesByUrl(fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id))
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id), nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+		res, err := client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+		defer res.Body.Close()
+		if res.StatusCode != 200 {
+			return nil, errors.New(res.Status)
+		}
+		b, err := io.ReadAll(res.Body)
 		if err != nil {
 			return nil, err
 		}

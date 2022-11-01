@@ -2,12 +2,16 @@ package aivoice
 
 import (
 	"os"
+	"strings"
 	"testing"
 )
 
 func TestGetGenshinVoice(t *testing.T) {
 	b, err := GetGenshinVoice("別狗叫", "派蒙")
 	if err != nil {
+		if strings.HasPrefix(err.Error(), "500") {
+			return
+		}
 		t.Fatal(err)
 	}
 	if len(b) == 0 {
