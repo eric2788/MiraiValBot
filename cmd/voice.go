@@ -37,6 +37,10 @@ func voiceQQ(args []string, source *command.MessageSource) error {
 
 func voiceGenshin(args []string, source *command.MessageSource) error {
 	actor, content := args[0], strings.Join(args[1:], "，")
+
+	reply := qq.CreateReply(source.Message).Append(qq.NewTextf("正在尝试生成 %s 的语音...", actor))
+	_ = qq.SendGroupMessage(reply)
+
 	data, err := aivoice.GetGenshinVoice(content, actor)
 	if err != nil {
 		return err

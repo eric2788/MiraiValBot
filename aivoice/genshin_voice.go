@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -70,20 +71,24 @@ const (
 	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=%d"
 )
 
-var client = &http.Client{Timeout: time.Second * 30}
+var client = &http.Client{Timeout: time.Second * 300}
 
 func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	if id, ok := actors[actor]; !ok {
 		return nil, fmt.Errorf("未知的角色: %s", actor)
 	} else {
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id), nil)
+		api := fmt.Sprintf(VoiceAPI, url.QueryEscape(msg), id)
+		req, err := http.NewRequest(http.MethodGet, api, nil)
 		if err != nil {
 			return nil, fmt.Errorf("http_error: %v", err)
 		}
 		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
 		res, err := client.Do(req)
 		if err != nil {
-			return nil, fmt.Errorf("http_error: %v", err)
+			if strings.Contains(err.Error(), "context deadline exceeded") {
+				return nil, fmt.Errorf("http_error: %s", "API请求逾时")
+			}
+			return nil, fmt.Errorf("http_error: %v", err.Error())
 		}
 		defer res.Body.Close()
 		if res.StatusCode != 200 {
