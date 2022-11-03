@@ -42,7 +42,9 @@ jobs:
           images: |
             docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.artifact_name }}
           tags: |
-            type=edge,event=push,suffix=-{{sha}}
+            type=edge
+            type=sha,event=branch,branch=master
+            type=ref,event=tag
       - run: |
           echo tag: ${{ steps.meta.outputs.tags }}
       - name: Build and push
@@ -76,7 +78,8 @@ jobs:
           images: |
             docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.artifact_name }}
           tags: |
-            type=edge,event=push,suffix=-{{sha}}
+            type=edge
+            type=sha,event=branch,branch=master
             type=ref,event=tag
       - name: Build and push
         id: docker_build
