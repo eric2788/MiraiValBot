@@ -6,3 +6,6 @@
 session.token
 **/imgtxt/*.png
 **/file/*.yaml
+**/*.exe
+**/cache/**
+**/codec/**
