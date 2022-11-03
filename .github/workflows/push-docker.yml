@@ -68,6 +68,7 @@ jobs:
           tags: |
             type=edge
             type=ref,event=tag
+            type=ref,event=pr
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2

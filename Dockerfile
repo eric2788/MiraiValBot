@@ -1,11 +1,11 @@
-FROM golang:1.17-alpine AS builder
+FROM golang:1.17 AS builder
 
 WORKDIR /app
 
 COPY . .
 
 # install timzone data
-RUN apk add --no-cache tzdata
+# RUN apk add --no-cache tzdata
 
 RUN go mod tidy -compat="1.17"
 RUN go mod download
