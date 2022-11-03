@@ -32,8 +32,8 @@ func WavToAmr(b []byte) (data []byte, err error) {
 	}
 	log.Println("converting to amr: ", f.Name())
 	// Convert to AMR
-	comm := ffmpeg_go.Input(name+".wav").Output(name+".amr", ffmpeg_go.KwArgs{"ar": AudioSamplingRateAMR, "ac": NumberOfAudioChannels, "ab": AudioBitRate})
-	//comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ac", NumberOfAudioChannels, "-ar", AudioSamplingRateAMR, name+".amr")
+	comm := ffmpeg_go.Input(name+".wav").Output(name+".amr", ffmpeg_go.KwArgs{"ar": AudioSamplingRateAMR, "ab": AudioBitRate})
+	//comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ar", AudioSamplingRateAMR, name+".amr")
 	if err = comm.Run(); err != nil {
 		return nil, err
 	}

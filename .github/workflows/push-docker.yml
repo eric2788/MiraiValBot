@@ -41,7 +41,7 @@ jobs:
         with:
           context: .
           push: false
-          tags: test
+          tags: ${{ steps.meta.outputs.tags }}
           labels: test_image
           platforms: linux/arm64/v8, linux/amd64
   publish_docker:
@@ -67,8 +67,8 @@ jobs:
             docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.artifact_name }}
           tags: |
             type=edge
+            type=sha,event=branch,branch=master
             type=ref,event=tag
-            type=ref,event=pr
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
