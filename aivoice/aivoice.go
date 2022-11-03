@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	ffmpeg_go "github.com/u2takey/ffmpeg-go"
+	"github.com/wdvxdr1123/go-silk"
 	"log"
 	"os"
 )
@@ -16,6 +17,12 @@ const (
 	AudioSamplingRateAMR  = "8000"
 )
 
+func WavToSilk(b []byte) (data []byte, err error) {
+	return silk.EncodePcmBuffToSilk(b, 24000, 24000, true)
+}
+
+// WavToAmr Wav To Amr file
+// Deprecated: not going to use with ffmpeg, use WavToSilk instead
 func WavToAmr(b []byte) (data []byte, err error) {
 	hash := md5.Sum(b)
 	name := hex.EncodeToString(hash[:])

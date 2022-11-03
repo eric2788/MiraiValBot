@@ -67,7 +67,7 @@ jobs:
             docker.io/${{ secrets.DOCKER_USERNAME }}/${{ env.artifact_name }}
           tags: |
             type=edge
-            type=sha,event=branch,branch=master
+            type=sha,event=branch
             type=ref,event=tag
       - name: Build and push
         id: docker_build
