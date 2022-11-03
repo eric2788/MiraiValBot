@@ -4,8 +4,8 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"github.com/Yiwen-Chan/go-silk/silk"
 	ffmpeg_go "github.com/u2takey/ffmpeg-go"
-	"github.com/wdvxdr1123/go-silk"
 	"log"
 	"os"
 )
@@ -18,11 +18,19 @@ const (
 )
 
 func WavToSilk(b []byte) (data []byte, err error) {
-	return silk.EncodePcmBuffToSilk(b, 24000, 24000, true)
+	encoder := &silk.Encoder{}
+	err = encoder.Init("/cache", "/codec")
+	if err != nil {
+		return nil, err
+	}
+	bb := md5.Sum(b)
+	tempName := hex.EncodeToString(bb[:])
+	data, err = encoder.EncodeToSilk(b, tempName, false)
+	return
 }
 
 // WavToAmr Wav To Amr file
-// Deprecated: not going to use with ffmpeg, use WavToSilk instead
+// Deprecated: use WavToSilk instead
 func WavToAmr(b []byte) (data []byte, err error) {
 	hash := md5.Sum(b)
 	name := hex.EncodeToString(hash[:])
