@@ -11,7 +11,7 @@ RUN go mod tidy -compat="1.17"
 RUN go mod download
 RUN go build -v -o /go/bin/valbot
 
-FROM guglio/ffmpeg
+FROM linuxserver/ffmpeg
 
 RUN ffmpeg -version
 # copy timezone info from builder
