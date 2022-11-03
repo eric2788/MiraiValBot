@@ -14,6 +14,7 @@ require (
 	github.com/hqbobo/text2pic v0.0.0-20180823042751-2479e146d720
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
+	github.com/u2takey/ffmpeg-go v0.4.1
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -53,7 +54,6 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tuotoo/qrcode v0.0.0-20190222102259-ac9c44189bf2 // indirect
-	github.com/u2takey/ffmpeg-go v0.4.1 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect

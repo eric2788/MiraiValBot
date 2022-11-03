@@ -27,13 +27,30 @@ jobs:
       - name: Run tests
         run: |
           go test -v ./...
+  build_image:
+    needs: [test_program]
+    if: ${{ github.repository_owner == 'sysnapse' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: false
+          tags: test
+          labels: test_image
+          platforms: linux/arm64/v8, linux/amd64
   publish_docker:
     needs: [test_program]
     if: ${{ github.repository_owner == 'eric2788' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
