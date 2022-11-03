@@ -81,6 +81,8 @@ github.com/eric2788/go-silk v0.0.0-20221103155033-bd3dd96f744e h1:0tcQcbMBoSwf8j
 github.com/eric2788/go-silk v0.0.0-20221103155033-bd3dd96f744e/go.mod h1:INo5wJ3/Qg6iPkfUjzH7Jn5HFWA2B/FDDMtXz5SJS1A=
 github.com/eric2788/go-silk v0.0.0-20221103155539-f82a9a7afdc5 h1:W/zaSI+NSluDS8WGZmT+S7DVwR/NYQN0XlNvmzrvT+E=
 github.com/eric2788/go-silk v0.0.0-20221103155539-f82a9a7afdc5/go.mod h1:INo5wJ3/Qg6iPkfUjzH7Jn5HFWA2B/FDDMtXz5SJS1A=
+github.com/eric2788/go-silk v0.0.0-20221103160020-81195948ffe2 h1:Zf4ry32TnscDrjRx7B+d3N+3SaH92rgA5ngxMqN+ZW0=
+github.com/eric2788/go-silk v0.0.0-20221103160020-81195948ffe2/go.mod h1:INo5wJ3/Qg6iPkfUjzH7Jn5HFWA2B/FDDMtXz5SJS1A=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.5.1 h1:mZcQUHVQUQWoPXXtuf9yuEXKudkV2sx1E06UadKWpgI=
