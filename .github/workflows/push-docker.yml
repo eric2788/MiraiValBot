@@ -9,7 +9,7 @@ on:
     tags:
       - '*'
     branches:
-      - master
+      - '*'
 
 jobs:
   test_program:
