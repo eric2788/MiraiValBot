@@ -32,6 +32,16 @@ func randomMember(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(reply)
 }
 
+func randomLong(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+	img, err := qq.NewImageByUrl("http://106.13.17.214:23856/dragon")
+	if err != nil {
+		return err
+	}
+	msg.Append(img)
+	return qq.SendGroupMessage(msg)
+}
+
 func randomChoice(args []string, source *command.MessageSource) error {
 
 	msg := qq.CreateReply(source.Message)
@@ -367,6 +377,7 @@ var (
 	randomWeaponCommand  = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
 	randomBundleCommand  = command.NewNode([]string{"bundle", "套装"}, "随机抽选一个瓦套装", false, randomBundle)
 	randomSkinCommand    = command.NewNode([]string{"skin", "皮肤"}, "随机抽选一个瓦皮肤", false, randomSkin, "<武器名称>")
+	randomDragonCommand  = command.NewNode([]string{"long", "dragon", "龙图"}, "随机抽选一张龙图", false, randomLong)
 )
 
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
@@ -378,6 +389,7 @@ var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指�
 	randomWeaponCommand,
 	randomBundleCommand,
 	randomSkinCommand,
+	randomDragonCommand,
 )
 
 func init() {
