@@ -23,7 +23,7 @@ FROM alpine:latest
 
 COPY --from=installer /usr/bin/ffmpeg /usr/bin/ffmpeg
 COPY --from=installer /usr/bin/ffmpeg /usr/local/bin/ffmpeg
-RUN export $PATH=/usr/local/bin:$PATH
+RUN export PATH=/usr/local/bin:$PATH
 RUN ffmepg -version
 
 # copy timezone info from builder
