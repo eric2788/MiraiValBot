@@ -46,8 +46,6 @@ github.com/Mrs4s/MiraiGo v0.0.0-20211228140953-ab72f3dc28da h1:uqY6vOKvcCBKlIDaZ
 github.com/Mrs4s/MiraiGo v0.0.0-20211228140953-ab72f3dc28da/go.mod h1:VrmhZC9o+uKB9AKRy5bZZxE5EJwJhAmo7Xn/c2tzkZI=
 github.com/RomiChan/protobuf v0.0.0-20211223055824-048df49a8956 h1:hnaAkKz4t+xpSNVp5mnuloRMd3Rj2Lfg5biZ3emv//c=
 github.com/RomiChan/protobuf v0.0.0-20211223055824-048df49a8956/go.mod h1:CKKOWC7mBxd36zxsCB1V8DTrwlTNRQvkSVbYqyUiGEE=
-github.com/Yiwen-Chan/go-silk v0.0.5 h1:VOl8HQCwAEeeWRkeZMgk3jB3chkjHi3Une3lehLqj+I=
-github.com/Yiwen-Chan/go-silk v0.0.5/go.mod h1:1KdX2vonxT4/ekiUMza5Cx4K8JVT2GdEkTSOGy9H2TQ=
 github.com/aws/aws-sdk-go v1.38.20/go.mod h1:hcU610XS61/+aQV88ixoOzUoG7v3b31pl2zKMmprdro=
 github.com/aws/aws-sdk-go v1.44.127 h1:IoO2VfuIQg1aMXnl8l6OpNUKT4Qq5CnJMOyIWoTYXj0=
 github.com/aws/aws-sdk-go v1.44.127/go.mod h1:y4AeaBuwd2Lk+GepC1E9v0qOiTws0MIWAX4oIKwKHZo=
@@ -79,6 +77,8 @@ github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.m
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a h1:AWdDNwWdth4fEycsdrbqRZHnRBsAQHsfcUTykhWhT8k=
 github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a/go.mod h1:9r5dFvjmEyc6dZY7EP5JZ7M2gkFFzUnOBmoNicgieNo=
+github.com/eric2788/go-silk v0.0.0-20221103155033-bd3dd96f744e h1:0tcQcbMBoSwf8j0+oik+xzGosdyF4qVLKQ9KQbVLErc=
+github.com/eric2788/go-silk v0.0.0-20221103155033-bd3dd96f744e/go.mod h1:INo5wJ3/Qg6iPkfUjzH7Jn5HFWA2B/FDDMtXz5SJS1A=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.5.1 h1:mZcQUHVQUQWoPXXtuf9yuEXKudkV2sx1E06UadKWpgI=
