@@ -46,7 +46,7 @@ jobs:
             type=sha,event=branch,branch=master
             type=ref,event=tag
       - run: |
-          echo tag: ${{ steps.meta.outputs.tags }}
+          echo "tag: ${{ steps.meta.outputs.tags }}"
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
