@@ -14,10 +14,10 @@ RUN go build -v -o /go/bin/valbot
 FROM ubuntu:latest AS installer
 
 RUN apt-get -y update
-RUN apt-get -y upgrade
 RUN apt-get -y install ffmpeg
 RUN ffmpeg -version
-RUN which ffmpeg
+RUN whereis ffmpeg
+RUN echo $PATH
 
 FROM alpine:latest
 
