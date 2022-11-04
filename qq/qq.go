@@ -173,7 +173,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	persistGroupMsg := &PersistentGroupMessage{}
 	exist, err := redis.Get(key, persistGroupMsg)
 	if err != nil {
-		return nil, err
+		logger.Errorf("嘗試從 redis 獲取群組消息時出現錯誤: %v, 將使用 API 獲取", err)
 	} else if exist {
 		return persistGroupMsg.ToGroupMessage(), nil
 	}

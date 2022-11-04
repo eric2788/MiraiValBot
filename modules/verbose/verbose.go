@@ -2,6 +2,8 @@ package verbose
 
 import (
 	"fmt"
+	"sync"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
@@ -10,7 +12,6 @@ import (
 	"github.com/eric2788/MiraiValBot/file"
 	qq "github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/redis"
-	"sync"
 )
 
 type verbose struct {
