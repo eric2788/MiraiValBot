@@ -41,5 +41,6 @@ func init(){
 		nodes = append(nodes, command.NewNode([]string{name}, name, true, handler))
 	}
 	var testCommand = command.NewParent([]string{"test", "测试"}, "测试指令", nodes...)
+	testCommand.AdminOnly = true
 	command.AddCommand(testCommand)
 }
