@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -10,7 +11,7 @@ import (
 )
 
 func testSendMp3Voice(args []string, source *command.MessageSource) error {
-	data, err := request.GetBytesByUrl("https://genshin.azurewebsites.net/api/speak?format=mp3&text=测试测试&id=0")
+	data, err := request.GetBytesByUrl(fmt.Sprintf("https://genshin.azurewebsites.net/api/speak?format=mp3&text=%s&id=0", url.QueryEscape("测试测试")))
 	if err != nil {
 		return err
 	}
@@ -22,7 +23,7 @@ func testSendMp3Voice(args []string, source *command.MessageSource) error {
 }
 
 func testSendWavVoice(args []string, source *command.MessageSource) error {
-	data, err := request.GetBytesByUrl("https://genshin.azurewebsites.net/api/speak?format=wav&text=测试测试&id=0")
+	data, err := request.GetBytesByUrl(fmt.Sprintf("https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=0", url.QueryEscape("测试测试")))
 	if err != nil {
 		return err
 	}
