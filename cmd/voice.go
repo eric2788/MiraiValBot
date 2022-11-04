@@ -42,15 +42,10 @@ func voiceGenshin(args []string, source *command.MessageSource) error {
 	if err != nil {
 		return err
 	}
-
-	/*
-		voice, err := qq.NewVoiceByBytes(data)
-		if err != nil {
-			return err
-		}
-	*/
-
-	voice := &message.VoiceElement{Data: data}
+	voice, err := qq.NewVoiceByBytes(data)
+	if err != nil {
+		return err
+	}
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voice))
 }
 

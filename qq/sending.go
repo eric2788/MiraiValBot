@@ -210,9 +210,8 @@ func GetRandomMessageByTry(try int) []*message.TextElement {
 		random, err := GetRandomGroupMessage(ValGroupInfo.Uin)
 
 		if try > 2 { // 發送多一則隨機消息
-			for _, element := range GetRandomMessageByTry(1) { // 使用 1 確保不無限套娃
-				extras = append(extras, element)
-			}
+			// 使用 1 確保不無限套娃
+			extras = append(extras, GetRandomMessageByTry(1)...)
 		}
 
 		if err == nil && random != nil {
