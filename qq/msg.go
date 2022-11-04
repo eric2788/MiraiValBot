@@ -38,7 +38,7 @@ func NewTts(text string) (*message.GroupVoiceElement, error) {
 	return NewTtsWithGroup(ValGroupInfo.Uin, text)
 }
 
-func NewVoiceByUrl(url string) (*message.VoiceElement, error){
+func NewVoiceByUrl(url string) (*message.GroupVoiceElement, error){
 	data, err := request.GetBytesByUrl(url)
 	if err != nil{
 		return nil, err
@@ -46,8 +46,8 @@ func NewVoiceByUrl(url string) (*message.VoiceElement, error){
 	return NewVoiceByBytes(data)
 }
 
-func NewVoiceByBytes(b []byte) (*message.VoiceElement, error){
-	return &message.VoiceElement{Data: b}, nil
+func NewVoiceByBytes(b []byte) (*message.GroupVoiceElement, error){
+	return NewVoiceByBytesWithGroup(ValGroupInfo.Uin, b)
 }
 
 func NewVoiceByBytesWithGroup(gp int64, b []byte) (*message.GroupVoiceElement, error){
