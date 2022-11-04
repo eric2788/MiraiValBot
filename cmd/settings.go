@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
+	qq "github.com/eric2788/MiraiValBot/qq"
 )
 
 func yearlyCheck(args []string, source *command.MessageSource) error {
@@ -11,24 +11,24 @@ func yearlyCheck(args []string, source *command.MessageSource) error {
 		file.DataStorage.Setting.YearlyCheck = !file.DataStorage.Setting.YearlyCheck
 	})
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	var s string
 	if file.DataStorage.Setting.YearlyCheck {
 		s = "每年"
 	} else {
 		s = "每月"
 	}
-	reply.Append(qq2.NewTextf("已设置群精华消息检查间隔为 %s", s))
-	return qq2.SendGroupMessage(reply)
+	reply.Append(qq.NewTextf("已设置群精华消息检查间隔为 %s", s))
+	return qq.SendGroupMessage(reply)
 }
 
 func verbose(args []string, source *command.MessageSource) error {
 	file.UpdateStorage(func() {
 		file.DataStorage.Setting.Verbose = !file.DataStorage.Setting.Verbose
 	})
-	reply := qq2.CreateReply(source.Message)
-	reply.Append(qq2.NewTextf("成功切换广播状态为 %v", file.DataStorage.Setting.Verbose))
-	return qq2.SendGroupMessage(reply)
+	reply := qq.CreateReply(source.Message)
+	reply.Append(qq.NewTextf("成功切换广播状态为 %v", file.DataStorage.Setting.Verbose))
+	return qq.SendGroupMessage(reply)
 
 }
 
@@ -36,9 +36,9 @@ func verboseDelete(args []string, source *command.MessageSource) error {
 	file.UpdateStorage(func() {
 		file.DataStorage.Setting.VerboseDelete = !file.DataStorage.Setting.VerboseDelete
 	})
-	reply := qq2.CreateReply(source.Message)
-	reply.Append(qq2.NewTextf("已成功设置显示撤回消息为 %v", file.DataStorage.Setting.VerboseDelete))
-	return qq2.SendGroupMessage(reply)
+	reply := qq.CreateReply(source.Message)
+	reply.Append(qq.NewTextf("已成功设置显示撤回消息为 %v", file.DataStorage.Setting.VerboseDelete))
+	return qq.SendGroupMessage(reply)
 }
 
 var (

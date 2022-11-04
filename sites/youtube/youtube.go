@@ -3,6 +3,7 @@ package youtube
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/file"
@@ -19,14 +20,14 @@ func (m *messageHandler) PubSubPrefix() string {
 	return "ylive:"
 }
 
-func (m *messageHandler) ToLiveData(message *redis.Message) (interface{}, error) {
+func (m *messageHandler) ToLiveData(message *redis.Message) (*LiveInfo, error) {
 	var liveInfo = &LiveInfo{}
 	err := json.Unmarshal([]byte(message.Payload), liveInfo)
 	return liveInfo, err
 }
 
-func (m *messageHandler) GetCommand(data interface{}) string {
-	return data.(*LiveInfo).Status
+func (m *messageHandler) GetCommand(data *LiveInfo) string {
+	return data.Status
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
@@ -41,7 +42,7 @@ func (m *messageHandler) GetOfflineListening() []string {
 func (m *messageHandler) HandleError(bot *bot.Bot, error error) {
 }
 
-var MessageHandler = broadcaster.BuildHandle(logger, &messageHandler{})
+var MessageHandler = broadcaster.BuildHandle[LiveInfo](logger, &messageHandler{})
 
 func init() {
 	broadcaster.RegisterHandler("youtube", MessageHandler)

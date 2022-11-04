@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
@@ -42,6 +43,8 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在 %s 的直播间发送了一则消息", uname, data.LiveInfo.Name))
 
+	var dcImage *discordgo.MessageEmbedImage = nil
+
 	// is stamp
 	if obj, ok := base[13].(map[string]interface{}); ok {
 
@@ -55,12 +58,15 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 			//stamp.Width = int32(obj["width"].(float64))
 			msg.Append(qq.NewTextLn("表情包: "))
 			msg.Append(stamp)
+			dcImage = &discordgo.MessageEmbedImage{
+				URL: obj["url"].(string),
+			}
 		}
 
 		// discord
 		fields = append(fields, &discordgo.MessageEmbedField{
 			Name:   "表情包",
-			Value:  "[表情包](" + obj["url"].(string) + ")",
+			Value:  "![表情包](" + obj["url"].(string) + ")",
 			Inline: false,
 		})
 
@@ -71,7 +77,7 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 
 		// discord
 		fields = append(fields, &discordgo.MessageEmbedField{
-			Name:  "表情包",
+			Name:  "弹幕",
 			Value: danmu,
 		})
 
@@ -79,12 +85,8 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 
 	go discord.SendNewsEmbed(&discordgo.MessageEmbed{
 		Description: fmt.Sprintf("[%s](%s) 在 [%s](%s) 的直播间发送了一则讯息: ", uname, biliSpaceLink(uid), data.LiveInfo.Name, biliRoomLink(room)),
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:  "弹幕",
-				Value: danmu,
-			},
-		},
+		Fields:      fields,
+		Image:       dcImage,
 	})
 
 	return withBilibiliRisky(msg)
@@ -99,5 +101,5 @@ func biliRoomLink(room int64) string {
 }
 
 func init() {
-	bilibili.RegisterDataHandler(bilibili.DanmuMsg, HandleDanmuMsg)
+	bilibili.MessageHandler.AddHandler(bilibili.DanmuMsg, HandleDanmuMsg)
 }

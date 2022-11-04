@@ -23,7 +23,7 @@ type (
 )
 
 func (a *AtResponse) HookEvent(bot *bot.Bot) {
-	bot.OnGroupMessage(func(cl *client.QQClient, msg *message.GroupMessage) {
+	bot.GroupMessageEvent.Subscribe(func(cl *client.QQClient, msg *message.GroupMessage) {
 		content := qq.ParseMsgContent(msg.Elements)
 
 		if array.IndexOfInt64(content.At, cl.Uin) != -1 && len(content.Texts) > 0 {
@@ -35,7 +35,7 @@ func (a *AtResponse) HookEvent(bot *bot.Bot) {
 					break
 				}
 			}
-			
+
 		}
 	})
 }

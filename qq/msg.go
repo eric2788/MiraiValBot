@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/redis"
@@ -38,23 +39,23 @@ func NewTts(text string) (*message.GroupVoiceElement, error) {
 	return NewTtsWithGroup(ValGroupInfo.Uin, text)
 }
 
-func NewVoiceByUrl(url string) (*message.GroupVoiceElement, error){
+func NewVoiceByUrl(url string) (*message.GroupVoiceElement, error) {
 	data, err := request.GetBytesByUrl(url)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	return NewVoiceByBytes(data)
 }
 
-func NewVoiceByBytes(b []byte) (*message.GroupVoiceElement, error){
+func NewVoiceByBytes(b []byte) (*message.GroupVoiceElement, error) {
 	return NewVoiceByBytesWithGroup(ValGroupInfo.Uin, b)
 }
 
-func NewVoiceByBytesWithGroup(gp int64, b []byte) (*message.GroupVoiceElement, error){
-	return bot.Instance.UploadGroupPtt(gp, bytes.NewReader(b))
+func NewVoiceByBytesWithGroup(gp int64, b []byte) (*message.GroupVoiceElement, error) {
+	return bot.Instance.UploadVoice(NewGroupSource(gp), bytes.NewReader(b))
 }
 
-func NewVoiceByUrlWithGroup(gp int64, url string) (*message.GroupVoiceElement, error){
+func NewVoiceByUrlWithGroup(gp int64, url string) (*message.GroupVoiceElement, error) {
 	b, err := request.GetBytesByUrl(url)
 	if err != nil {
 		return nil, err
@@ -83,7 +84,7 @@ func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, e
 		return nil, err
 	}
 
-	voice, err = bot.Instance.UploadGroupPtt(gp, bytes.NewReader(data))
+	voice, err = bot.Instance.UploadVoice(NewGroupSource(gp), bytes.NewReader(data))
 	if err == nil {
 		redisError := redis.Store(key, voice)
 		if redisError != nil {
@@ -145,7 +146,7 @@ func NewTtsWithPrivate(uid int64, text string) (voice *message.PrivateVoiceEleme
 		return nil, err
 	}
 
-	voice, err = bot.Instance.UploadPrivatePtt(uid, bytes.NewReader(data))
+	voice, err = bot.Instance.UploadVoice(NewPrivateSource(uid), bytes.NewReader(data))
 	if err == nil {
 		redisError := redis.Store(key, voice)
 		if redisError != nil {
@@ -164,31 +165,37 @@ func NewImageByByte(img []byte) (*message.GroupImageElement, error) {
 }
 
 func NewImageByUrlWithPrivate(uid int64, url string) (*message.FriendImageElement, error) {
-	img, err := request.GetBytesByUrl(url)
+	b, err := request.GetBytesByUrl(url)
 	if err != nil {
 		return nil, err
 	}
-	reader := bytes.NewReader(img)
-	return bot.Instance.UploadPrivateImage(uid, reader)
+	return NewImagesByByteWithPrivate(uid, b)
 }
 
 func NewImageByUrlWithGroup(gp int64, url string) (*message.GroupImageElement, error) {
-	img, err := request.GetBytesByUrl(url)
+	b, err := request.GetBytesByUrl(url)
 	if err != nil {
 		return nil, err
 	}
-	reader := bytes.NewReader(img)
-	return bot.Instance.UploadGroupImage(gp, reader)
+	return NewImagesByByteWithGroup(gp, b)
 }
 
 func NewImagesByByteWithGroup(gp int64, img []byte) (*message.GroupImageElement, error) {
 	reader := bytes.NewReader(img)
-	return bot.Instance.UploadGroupImage(gp, reader)
+	imgElement, err := bot.Instance.UploadImage(NewGroupSource(gp), reader)
+	if err != nil {
+		return nil, err
+	}
+	return imgElement.(*message.GroupImageElement), nil
 }
 
 func NewImagesByByteWithPrivate(uid int64, img []byte) (*message.FriendImageElement, error) {
 	reader := bytes.NewReader(img)
-	return bot.Instance.UploadPrivateImage(uid, reader)
+	imgElement, err := bot.Instance.UploadImage(NewPrivateSource(uid), reader)
+	if err != nil {
+		return nil, err
+	}
+	return imgElement.(*message.FriendImageElement), nil
 }
 
 func NewVideoByUrl(url, thumbUrl string) (*message.ShortVideoElement, error) {
@@ -204,5 +211,19 @@ func NewVideoByUrlWithGroup(gp int64, url, thumbUrl string) (*message.ShortVideo
 	if err != nil {
 		return nil, fmt.Errorf("封面解析失敗(%v)", err)
 	}
-	return bot.Instance.UploadGroupShortVideo(gp, bytes.NewReader(video), bytes.NewReader(thumb))
+	return bot.Instance.UploadShortVideo(NewGroupSource(gp), bytes.NewReader(video), bytes.NewReader(thumb), 5)
+}
+
+func NewGroupSource(gp int64) message.Source {
+	return message.Source{
+		PrimaryID:  gp,
+		SourceType: message.SourceGroup,
+	}
+}
+
+func NewPrivateSource(uid int64) message.Source {
+	return message.Source{
+		PrimaryID:  uid,
+		SourceType: message.SourcePrivate,
+	}
 }

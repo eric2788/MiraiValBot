@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/qq"
@@ -45,5 +46,5 @@ func OnMatchesUpdated(_ *bot.Bot, data *valorant.MatchMetaDataSub) error {
 }
 
 func init() {
-	valorant.RegisterDataHandler(valorant.MatchesUpdated, OnMatchesUpdated)
+	valorant.MessageHandler.AddHandler(valorant.MatchesUpdated, OnMatchesUpdated)
 }

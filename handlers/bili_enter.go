@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
@@ -34,5 +35,5 @@ func HandleEnterRoom(bot *bot.Bot, data *bilibili.LiveData) error {
 }
 
 func init() {
-	bilibili.RegisterDataHandler(bilibili.InteractWord, HandleEnterRoom)
+	bilibili.MessageHandler.AddHandler(bilibili.InteractWord, HandleEnterRoom)
 }

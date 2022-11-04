@@ -2,16 +2,17 @@ package qq
 
 import (
 	"fmt"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/redis"
-	"math/rand"
-	"os"
-	"strings"
-	"time"
 )
 
 var ValGroupInfo = &client.GroupInfo{
@@ -70,9 +71,10 @@ func RefreshGroupInfo() {
 			ValGroupInfo.LastMsgSeq = ginfo.LastMsgSeq
 			ValGroupInfo.Code = ginfo.Code
 			ValGroupInfo.GroupLevel = ginfo.GroupLevel
-			ValGroupInfo.Memo = ginfo.Memo
+			ValGroupInfo.OwnerUin = ginfo.OwnerUin
 			ValGroupInfo.MaxMemberCount = ginfo.MaxMemberCount
 			ValGroupInfo.OwnerUin = ginfo.OwnerUin
+			ValGroupInfo.MemberCount = ginfo.MemberCount
 		}
 	})
 }
@@ -151,7 +153,17 @@ func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.G
 		// 略過機器人訊息
 		return getRandomGroupMessageWithInfo(gp, info)
 	}
-	return GetGroupMessage(gp, id)
+	msg, err := GetGroupMessage(gp, id)
+	if err != nil {
+		return nil, err
+	} else if msg.Sender.Uin == bot.Instance.Uin {
+		// 不要機器人自己發過的訊息
+		logger.Infof("獲取的隨機群訊息為機器人訊息，正在重新獲取...")
+		botSaid.Add(msg.Id)
+		<-time.After(time.Second) // 緩衝
+		return GetRandomGroupMessage(gp)
+	}
+	return msg, nil
 }
 
 func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
@@ -161,7 +173,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	persistGroupMsg := &PersistentGroupMessage{}
 	exist, err := redis.Get(key, persistGroupMsg)
 	if err != nil {
-		return nil, err
+		logger.Errorf("嘗試從 redis 獲取群組消息時出現錯誤: %v, 將使用 API 獲取", err)
 	} else if exist {
 		return persistGroupMsg.ToGroupMessage(), nil
 	}
@@ -185,17 +197,13 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	}
 	if len(msgList) > 0 {
 		msg := msgList[0]
-		if msg.Sender.Uin == bot.Instance.Uin {
-			// 不要機器人自己發過的訊息
-			logger.Infof("獲取的隨機群訊息為機器人訊息，正在重新獲取...")
-			botSaid.Add(msg.Id)
-			<-time.After(time.Second) // 緩衝
-			return GetRandomGroupMessage(groupCode)
-		}
-		persistGroupMsg.Parse(msg)
-		err = redis.Store(key, persistGroupMsg)
-		if err != nil {
-			logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+		// 非 bot 訊息才儲存
+		if msg.Sender.Uin != bot.Instance.Uin {
+			persistGroupMsg.Parse(msg)
+			err = redis.Store(key, persistGroupMsg)
+			if err != nil {
+				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+			}
 		}
 		return msg, nil
 	} else {

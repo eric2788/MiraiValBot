@@ -31,5 +31,5 @@ func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 }
 
 func init() {
-	twitter.RegisterDataHandler(twitter.Tweet, HandleTweet)
+	twitter.MessageHandler.AddHandler(twitter.Tweet, HandleTweet)
 }

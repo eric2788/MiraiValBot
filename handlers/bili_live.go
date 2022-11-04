@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
@@ -56,5 +57,5 @@ func handleLiveDiscord(data *bilibili.LiveData) {
 }
 
 func init() {
-	bilibili.RegisterDataHandler(bilibili.Live, HandleLive)
+	bilibili.MessageHandler.AddHandler(bilibili.Live, HandleLive)
 }

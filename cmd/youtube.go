@@ -7,7 +7,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
+	qq "github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/sites/youtube"
 )
@@ -18,14 +18,14 @@ func yBroadcastIdle(args []string, source *command.MessageSource) error {
 		file.DataStorage.Youtube.BroadcastIdle = !file.DataStorage.Youtube.BroadcastIdle
 	})
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	if file.DataStorage.Youtube.BroadcastIdle {
-		reply.Append(qq2.NewTextf("已开启直播结束广播。"))
+		reply.Append(qq.NewTextf("已开启直播结束广播。"))
 	} else {
-		reply.Append(qq2.NewTextf("已关闭直播结束广播。"))
+		reply.Append(qq.NewTextf("已关闭直播结束广播。"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 func yAntiDuplicate(args []string, source *command.MessageSource) error {
@@ -33,13 +33,13 @@ func yAntiDuplicate(args []string, source *command.MessageSource) error {
 		file.DataStorage.Youtube.AntiDuplicate = !file.DataStorage.Youtube.AntiDuplicate
 	})
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	if file.DataStorage.Youtube.AntiDuplicate {
-		reply.Append(qq2.NewTextf("已开启重复广播过滤。"))
+		reply.Append(qq.NewTextf("已开启重复广播过滤。"))
 	} else {
-		reply.Append(qq2.NewTextf("已关闭重复广播过滤。"))
+		reply.Append(qq.NewTextf("已关闭重复广播过滤。"))
 	}
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 func yConvert(args []string, source *command.MessageSource) error {
@@ -50,50 +50,50 @@ func yConvert(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	reply := qq2.CreateReply(source.Message)
-	reply.Append(qq2.NewTextf("该链接的频道URL为: %s", id))
+	reply := qq.CreateReply(source.Message)
+	reply.Append(qq.NewTextf("该链接的频道URL为: %s", id))
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 func yListen(args []string, source *command.MessageSource) error {
 	channelId := args[0]
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	result, err := youtube.StartListen(channelId)
 	if err != nil {
-		reply.Append(qq2.NewTextf("启动监听时出现错误: %v", err))
+		reply.Append(qq.NewTextf("启动监听时出现错误: %v", err))
 	} else if result {
-		reply.Append(qq2.NewTextf("开始监听频道 %s", channelId))
+		reply.Append(qq.NewTextf("开始监听频道 %s", channelId))
 	} else {
-		reply.Append(qq2.NewTextf("频道 %s 已启动监听", channelId))
+		reply.Append(qq.NewTextf("频道 %s 已启动监听", channelId))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 func yTerminate(args []string, source *command.MessageSource) error {
 	channelId := args[0]
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 
 	result, err := youtube.StopListen(channelId)
 
 	if err != nil {
-		reply.Append(qq2.NewTextf("中止监听时出现错误: %v", err))
+		reply.Append(qq.NewTextf("中止监听时出现错误: %v", err))
 	} else if result {
-		reply.Append(qq2.NewTextf("已中止监听频道(%s)。", channelId))
+		reply.Append(qq.NewTextf("已中止监听频道(%s)。", channelId))
 	} else {
 		reply.Append(message.NewText("你尚未开始监听此频道。"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 
 }
 
 func yListening(args []string, source *command.MessageSource) error {
 	listening := file.DataStorage.Listening.Youtube.ToArr()
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	if len(listening) > 0 {
 
 		channelNames := make([]string, len(listening))
@@ -110,12 +110,12 @@ func yListening(args []string, source *command.MessageSource) error {
 			}
 		}
 
-		reply.Append(qq2.NewTextf("正在监听的频道: %v", strings.Join(channelNames, ", ")))
+		reply.Append(qq.NewTextf("正在监听的频道: %v", strings.Join(channelNames, ", ")))
 	} else {
-		reply.Append(qq2.NewTextf("没有监听的频道"))
+		reply.Append(qq.NewTextf("没有监听的频道"))
 	}
 
-	return qq2.SendWithRandomRiskyStrategy(reply)
+	return qq.SendWithRandomRiskyStrategy(reply)
 }
 
 var (

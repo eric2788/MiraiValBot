@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
@@ -56,5 +57,5 @@ func HandleSuperChatMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 }
 
 func init() {
-	bilibili.RegisterDataHandler(bilibili.SuperChatMessage, HandleSuperChatMsg)
+	bilibili.MessageHandler.AddHandler(bilibili.SuperChatMessage, HandleSuperChatMsg)
 }

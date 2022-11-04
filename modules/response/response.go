@@ -54,7 +54,7 @@ func (r *response) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 }
 
 func (r *response) HookEvent(bot *bot.Bot) {
-	bot.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
+	bot.GroupMessageEvent.Subscribe(func(c *client.QQClient, msg *message.GroupMessage) {
 		content := msg.ToString()
 
 		if res, ok := file.DataStorage.Responses[content]; ok {

@@ -4,32 +4,32 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
+	qq "github.com/eric2788/MiraiValBot/qq"
 	"github.com/eric2788/common-utils/datetime"
 )
 
 func check(args []string, source *command.MessageSource) error {
 
-	ats := qq2.ParseMsgContent(source.Message.Elements).At
+	ats := qq.ParseMsgContent(source.Message.Elements).At
 
 	for _, at := range ats {
-		if member := qq2.FindGroupMember(at); member != nil {
+		if member := qq.FindGroupMember(at); member != nil {
 			msg := message.NewSendingMessage()
 
-			msg.Append(qq2.NewTextfLn("UID: %d", member.Uin))
-			msg.Append(qq2.NewTextfLn("名称: %s", member.Nickname))
-			if qq2.IsMuted(member.Uin) {
-				msg.Append(qq2.NewTextfLn("禁言结束时间: %s", datetime.FromSeconds(member.ShutUpTimestamp)))
+			msg.Append(qq.NewTextfLn("UID: %d", member.Uin))
+			msg.Append(qq.NewTextfLn("名称: %s", member.Nickname))
+			if qq.IsMuted(member.Uin) {
+				msg.Append(qq.NewTextfLn("禁言结束时间: %s", datetime.FromSeconds(member.ShutUpTimestamp)))
 			}
-			msg.Append(qq2.NewTextfLn("显示名称: %s", member.DisplayName()))
-			msg.Append(qq2.NewTextfLn("性别: %s", genderName(member.Gender)))
-			msg.Append(qq2.NewTextfLn("加入日期: %s", datetime.FormatSeconds(member.JoinTime)))
-			msg.Append(qq2.NewTextfLn("权限: %s", permissionName(member.Permission)))
-			msg.Append(qq2.NewTextfLn("最后发言时间: %s", datetime.FormatSeconds(member.LastSpeakTime)))
-			msg.Append(qq2.NewTextfLn("等级: %d", member.Level))
-			msg.Append(qq2.NewTextf("特别头衔: %s", member.SpecialTitle))
+			msg.Append(qq.NewTextfLn("显示名称: %s", member.DisplayName()))
+			msg.Append(qq.NewTextfLn("性别: %s", genderName(member.Gender)))
+			msg.Append(qq.NewTextfLn("加入日期: %s", datetime.FormatSeconds(member.JoinTime)))
+			msg.Append(qq.NewTextfLn("权限: %s", permissionName(member.Permission)))
+			msg.Append(qq.NewTextfLn("最后发言时间: %s", datetime.FormatSeconds(member.LastSpeakTime)))
+			msg.Append(qq.NewTextfLn("等级: %d", member.Level))
+			msg.Append(qq.NewTextf("特别头衔: %s", member.SpecialTitle))
 
-			if err := qq2.SendGroupMessage(msg); err != nil {
+			if err := qq.SendGroupMessage(msg); err != nil {
 				return err
 			}
 		}
