@@ -1,6 +1,9 @@
 package aichat
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 
 var chats = map[string]AIReply{
@@ -13,6 +16,10 @@ func TestGetXiaoAi(t *testing.T) {
 
 	msg, err := aichat.Reply("你好，你叫什么？")
 	if err != nil {
+		if strings.Contains(err.Error(), "timeout") {
+			t.Log(err)
+			return
+		}
 		t.Fatal(err)
 	}
 
@@ -24,6 +31,10 @@ func TestQingYunKe(t *testing.T) {
 
 	msg, err := aichat.Reply("你好，你叫什么？")
 	if err != nil {
+		if strings.Contains(err.Error(), "timeout") {
+			t.Log(err)
+			return
+		}
 		t.Fatal(err)
 	}
 
