@@ -15,8 +15,9 @@ type Configuration struct {
 }
 
 type BotConfig struct {
-	Account  int64  `yaml:"account"`
-	Password string `yaml:"password"`
+	LoginMethod string `yaml:"loginmethod"`
+	Account     int64  `yaml:"account"`
+	Password    string `yaml:"password"`
 }
 
 type ValConfig struct {
@@ -42,8 +43,9 @@ type DiscordConfig struct {
 
 var defaultConfig = Configuration{
 	Bot: BotConfig{
-		Account:  123456789,
-		Password: "password",
+		LoginMethod: "qrcode",
+		Account:     123456789,
+		Password:    "password",
 	},
 	Val: ValConfig{
 		GroupId:          123456789,
