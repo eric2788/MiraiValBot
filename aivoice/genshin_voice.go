@@ -98,6 +98,6 @@ func GetGenshinVoice(msg, actor string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		return WavToAmr(b)
+		return WavToSilk(b)
 	}
 }

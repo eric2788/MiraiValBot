@@ -1,19 +1,20 @@
-FROM golang:1.17 AS builder
+FROM golang:1.17-alpine AS builder
 
 WORKDIR /app
 
 COPY . .
 
 # install timzone data
-# RUN apk add --no-cache tzdata
+RUN apk add --no-cache tzdata
 
 RUN go mod tidy -compat="1.17"
 RUN go mod download
 RUN go build -v -o /go/bin/valbot
 
-FROM linuxserver/ffmpeg
+FROM alpine:latest
 
-RUN ffmpeg -version
+RUN apk add --no-cache ffmpeg
+
 # copy timezone info from builder
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /go/bin/valbot /valbot

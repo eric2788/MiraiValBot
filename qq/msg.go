@@ -39,7 +39,11 @@ func NewTts(text string) (*message.GroupVoiceElement, error) {
 }
 
 func NewVoiceByUrl(url string) (*message.GroupVoiceElement, error){
-	return NewVoiceByUrlWithGroup(ValGroupInfo.Uin, url)
+	data, err := request.GetBytesByUrl(url)
+	if err != nil{
+		return nil, err
+	}
+	return NewVoiceByBytes(data)
 }
 
 func NewVoiceByBytes(b []byte) (*message.GroupVoiceElement, error){
