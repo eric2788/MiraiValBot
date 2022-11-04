@@ -4,10 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/eric2788/go-silk/silk"
-	ffmpeg_go "github.com/u2takey/ffmpeg-go"
 	"log"
 	"os"
+	"os/exec"
+
+	"github.com/eric2788/go-silk/multiplat"
+	ffmpeg_go "github.com/u2takey/ffmpeg-go"
+	silk "github.com/wdvxdr1123/go-silk"
 )
 
 const (
@@ -18,15 +21,29 @@ const (
 )
 
 func WavToSilk(b []byte) (data []byte, err error) {
-	encoder := &silk.Encoder{}
-	err = encoder.Init("/cache", "/codec")
+	md := md5.Sum(b)
+	tempName := hex.EncodeToString(md[:])
+
+	wav, pcm := tempName+".wav", tempName+".pcm"
+
+	err = os.WriteFile(wav, b, os.ModePerm)
 	if err != nil {
 		return nil, err
 	}
-	bb := md5.Sum(b)
-	tempName := hex.EncodeToString(bb[:])
-	data, err = encoder.EncodeToSilk(b, tempName, false)
-	return
+	defer os.Remove(wav)
+
+	// 2.转换pcm
+	cmd := exec.Command("ffmpeg", "-i", wav, "-f", "s16le", "-ar", "24000", "-ac", "1", pcm)
+	multiplat.HideWindow(cmd)
+	if err = cmd.Run(); err != nil {
+		return nil, err
+	}
+	defer os.Remove(pcm)
+	pcmByte, err := os.ReadFile(pcm)
+	if err != nil {
+		return nil, err
+	}
+	return silk.EncodePcmBuffToSilk(pcmByte, 24000, 24000, true)
 }
 
 // WavToAmr Wav To Amr file
