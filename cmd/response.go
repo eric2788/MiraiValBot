@@ -4,17 +4,17 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
+	qq "github.com/eric2788/MiraiValBot/qq"
 )
 
 func checkRes(args []string, source *command.MessageSource) error {
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 	reply.Append(message.NewText("回应列表: ")).Append(message.NewText("\n"))
 	for content, res := range file.DataStorage.Responses {
-		reply.Append(qq2.NewTextf("%s: %s\n", content, res))
+		reply.Append(qq.NewTextf("%s: %s\n", content, res))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 func setRes(args []string, source *command.MessageSource) error {
@@ -25,14 +25,14 @@ func setRes(args []string, source *command.MessageSource) error {
 		file.DataStorage.Responses[content] = res
 	})
 
-	reply := qq2.CreateReply(source.Message).Append(qq2.NewTextf("已成功设置 %s 的回应为 %s。", content, res))
-	return qq2.SendGroupMessage(reply)
+	reply := qq.CreateReply(source.Message).Append(qq.NewTextf("已成功设置 %s 的回应为 %s。", content, res))
+	return qq.SendGroupMessage(reply)
 }
 
 func removeRes(args []string, source *command.MessageSource) error {
 	content := args[0]
 
-	reply := qq2.CreateReply(source.Message)
+	reply := qq.CreateReply(source.Message)
 
 	if _, ok := file.DataStorage.Responses[content]; !ok {
 		reply.Append(message.NewText("找不到这个文字。"))
@@ -44,7 +44,7 @@ func removeRes(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("移除成功。"))
 	}
 
-	return qq2.SendGroupMessage(reply)
+	return qq.SendGroupMessage(reply)
 }
 
 var (

@@ -2,10 +2,11 @@ package file
 
 import (
 	"fmt"
-	"github.com/eric2788/common-utils/set"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/eric2788/common-utils/set"
+	"github.com/stretchr/testify/assert"
 )
 
 var bilibili = &DataStorage.Bilibili

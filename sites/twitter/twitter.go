@@ -3,6 +3,7 @@ package twitter
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
@@ -16,14 +17,14 @@ func (m *messageHandler) PubSubPrefix() string {
 	return "twitter:"
 }
 
-func (m *messageHandler) ToLiveData(message *redis.Message) (interface{}, error) {
+func (m *messageHandler) ToLiveData(message *redis.Message) (*TweetStreamData, error) {
 	var twitterStream = &TweetStreamData{}
 	err := json.Unmarshal([]byte(message.Payload), twitterStream)
 	return twitterStream, err
 }
 
-func (m *messageHandler) GetCommand(data interface{}) string {
-	return data.(*TweetStreamData).GetCommand()
+func (m *messageHandler) GetCommand(data *TweetStreamData) string {
+	return data.GetCommand()
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
@@ -38,7 +39,7 @@ func (m *messageHandler) GetOfflineListening() []string {
 func (m *messageHandler) HandleError(bot *bot.Bot, error error) {
 }
 
-var MessageHandler = broadcaster.BuildHandle(logger, &messageHandler{})
+var MessageHandler = broadcaster.BuildHandle[TweetStreamData](logger, &messageHandler{})
 
 func init() {
 	broadcaster.RegisterHandler("twitter", MessageHandler)

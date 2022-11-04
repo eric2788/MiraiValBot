@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/discord"
 	"github.com/eric2788/MiraiValBot/file"
@@ -22,5 +23,5 @@ func HandleUpcomingEvent(bot *bot.Bot, info *youtube.LiveInfo) error {
 }
 
 func init() {
-	youtube.RegisterDataHandler(youtube.UpComing, HandleUpcomingEvent)
+	youtube.MessageHandler.AddHandler(youtube.UpComing, HandleUpcomingEvent)
 }

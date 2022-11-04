@@ -19,7 +19,7 @@ type command struct {
 }
 
 func (c *command) HookEvent(bot *bot.Bot) {
-	bot.OnGroupMessage(func(ct *client.QQClient, msg *message.GroupMessage) {
+	bot.GroupMessageEvent.Subscribe(func(ct *client.QQClient, msg *message.GroupMessage) {
 
 		// 非瓦群無視
 		if msg.GroupCode != file.ApplicationYaml.Val.GroupId {
@@ -103,7 +103,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 	})
 
 	// 瓦群成员自动接受好友邀请
-	bot.OnNewFriendRequest(func(ct *client.QQClient, req *client.NewFriendRequest) {
+	bot.NewFriendRequestEvent.Subscribe(func(ct *client.QQClient, req *client.NewFriendRequest) {
 		if qq.FindGroupMember(req.RequesterUin) == nil {
 			logger.Infof("%s (%d) 非瓦群成員，已無視好友邀請。", req.RequesterNick, req.RequesterUin)
 			req.Reject()

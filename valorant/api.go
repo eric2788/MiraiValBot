@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -33,23 +32,6 @@ const (
 )
 
 var (
-	AllowedSeasons = set.FromStrArr([]string{
-		"e5a3",
-		"e5a2",
-		"e5a1",
-		"e4a3",
-		"e4a2",
-		"e4a1",
-		"e3a3",
-		"e3a2",
-		"e3a1",
-		"e2a3",
-		"e2a2",
-		"e2a1",
-		"e1a3",
-		"e1a2",
-		"e1a1",
-	})
 	AllowedModes = set.FromStrArr([]string{
 		"competitive",
 		"unrated",
@@ -249,8 +231,8 @@ func GetMMRDetailsV2(name, tag string, region Region) (*MMRV2Details, error) {
 }
 
 func GetMMRDetailsBySeason(name, tag, filter string, region Region) (*MMRV2SeasonDetails, error) {
-	if !AllowedSeasons.Contains(filter) {
-		return nil, fmt.Errorf("无效的赛季: %v, 可用的赛季: %s", filter, strings.Join(AllowedSeasons.ToArr(), ", "))
+	if !seasonRegex.Match([]byte(filter)) {
+		return nil, fmt.Errorf("赛季格式无效: %v, 格式为: e[赛季]a[章节]", filter)
 	}
 	resp, err := getRequest(fmt.Sprintf("%v/mmr/%s/%s/%s?filter=%s", V2, region, name, tag, filter))
 	if err != nil {

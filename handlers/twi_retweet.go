@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/bwmarrin/discordgo"
@@ -86,6 +87,6 @@ func HandleReTweetWithText(_ *bot.Bot, data *twitter.TweetStreamData) error {
 }
 
 func init() {
-	twitter.RegisterDataHandler(twitter.ReTweet, HandleReTweet)
-	twitter.RegisterDataHandler(twitter.ReTweetWithText, HandleReTweetWithText)
+	twitter.MessageHandler.AddHandler(twitter.ReTweet, HandleReTweet)
+	twitter.MessageHandler.AddHandler(twitter.ReTweetWithText, HandleReTweetWithText)
 }
