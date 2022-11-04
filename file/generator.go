@@ -15,7 +15,7 @@ type Configuration struct {
 }
 
 type BotConfig struct {
-	LoginMethod string `yaml:"loginmethod"`
+	LoginMethod string `yaml:"login-method"`
 	Account     int64  `yaml:"account"`
 	Password    string `yaml:"password"`
 }
