@@ -16,7 +16,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
 	github.com/u2takey/ffmpeg-go v0.4.1
-	github.com/wdvxdr1123/go-silk v0.0.0-20220304095002-f67345df09ea
+	github.com/wdvxdr1123/go-silk v0.0.0-20210316130616-d47b553def60
 	gopkg.in/yaml.v3 v3.0.1
 )
 
