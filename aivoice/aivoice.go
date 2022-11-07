@@ -8,17 +8,13 @@ import (
 	"os/exec"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/eric2788/go-silk/multiplat"
-	ffmpeg_go "github.com/u2takey/ffmpeg-go"
 	silk "github.com/wdvxdr1123/go-silk"
 )
 
 var logger = utils.GetModuleLogger("valbot.aivoice")
 
 const (
-	AudioSamplingRateMP3  = "22050"
 	AudioBitRate          = "12.2k" // in Hz
-	NumberOfAudioChannels = "1"
 	AudioSamplingRateAMR  = "8000"
 )
 
@@ -38,7 +34,6 @@ func WavToSilk(b []byte) (data []byte, err error) {
 	logger.Infof("converting to pcm...")
 	cmd := exec.Command("ffmpeg", "-i", wav, "-f", "s16le", "-ar", "24000", "-ac", "1", pcm)
 	logger.Infof("converted to pcm: %s", pcm)
-	multiplat.HideWindow(cmd)
 	if err = cmd.Run(); err != nil {
 		return nil, err
 	}
@@ -75,8 +70,7 @@ func WavToAmr(b []byte) (data []byte, err error) {
 	}
 	logger.Info("converting to amr: ", f.Name())
 	// Convert to AMR
-	comm := ffmpeg_go.Input(name+".wav").Output(name+".amr", ffmpeg_go.KwArgs{"ar": AudioSamplingRateAMR, "ab": AudioBitRate})
-	//comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ar", AudioSamplingRateAMR, name+".amr")
+	comm := exec.Command("ffmpeg", "-i", "./"+name+".wav", "-ab", AudioBitRate, "-ar", AudioSamplingRateAMR, name+".amr")
 	if err = comm.Run(); err != nil {
 		return nil, err
 	}
