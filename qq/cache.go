@@ -62,7 +62,7 @@ func saveGroupImages(msg *message.GroupMessage) {
 			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
 			continue
 		}
-		compressed := compress.DoZlibCompress(b)
+		compressed := compress.DoCompress(b)
 		err = os.WriteFile(cacheDirPath+imagePath+name, compressed, os.ModePerm)
 		if err != nil {
 			logger.Errorf("緩存圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
@@ -82,7 +82,7 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 			var img *message.GroupImageElement
 
 			if err == nil {
-				b := compress.DoZlibUnCompress(compressed)
+				b := compress.DoUnCompress(compressed)
 				img, err = NewImagesByByteWithGroup(gp, b)
 				if err != nil {
 					logger.Errorf("群圖片上傳失敗: %v, 將使用QQ查詢", err)
@@ -171,7 +171,7 @@ func saveGroupEssenceErr(msg *message.GroupMessage) error {
 		return err
 	}
 
-	compressed := compress.DoZlibCompress(buffer.Bytes())
+	compressed := compress.DoCompress(buffer.Bytes())
 	err = os.WriteFile(cacheDirPath+essencePath+fmt.Sprint(msg.Id), compressed, os.ModePerm)
 	if err != nil {
 		logger.Errorf("缓存群精华消息时出现错误: %v", err)
@@ -239,7 +239,7 @@ func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error)
 	compressed, err := os.ReadFile(cacheDirPath + essencePath + fmt.Sprint(msg))
 
 	if err == nil {
-		b := compress.DoZlibUnCompress(compressed)
+		b := compress.DoUnCompress(compressed)
 		persit := &PersistentGroupMessage{}
 		buffer := bytes.NewBuffer(b)
 		dec := gob.NewDecoder(buffer)

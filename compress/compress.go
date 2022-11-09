@@ -10,15 +10,19 @@ import (
 
 var logger = utils.GetModuleLogger("valbot.compress")
 
-func DoZlibCompress(src []byte) []byte {
+func DoCompress(src []byte) []byte {
 	var in bytes.Buffer
-	w := zlib.NewWriter(&in)
+	w, _ := zlib.NewWriterLevel(&in, zlib.BestCompression)
 	defer w.Close()
 	w.Write(src)
+	if err := w.Flush(); err != nil {
+		logger.Errorf("压缩失败: %v, 将返回原本的数据", err)
+		return src
+	}
 	return in.Bytes()
 }
 
-func DoZlibUnCompress(compressSrc []byte) []byte {
+func DoUnCompress(compressSrc []byte) []byte {
 	b := bytes.NewReader(compressSrc)
 	var out bytes.Buffer
 	r, err := zlib.NewReader(b)

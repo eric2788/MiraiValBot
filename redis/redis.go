@@ -83,14 +83,14 @@ func StoreProtoTemp(key string, arg interface{}) error {
 }
 
 func StoreBytes(key string, data []byte, duration time.Duration) error {
-	data = compress.DoZlibCompress(data)
+	data = compress.DoCompress(data)
 	return rdb.Set(ctx, key, data, duration).Err()
 }
 
 func GetBytes(key string) ([]byte, bool, error) {
 	b, err := rdb.Get(ctx, key).Bytes()
-	if b != nil && len(b) > 0 {
-		b = compress.DoZlibUnCompress(b)
+	if b != nil {
+		b = compress.DoUnCompress(b)
 	}
 	return b, err == rgo.Nil, err
 }
