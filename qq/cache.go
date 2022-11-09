@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -49,14 +50,14 @@ func saveGroupImages(msg *message.GroupMessage) {
 
 		b, err := request.GetBytesByUrl(url)
 		if err != nil {
-			logger.Errorf("下載圖片 %s(%s) 時出現錯誤: %v", imageId, name, err)
+			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
 			return
 		}
 		err = os.WriteFile(fmt.Sprintf("%s%s/%s", cacheDirPath, "images", name), b, os.ModePerm)
 		if err != nil {
-			logger.Errorf("緩存圖片 %s(%s) 時出現錯誤: %v", imageId, name, err)
+			logger.Errorf("緩存圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
 		} else {
-			logger.Infof("緩存圖片 %s(%s) 成功。", imageId, name)
+			logger.Infof("緩存圖片 %s 成功。", strings.ToLower(imageId))
 		}
 	}
 }
@@ -75,7 +76,7 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 				if err != nil {
 					logger.Errorf("群圖片上傳失敗: %v, 將使用QQ查詢", err)
 				} else {
-					logger.Infof("恢复缓存图片 %s 成功。", name)
+					logger.Infof("恢复缓存图片 %s 成功。", strings.ToLower(groupImage.ImageId))
 				}
 			} else {
 
@@ -89,8 +90,6 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 					} else {
 						logger.Warnf("群图片上传失败: %v", err)
 					}
-				} else {
-					logger.Errorf("获取群图片下载链接失败: %v", err)
 				}
 			}
 
@@ -100,7 +99,21 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 					logger.Errorf("QQ查詢群圖片失敗: %v, 將繼續使用舊元素發送。", err)
 					img = groupImage
 				} else {
-					logger.Infof("查询图片 %s 成功。", name)
+					logger.Infof("查询图片 %s 成功。", strings.ToLower(groupImage.ImageId))
+
+					//查詢成功后下載
+					url := img.Url
+					b, err := request.GetBytesByUrl(url)
+					if err != nil {
+						logger.Errorf("下載查詢圖片 %s 時出現錯誤: %v", strings.ToLower(groupImage.ImageId), name, err)
+					} else {
+						err = os.WriteFile(fmt.Sprintf("%s%s/%s", cacheDirPath, "images", name), b, os.ModePerm)
+						if err != nil {
+							logger.Errorf("緩存查詢圖片 %s 時出現錯誤: %v", strings.ToLower(groupImage.ImageId), err)
+						} else {
+							logger.Infof("緩存查詢圖片 %s 成功。", strings.ToLower(groupImage.ImageId))
+						}
+					}
 				}
 			}
 
