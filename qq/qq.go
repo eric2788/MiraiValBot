@@ -182,6 +182,8 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 		logger.Errorf("嘗試從 redis 獲取群組消息時出現錯誤: %v, 將使用 API 獲取", err)
 	} else if exist {
 		if msg, err := persistGroupMsg.ToGroupMessage(); err == nil {
+			//修復圖片
+			fixGroupImages(groupCode, msg)
 			return msg, nil
 		} else {
 			logger.Errorf("嘗試從 redis 解析 群組消息 時出現錯誤: %v, 將使用 API 獲取", err)

@@ -66,6 +66,44 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 		}
 
 	})
+
+	qBot.GroupDigestEvent.Subscribe(func(cli *client.QQClient, event *client.GroupDigestEvent) {
+		gp := event.GroupCode
+		msgId := event.MessageID
+		add := event.OperationType == 1
+
+		// 非瓦群无视
+		if gp != ValGroupInfo.Code {
+			return
+		}
+
+		if add {
+			logger.Infof(
+				"群 %v 内 %v 将 %v 的消息(%v)设为了精华消息.",
+				ValGroupInfo.Name,
+				event.OperatorNick,
+				event.SenderNick,
+				msgId,
+			)
+
+			if msg, err := GetGroupMessage(gp, int64(msgId)); err == nil {
+				go saveGroupEssence(msg)
+			} else {
+				logger.Errorf("尝试获取该群精华消息 %d 时出现错误: %v", msgId, err)
+			}
+
+		} else {
+			logger.Infof(
+				"群 %v 内 %v 将 %v 的消息(%v)移出了精华消息.",
+				ValGroupInfo.Name,
+				event.OperatorNick,
+				event.SenderNick,
+				msgId,
+			)
+			go removeGroupEssence(int64(msgId))
+		}
+
+	})
 }
 
 func init() {

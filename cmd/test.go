@@ -42,8 +42,8 @@ var testCommands = []command.CmdHandler{
 func init() {
 	nodes := make([]command.Node, len(testCommands))
 	for i, handler := range testCommands {
-		name := fmt.Sprintf("%d", i)
-		nodes = append(nodes, command.NewNode([]string{name}, name, true, handler))
+		name := fmt.Sprintf("%d", i+1)
+		nodes[i] = command.NewNode([]string{name}, name, true, handler)
 	}
 	var testCommand = command.NewParent([]string{"test", "测试"}, "测试指令", nodes...)
 	testCommand.AdminOnly = true
