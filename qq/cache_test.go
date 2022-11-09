@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/compress"
 )
 
 const imgUrl = "https://media.valorant-api.com/competitivetiers/564d8e28-c226-3180-6285-e48a390db8b1/3/ranktriangleupicon.png"
@@ -25,13 +26,15 @@ func TestSaveImage(t *testing.T) {
 	saveGroupImages(groupMessage)
 }
 
-func TestGetImage(t *testing.T){
+func TestGetImage(t *testing.T) {
 	hash := md5.Sum([]byte(imgUrl))
 	fileName := hex.EncodeToString(hash[:])
-	b, err := os.ReadFile(cacheDirPath+imagePath+fileName)
+	b, err := os.ReadFile(cacheDirPath + imagePath + fileName)
 	if err != nil {
 		t.Log(err)
-	}else{
+	} else {
 		t.Logf("file size: %d", len(b))
+		b = compress.DoUnCompress(b)
+		t.Logf("file size (uncompressed): %d", len(b))
 	}
 }
