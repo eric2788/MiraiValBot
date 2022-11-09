@@ -171,7 +171,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	key := GroupKey(groupCode, fmt.Sprintf("msg:%d", seq))
 
 	persistGroupMsg := &PersistentGroupMessage{}
-	exist, err := redis.Get(key, persistGroupMsg)
+	exist, err := redis.GetProto(key, persistGroupMsg)
 	if err != nil {
 		logger.Errorf("嘗試從 redis 獲取群組消息時出現錯誤: %v, 將使用 API 獲取", err)
 	} else if exist {
@@ -200,7 +200,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 		// 非 bot 訊息才儲存
 		if msg.Sender.Uin != bot.Instance.Uin {
 			persistGroupMsg.Parse(msg)
-			err = redis.Store(key, persistGroupMsg)
+			err = redis.StoreProto(key, persistGroupMsg)
 			if err != nil {
 				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
 			}

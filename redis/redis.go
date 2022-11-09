@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/RomiChan/protobuf/proto"
 	"github.com/eric2788/MiraiValBot/file"
 	rgo "github.com/go-redis/redis/v8"
 )
@@ -46,26 +47,6 @@ func HasKey(key string) (bool, error) {
 	return re == 1, err
 }
 
-func Store(key string, arg interface{}) error {
-	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, buffer.Bytes(), Permanent)
-}
-
-func StoreTemp(key string, arg interface{}) error {
-	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, buffer.Bytes(), ShortMoment)
-}
-
 func StoreTimely(key string, arg interface{}, duration time.Duration) error {
 	var buffer bytes.Buffer
 	enc := gob.NewEncoder(&buffer)
@@ -74,6 +55,30 @@ func StoreTimely(key string, arg interface{}, duration time.Duration) error {
 		return err
 	}
 	return StoreBytes(key, buffer.Bytes(), duration)
+}
+
+func Store(key string, arg interface{}) error {
+	return StoreTimely(key, arg, Permanent)
+}
+
+func StoreTemp(key string, arg interface{}) error {
+	return StoreTimely(key, arg, ShortMoment)
+}
+
+func StoreProtoTimely(key string, arg interface{}, duration time.Duration) error {
+	b, err := proto.Marshal(arg)
+	if err != nil {
+		return err
+	}
+	return StoreBytes(key, b, duration)
+}
+
+func StoreProto(key string, arg interface{}) error {
+	return StoreProtoTimely(key, arg, Permanent)
+}
+
+func StoreProtoTemp(key string, arg interface{}) error {
+	return StoreProtoTimely(key, arg, ShortMoment)
 }
 
 func StoreBytes(key string, data []byte, duration time.Duration) error {
@@ -144,6 +149,16 @@ func SetContains(key string, value interface{}) (bool, error) {
 
 func Delete(key string) error {
 	return rdb.Del(ctx, key).Err()
+}
+
+func GetProto(key string, arg interface{}) (bool, error) {
+	b, notExist, err := GetBytes(key)
+	if notExist {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	return true, proto.Unmarshal(b, arg)
 }
 
 func Get(key string, arg interface{}) (bool, error) {

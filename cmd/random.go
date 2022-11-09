@@ -76,7 +76,7 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	msg, err := qq.GetRandomGroupMessage(source.Message.GroupCode)
 	if err != nil {
 		return err
-	} else if msg == nil {
+	} else if msg == nil || len(msg.Elements) == 0 {
 		return fmt.Errorf("随机消息为空")
 	}
 
