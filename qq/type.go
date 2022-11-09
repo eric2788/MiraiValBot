@@ -24,7 +24,7 @@ func (m *PersistentGroupMessage) Parse(gp *message.GroupMessage) error {
 	m.Sender = gp.Sender
 	m.Time = gp.Time
 	protoElements := message.ToProtoElems(gp.Elements, true)
-	b, err := proto.Marshal(protoElements)
+	b, err := proto.Marshal(&protoElements)
 	if err != nil {
 		return err
 	}
