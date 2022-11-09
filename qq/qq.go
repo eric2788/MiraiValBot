@@ -205,6 +205,8 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
 			}
 		}
+		//修復圖片
+		fixGroupImages(groupCode, msg)
 		return msg, nil
 	} else {
 		return nil, nil

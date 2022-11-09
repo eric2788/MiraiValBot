@@ -106,7 +106,7 @@ type (
 		Behaviour struct {
 			AfkRounds    float64      `json:"afk_rounds"`
 			FriendlyFire FriendlyFire `json:"friendly_fire"`
-			RoundInSpawn int          `json:"round_in_spawn"`
+			RoundInSpawn float64          `json:"round_in_spawn"`
 		} `json:"behavior"`
 
 		Platform struct {
@@ -139,8 +139,8 @@ type (
 	}
 
 	FriendlyFire struct {
-		Incoming int `json:"incoming"`
-		Outgoing int `json:"outgoing"`
+		Incoming float64 `json:"incoming"`
+		Outgoing float64 `json:"outgoing"`
 	}
 
 	EconomyInfo struct {
@@ -342,7 +342,6 @@ type (
 		BySeason map[string]MMRV2SeasonDetails `json:"by_season"`
 	}
 
-
 	// Resource Types
 
 	AgentData struct {
@@ -384,29 +383,29 @@ type (
 
 	WeaponSkinData struct {
 		Entity
-		ThemeUuid string `json:"themeUuid"`
+		ThemeUuid        string `json:"themeUuid"`
 		ContentTiderUuid string `json:"contentTierUuid"`
-		WallPaper string `json:"wallPaper"`
+		WallPaper        string `json:"wallPaper"`
 
-		Chromas []struct{
+		Chromas []struct {
 			Entity
-			FullRender string `json:"fullRender"`
-			Swatch string `json:"swatch"`
+			FullRender    string `json:"fullRender"`
+			Swatch        string `json:"swatch"`
 			StreamedVideo string `json:"streamedVideo"`
 		} `json:"chromas"`
 
-		Levels []struct{
-			Entity 
-			LevelItem string `json:"levelItem"`
+		Levels []struct {
+			Entity
+			LevelItem     string `json:"levelItem"`
 			StreamedVideo string `json:"streamedVideo"`
 		} `json:"levels"`
 	}
 
 	BundleData struct {
 		Entity
-		DisplayIcon2 string `json:"displayIcon2"`
-		ExtraDescription string `json:"extraDescription"`
-		PromoDescription string `json:"promoDescription"`
+		DisplayIcon2       string `json:"displayIcon2"`
+		ExtraDescription   string `json:"extraDescription"`
+		PromoDescription   string `json:"promoDescription"`
 		VerticalPromoImage string `json:"verticalPromoImage"`
 	}
 )
