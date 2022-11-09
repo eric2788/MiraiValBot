@@ -155,6 +155,11 @@ func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.G
 	}
 	msg, err := GetGroupMessage(gp, id)
 	if err != nil {
+		// 不知是什麽，總之重新獲取
+		if strings.Contains(err.Error(), "108") {
+			<-time.After(time.Second) // 緩衝
+			return GetRandomGroupMessage(gp)
+		}
 		return nil, err
 	} else if msg.Sender.Uin == bot.Instance.Uin {
 		// 不要機器人自己發過的訊息
