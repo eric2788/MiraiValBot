@@ -13,7 +13,7 @@ type PersistentGroupMessage struct {
 	GroupName  string
 	Sender     *message.Sender
 	Time       int32
-	Elements   []byte
+	Elements   [][]byte
 }
 
 func (m *PersistentGroupMessage) Parse(gp *message.GroupMessage) error {
@@ -24,11 +24,14 @@ func (m *PersistentGroupMessage) Parse(gp *message.GroupMessage) error {
 	m.Sender = gp.Sender
 	m.Time = gp.Time
 	protoElements := message.ToProtoElems(gp.Elements, true)
-	b, err := proto.Marshal(&protoElements)
-	if err != nil {
-		return err
+	m.Elements = make([][]byte, len(protoElements))
+	for i, ele := range protoElements {
+		b, err := proto.Marshal(ele)
+		if err != nil {
+			return err
+		}
+		m.Elements[i] = b
 	}
-	m.Elements = b
 	return nil
 }
 
@@ -40,10 +43,14 @@ func (m *PersistentGroupMessage) ToGroupMessage() (*message.GroupMessage, error)
 	gp.GroupName = m.GroupName
 	gp.Sender = m.Sender
 	gp.Time = m.Time
-	var elements []*msg.Elem
-	err := proto.Unmarshal(m.Elements, &elements)
-	if err != nil {
-		return nil, err
+	elements := make([]*msg.Elem, len(m.Elements))
+	for i, b := range m.Elements {
+		var elem msg.Elem
+		err := proto.Unmarshal(b, &elem)
+		if err != nil {
+			return nil, err
+		}
+		elements[i] = &elem
 	}
 	gp.Elements = message.ParseMessageElems(elements)
 	return gp, nil

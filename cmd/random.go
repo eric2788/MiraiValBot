@@ -137,7 +137,7 @@ func randomEssence(args []string, source *command.MessageSource) error {
 	chosen := gpDist[rand.Intn(len(gpDist))]
 
 	seq := int64(chosen.MessageID)
-	essence, err := qq.GetGroupMessage(source.Message.GroupCode, seq)
+	essence, err := qq.GetGroupEssenceMessage(seq)
 
 	if err != nil {
 		logger.Warnf("获取群精华消息失败: %+v", chosen)

@@ -1,9 +1,12 @@
 package qq
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/hex"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
@@ -11,12 +14,18 @@ import (
 	"github.com/eric2788/common-utils/request"
 )
 
-const cacheDirPath = "cache/"
+const (
+	cacheDirPath = "cache/"
+	imagePath    = "images/"
+	essencePath  = "essences/"
+)
+
+// images
 
 func saveGroupImages(msg *message.GroupMessage) {
-	err := os.MkdirAll(cacheDirPath+"images", os.ModePerm)
+	err := os.MkdirAll(cacheDirPath+imagePath, os.ModePerm)
 	if err != nil {
-		logger.Errorf("創建緩存資料夾時出現錯誤: %v", err)
+		logger.Errorf("創建群图片緩存資料夾時出現錯誤: %v", err)
 		return
 	}
 
@@ -30,7 +39,6 @@ func saveGroupImages(msg *message.GroupMessage) {
 		case *message.FriendImageElement:
 			imageId, hash, url = e.ImageId, e.Md5, e.Url
 		case *message.GroupImageElement:
-
 			if e.Flash || e.Url == "" {
 				if url, err := bot.Instance.GetGroupImageDownloadUrl(e.FileId, msg.GroupCode, e.Md5); err == nil {
 					e.Url = url
@@ -51,9 +59,9 @@ func saveGroupImages(msg *message.GroupMessage) {
 		b, err := request.GetBytesByUrl(url)
 		if err != nil {
 			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
-			return
+			continue
 		}
-		err = os.WriteFile(fmt.Sprintf("%s%s/%s", cacheDirPath, "images", name), b, os.ModePerm)
+		err = os.WriteFile(cacheDirPath+imagePath+name, b, os.ModePerm)
 		if err != nil {
 			logger.Errorf("緩存圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
 		} else {
@@ -107,7 +115,7 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 					if err != nil {
 						logger.Errorf("下載查詢圖片 %s 時出現錯誤: %v", strings.ToLower(groupImage.ImageId), name, err)
 					} else {
-						err = os.WriteFile(fmt.Sprintf("%s%s/%s", cacheDirPath, "images", name), b, os.ModePerm)
+						err = os.WriteFile(cacheDirPath+imagePath+name, b, os.ModePerm)
 						if err != nil {
 							logger.Errorf("緩存查詢圖片 %s 時出現錯誤: %v", strings.ToLower(groupImage.ImageId), err)
 						} else {
@@ -130,4 +138,126 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 	}
 
 	sending.Elements = fixed
+}
+
+// essence
+
+func saveGroupEssence(msg *message.GroupMessage) {
+	_ = saveGroupEssenceErr(msg)
+}
+
+func saveGroupEssenceErr(msg *message.GroupMessage) error {
+	err := os.MkdirAll(cacheDirPath+essencePath, os.ModePerm)
+	if err != nil {
+		logger.Errorf("創建群精华緩存資料夾時出現錯誤: %v", err)
+		return err
+	}
+
+	persit := &PersistentGroupMessage{}
+	err = persit.Parse(msg)
+	if err != nil {
+		logger.Errorf("尝试持久化群精华消息时出现错误: %v", err)
+		return err
+	}
+
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+	err = enc.Encode(persit)
+	if err != nil {
+		logger.Errorf("尝试序列化群精华消息时出现错误: %v", err)
+		return err
+	}
+
+	err = os.WriteFile(cacheDirPath+essencePath+fmt.Sprint(msg.Id), buffer.Bytes(), os.ModePerm)
+	if err != nil {
+		logger.Errorf("缓存群精华消息时出现错误: %v", err)
+	} else {
+		logger.Infof("缓存群精华消息成功: %d", msg.Id)
+	}
+	return err
+}
+
+func removeGroupEssence(msg int64) {
+	err := os.Remove(cacheDirPath + essencePath + fmt.Sprint(msg))
+	if err != nil {
+		logger.Errorf("尝试移除群精华缓存消息 %d 时出现错误: %v", msg, err)
+	}
+}
+
+func GetEssenceList(msg int64) []int64 {
+
+	result := make([]int64, 0)
+
+	files, err := os.ReadDir(cacheDirPath + essencePath)
+	if err != nil {
+		logger.Errorf("获取群精华缓存列表时错误: %v", err)
+		return result
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		i, err := strconv.ParseInt(file.Name(), 0, 64)
+		if err != nil {
+			logger.Errorf("解析群精华缓存ID时出现错误: %v", err)
+			continue
+		}
+		result = append(result, i)
+	}
+
+	return result
+}
+
+func FetchEssenceListToCache() (int, error) {
+	gd, err := bot.Instance.GetGroupEssenceMsgList(ValGroupInfo.Code)
+	if err != nil {
+		return -1, err
+	}
+	logger.Infof("成功获取群精华消息: %d 则", len(gd))
+	result := 0
+	for _, digest := range gd {
+		gpMsg, err := GetGroupMessage(digest.GroupCode, int64(digest.MessageID))
+		if err != nil {
+			logger.Errorf("尝试获取群精华消息 %d 时错误: %v", digest.MessageID, err)
+			continue
+		}
+		if err = saveGroupEssenceErr(gpMsg); err == nil {
+			result++
+		}
+
+	}
+	return result, nil
+}
+
+// GetGroupEssenceMessage 获取瓦群群精华消息
+func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error) {
+	b, err := os.ReadFile(cacheDirPath + essencePath + fmt.Sprint(msg))
+
+	if err == nil {
+		persit := &PersistentGroupMessage{}
+		buffer := bytes.NewBuffer(b)
+		dec := gob.NewDecoder(buffer)
+		err = dec.Decode(persit)
+		if err != nil {
+			logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)
+		} else {
+			if result, err = persit.ToGroupMessage(); err == nil {
+				fixGroupImages(ValGroupInfo.Code, result)
+				logger.Infof("群精华消息 %d 获取成功.", msg)
+			} else {
+				logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)
+			}
+		}
+	}
+
+	if result == nil {
+		logger.Infof("尝试使用 QQ API 获取群精华消息 %d ...", msg)
+		result, err = GetGroupMessage(ValGroupInfo.Code, msg)
+		if err != nil {
+			logger.Errorf("群精华消息 %d 获取失败: %v", msg, err)
+		}
+	}
+
+	return
 }

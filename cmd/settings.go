@@ -41,16 +41,27 @@ func verboseDelete(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(reply)
 }
 
+func fetchEssence(args []string, source *command.MessageSource) error {
+	i, err := qq.FetchEssenceListToCache()
+	if err != nil {
+		return err
+	}
+
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("已成功添加 %d 则群精华消息到缓存。", i)))
+}
+
 var (
 	verboseCommand       = command.NewNode([]string{"verbose", "切换广播"}, "切换是否广播监听状态", true, verbose)
 	verboseDeleteCommand = command.NewNode([]string{"telldelete"}, "显示撤回的消息", true, verboseDelete)
 	yearlyCheckCommand   = command.NewNode([]string{"yearly"}, "设置群精华消息检查间隔", true, yearlyCheck)
+	fetchEssenceCommand  = command.NewNode([]string{"fetchess"}, "刷新群精华消息到快取", true, fetchEssence)
 )
 
 var settingCommand = command.NewParent([]string{"setting", "设定"}, "设定指令",
 	verboseCommand,
 	verboseDeleteCommand,
 	yearlyCheckCommand,
+	fetchEssenceCommand,
 )
 
 func init() {
