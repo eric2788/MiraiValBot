@@ -1,36 +1,32 @@
 package compress
 
 import (
-	"bytes"
-	"compress/zlib"
-	"io"
-
 	"github.com/Logiase/MiraiGo-Template/utils"
+	"os"
 )
 
 var logger = utils.GetModuleLogger("valbot.compress")
+var compresser Compression
 
 func DoCompress(src []byte) []byte {
-	var in bytes.Buffer
-	w, _ := zlib.NewWriterLevel(&in, zlib.BestCompression)
-	defer w.Close()
-	w.Write(src)
-	if err := w.Flush(); err != nil {
-		logger.Errorf("压缩失败: %v, 将返回原本的数据", err)
-		return src
-	}
-	return in.Bytes()
+	return compresser.Compress(src)
 }
 
 func DoUnCompress(compressSrc []byte) []byte {
-	b := bytes.NewReader(compressSrc)
-	var out bytes.Buffer
-	r, err := zlib.NewReader(b)
-	if err != nil {
-		logger.Errorf("解压失败: %v, 将返回原本的数据", err)
-		return compressSrc
+	return compresser.UnCompress(compressSrc)
+}
+
+func SwitchType(t string) {
+	if com, ok := compressMap[t]; ok {
+		compresser = com
+		logger.Infof("成功切換到 %s 壓縮模式。", t)
+	} else {
+		compresser = compressMap["none"]
+		logger.Warnf("未知的壓縮類型: %s, 將使用無壓縮模式", t)
 	}
-	defer r.Close()
-	io.Copy(&out, r)
-	return out.Bytes()
+}
+
+func init() {
+	t := os.Getenv("COMPRESS_TYPE")
+	SwitchType(t)
 }

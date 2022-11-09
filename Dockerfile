@@ -23,6 +23,7 @@ RUN chmod +x /valbot
 EXPOSE 8080
 
 ENV TZ=Asia/Hong_Kong
+ENV COMPRESS_TYPE=zlib
 
 WORKDIR /app
 

@@ -23,6 +23,8 @@ const (
 
 // images
 
+// 圖片無需使用壓縮(因為已經是壓縮狀態)
+
 func saveGroupImages(msg *message.GroupMessage) {
 	err := os.MkdirAll(cacheDirPath+imagePath, os.ModePerm)
 	if err != nil {
@@ -47,7 +49,6 @@ func saveGroupImages(msg *message.GroupMessage) {
 					logger.Errorf("圖片URL為空或是閃照, 但嘗試獲取圖片 %s 的下載URL時出現錯誤: %v", e.FileId, err)
 				}
 			}
-
 			imageId, hash, url = e.ImageId, e.Md5, e.Url
 		case *message.GuildImageElement:
 			imageId, hash, url = fmt.Sprint(e.FileId), e.Md5, e.Url
@@ -62,8 +63,7 @@ func saveGroupImages(msg *message.GroupMessage) {
 			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
 			continue
 		}
-		compressed := compress.DoCompress(b)
-		err = os.WriteFile(cacheDirPath+imagePath+name, compressed, os.ModePerm)
+		err = os.WriteFile(cacheDirPath+imagePath+name, b, os.ModePerm)
 		if err != nil {
 			logger.Errorf("緩存圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
 		} else {
@@ -77,12 +77,11 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 	for _, element := range sending.Elements {
 		if groupImage, ok := element.(*message.GroupImageElement); ok {
 			name := hex.EncodeToString(groupImage.Md5)
-			compressed, err := os.ReadFile(cacheDirPath + "images/" + name)
+			b, err := os.ReadFile(cacheDirPath + "images/" + name)
 
 			var img *message.GroupImageElement
 
 			if err == nil {
-				b := compress.DoUnCompress(compressed)
 				img, err = NewImagesByByteWithGroup(gp, b)
 				if err != nil {
 					logger.Errorf("群圖片上傳失敗: %v, 將使用QQ查詢", err)
