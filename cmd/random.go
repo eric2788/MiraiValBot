@@ -34,21 +34,17 @@ func randomMember(args []string, source *command.MessageSource) error {
 
 func randomLong(args []string, source *command.MessageSource) error {
 	msg := qq.CreateReply(source.Message)
-	img, err := qq.NewImageByUrl("http://106.13.17.214:23856/dragon")
+	backup := "https://phqghume.github.io/img/"
+	rand.Seed(time.Now().UnixMicro())
+	random := rand.Intn(58) + 1
+	ext := ".jpg"
+	if random > 48 {
+		ext = ".gif"
+	}
+	imgLink := fmt.Sprintf("%slong%%20(%d)%s", backup, random, ext)
+	img, err := qq.NewImageByUrl(imgLink)
 	if err != nil {
-		logger.Errorf("尝试获取随机龙图时出现错误: %v, 将使用备份图片", err)
-		backup := "https://phqghume.github.io/img/"
-		rand.Seed(time.Now().UnixMicro())
-		random := rand.Intn(58) + 1
-		ext := ".jpg"
-		if random > 48 {
-			ext = ".gif"
-		}
-		imgLink := fmt.Sprintf("%slong%%20(%d)%s", backup, random, ext)
-		img, err = qq.NewImageByUrl(imgLink)
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	msg.Append(img)
 	return qq.SendGroupMessage(msg)
