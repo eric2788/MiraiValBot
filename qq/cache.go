@@ -12,14 +12,14 @@ import (
 
 const cacheDirPath = "cache/"
 
-func saveImages(elements []message.IMessageElement) {
+func saveGroupImages(msg *message.GroupMessage) {
 	err := os.MkdirAll(cacheDirPath+"images", os.ModePerm)
 	if err != nil {
 		logger.Errorf("創建緩存資料夾時出現錯誤: %v", err)
 		return
 	}
 
-	for _, element := range elements {
+	for _, element := range msg.Elements {
 
 		var url string
 		var imageId string
@@ -29,6 +29,15 @@ func saveImages(elements []message.IMessageElement) {
 		case *message.FriendImageElement:
 			imageId, hash, url = e.ImageId, e.Md5, e.Url
 		case *message.GroupImageElement:
+
+			if e.Flash || e.Url == "" {
+				if url, err := bot.Instance.GetGroupImageDownloadUrl(e.FileId, msg.GroupCode, e.Md5); err == nil {
+					e.Url = url
+				} else {
+					logger.Errorf("圖片URL為空或是閃照, 但嘗試獲取圖片 %s 的下載URL時出現錯誤: %v", e.FileId, err)
+				}
+			}
+
 			imageId, hash, url = e.ImageId, e.Md5, e.Url
 		case *message.GuildImageElement:
 			imageId, hash, url = fmt.Sprint(e.FileId), e.Md5, e.Url
@@ -65,9 +74,24 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 				img, err = NewImagesByByteWithGroup(gp, b)
 				if err != nil {
 					logger.Errorf("群圖片上傳失敗: %v, 將使用QQ查詢", err)
+				} else {
+					logger.Infof("恢复缓存图片 %s 成功。", name)
 				}
 			} else {
+
 				logger.Errorf("讀取緩存文件 %s 時出現錯誤: %v, 將使用QQ查詢", name, err)
+
+				if url, err := bot.Instance.GetGroupImageDownloadUrl(groupImage.FileId, gp, groupImage.Md5); err == nil {
+					logger.Infof("获取群图片下载链接成功，将尝试使用上传通道")
+					img, err = NewImageByUrlWithGroup(gp, url)
+					if err == nil {
+						logger.Infof("群图片上传成功")
+					} else {
+						logger.Warnf("群图片上传失败: %v", err)
+					}
+				} else {
+					logger.Errorf("获取群图片下载链接失败: %v", err)
+				}
 			}
 
 			if img == nil {
@@ -75,6 +99,8 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 				if err != nil {
 					logger.Errorf("QQ查詢群圖片失敗: %v, 將繼續使用舊元素發送。", err)
 					img = groupImage
+				} else {
+					logger.Infof("查询图片 %s 成功。", name)
 				}
 			}
 

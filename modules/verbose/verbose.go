@@ -46,6 +46,7 @@ func (v *verbose) Start(bot *bot.Bot) {
 
 func (v *verbose) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 	defer wg.Done()
+	file.SaveStorage()
 	logger.Infof("verbose 模组已关闭")
 }
 
@@ -90,7 +91,7 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 		persist := &qq.PersistentGroupMessage{}
 		persist.Parse(gm)
 
-		if err := redis.StoreTemp(key, persist); err != nil {
+		if err := redis.StoreProtoTemp(key, persist); err != nil {
 			logger.Warnf("Redis 储存群组消息时出现错误: %v", err)
 		} else {
 			logger.Infof("Redis 储存临时群组消息成功。")

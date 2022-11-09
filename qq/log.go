@@ -31,7 +31,7 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 
 		// 瓦群
 		if msg.GroupCode == ValGroupInfo.Code {
-			go saveImages(msg.Elements)
+			go saveGroupImages(msg)
 		}
 	})
 
