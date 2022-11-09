@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/qq"
@@ -103,44 +102,28 @@ func randomEssence(args []string, source *command.MessageSource) error {
 
 	rand.Seed(time.Now().UnixMicro())
 
-	gpDist, err := source.Client.GetGroupEssenceMsgList(source.Message.GroupCode)
-
-	// why empty ? not sure but let's try other method
-	if len(gpDist) == 0 {
-		logger.Warnf("群消息為空，正在使用第 2 種方式獲取")
-		gpDist, err = source.Client.GetGroupEssenceMsgList(qq.ValGroupInfo.Uin)
-	}
-
-	// why empty ? not sure but let's try other method
-	if len(gpDist) == 0 {
-		logger.Warnf("群消息為空，正在使用第 3 種方式獲取")
-		gpDist, err = bot.Instance.GetGroupEssenceMsgList(source.Message.GroupCode)
-	}
-
-	// why empty ? not sure but let's try other method
-	if len(gpDist) == 0 {
-		logger.Warnf("群消息為空，正在使用第 4 種方式獲取")
-		gpDist, err = bot.Instance.GetGroupEssenceMsgList(qq.ValGroupInfo.Uin)
-	}
-
+	msgids, err := qq.GetGroupEssenceMsgIds()
 	if err != nil {
-		logger.Warnf("获取群精华消息列表失败: %v", source.Message.GroupCode)
-		return err
+		logger.Warnf("获取群精华消息列表失败: %v, 將使用純緩存列表", source.Message.GroupCode)
+
+		// 快取是 0
+		if len(msgids) == 0 {
+			return err
+		}
+
 	}
 
-	if len(gpDist) == 0 {
+	if len(msgids) == 0 {
 		reply := qq.CreateReply(source.Message).Append(message.NewText("群精华消息列表为空。"))
 		_ = qq.SendGroupMessage(reply)
 		return nil
 	}
 
-	chosen := gpDist[rand.Intn(len(gpDist))]
-
-	seq := int64(chosen.MessageID)
-	essence, err := qq.GetGroupEssenceMessage(seq)
+	chosen := msgids[rand.Intn(len(msgids))]
+	essence, err := qq.GetGroupEssenceMessage(chosen)
 
 	if err != nil {
-		logger.Warnf("获取群精华消息失败: %+v", chosen)
+		logger.Warnf("获取群精华消息失败: %d", chosen)
 		return err
 	}
 	msg := message.NewSendingMessage()

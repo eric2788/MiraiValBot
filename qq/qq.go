@@ -2,6 +2,7 @@ package qq
 
 import (
 	"fmt"
+	"github.com/eric2788/common-utils/set"
 	"math/rand"
 	"os"
 	"strings"
@@ -77,6 +78,29 @@ func RefreshGroupInfo() {
 			ValGroupInfo.MemberCount = ginfo.MemberCount
 		}
 	})
+}
+
+// GetGroupEssenceMsgIds with cache
+func GetGroupEssenceMsgIds() ([]int64, error) {
+	gpDist, err := bot.Instance.GetGroupEssenceMsgList(ValGroupInfo.Code)
+	essencesCache := GetEssenceList()
+
+	if err != nil {
+		return essencesCache, err
+	}
+
+	var messages = set.NewInt64()
+
+	for _, dist := range gpDist {
+		messages.Add(int64(dist.MessageID))
+	}
+
+	for _, id := range essencesCache {
+		messages.Add(id)
+	}
+
+	return messages.ToArr(), nil
+
 }
 
 func ParseMsgContent(elements []message.IMessageElement) *MsgContent {

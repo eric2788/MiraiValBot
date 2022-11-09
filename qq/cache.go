@@ -187,7 +187,7 @@ func removeGroupEssence(msg int64) {
 	}
 }
 
-func GetEssenceList(msg int64) []int64 {
+func GetEssenceList() []int64 {
 
 	result := make([]int64, 0)
 
@@ -233,7 +233,7 @@ func FetchEssenceListToCache() (int, error) {
 	return result, nil
 }
 
-// GetGroupEssenceMessage 获取瓦群群精华消息
+// GetGroupEssenceMessage 获取瓦群群精华消息 連帶緩存
 func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error) {
 	compressed, err := os.ReadFile(cacheDirPath + essencePath + fmt.Sprint(msg))
 
