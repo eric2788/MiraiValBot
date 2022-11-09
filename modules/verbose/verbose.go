@@ -89,9 +89,13 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
 		key := qq.GroupKey(gm.GroupCode, fmt.Sprintf("msg:%d", gm.Id))
 		persist := &qq.PersistentGroupMessage{}
-		persist.Parse(gm)
+		
+		if err := persist.Parse(gm); err != nil {
+			logger.Warnf("嘗試序列化群組消息時出現錯誤: %v", err)
+			return
+		}
 
-		if err := redis.StoreProtoTemp(key, persist); err != nil {
+		if err := redis.StoreTemp(key, persist); err != nil {
 			logger.Warnf("Redis 储存群组消息时出现错误: %v", err)
 		} else {
 			logger.Infof("Redis 储存临时群组消息成功。")

@@ -157,6 +157,7 @@ func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.G
 	if err != nil {
 		// 不知是什麽，總之重新獲取
 		if strings.Contains(err.Error(), "108") {
+			logger.Errorf("嘗試獲取隨機消息時出現錯誤: %v, 將重新獲取...", err)
 			<-time.After(time.Second) // 緩衝
 			return GetRandomGroupMessage(gp)
 		}
@@ -176,11 +177,15 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	key := GroupKey(groupCode, fmt.Sprintf("msg:%d", seq))
 
 	persistGroupMsg := &PersistentGroupMessage{}
-	exist, err := redis.GetProto(key, persistGroupMsg)
+	exist, err := redis.Get(key, persistGroupMsg)
 	if err != nil {
 		logger.Errorf("嘗試從 redis 獲取群組消息時出現錯誤: %v, 將使用 API 獲取", err)
 	} else if exist {
-		return persistGroupMsg.ToGroupMessage(), nil
+		if msg, err := persistGroupMsg.ToGroupMessage(); err == nil {
+			return msg, nil
+		} else {
+			logger.Errorf("嘗試從 redis 解析 群組消息 時出現錯誤: %v, 將使用 API 獲取", err)
+		}
 	}
 
 	msgList, err := bot.Instance.GetGroupMessages(groupCode, seq, seq+1)
@@ -204,11 +209,16 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 		msg := msgList[0]
 		// 非 bot 訊息才儲存
 		if msg.Sender.Uin != bot.Instance.Uin {
-			persistGroupMsg.Parse(msg)
-			err = redis.StoreProto(key, persistGroupMsg)
+			err = persistGroupMsg.Parse(msg)
 			if err != nil {
-				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+				logger.Warnf("嘗試序列化群組消息時出現錯誤: %v", err)
+			} else {
+				err = redis.Store(key, persistGroupMsg)
+				if err != nil {
+					logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+				}
 			}
+
 		}
 		//修復圖片
 		fixGroupImages(groupCode, msg)

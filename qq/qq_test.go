@@ -2,8 +2,9 @@ package qq
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var testSerialized = `
@@ -15,7 +16,10 @@ func aTestParseFromPersistence(t *testing.T) {
 	if err := json.Unmarshal([]byte(testSerialized), persist); err != nil {
 		t.Fatal(err)
 	}
-	gpMsg := persist.ToGroupMessage()
+	gpMsg, err := persist.ToGroupMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
 	assert.Equal(t, (*gpMsg).GroupCode, persist.GroupCode)
 	assert.Equal(t, (*gpMsg).Sender.Uin, persist.Sender.Uin)
 }
