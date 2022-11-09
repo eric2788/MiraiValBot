@@ -47,42 +47,6 @@ func HasKey(key string) (bool, error) {
 	return re == 1, err
 }
 
-func Store(key string, arg interface{}) error {
-	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, buffer.Bytes(), Permanent)
-}
-
-func StoreTemp(key string, arg interface{}) error {
-	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, buffer.Bytes(), ShortMoment)
-}
-
-func StoreProto(key string, arg interface{}) error {
-	b, err := proto.Marshal(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, b, Permanent)
-}
-
-func StoreProtoTemp(key string, arg interface{}) error {
-	b, err := proto.Marshal(arg)
-	if err != nil {
-		return err
-	}
-	return StoreBytes(key, b, ShortMoment)
-}
-
 func StoreTimely(key string, arg interface{}, duration time.Duration) error {
 	var buffer bytes.Buffer
 	enc := gob.NewEncoder(&buffer)
@@ -91,6 +55,30 @@ func StoreTimely(key string, arg interface{}, duration time.Duration) error {
 		return err
 	}
 	return StoreBytes(key, buffer.Bytes(), duration)
+}
+
+func Store(key string, arg interface{}) error {
+	return StoreTimely(key, arg, Permanent)
+}
+
+func StoreTemp(key string, arg interface{}) error {
+	return StoreTimely(key, arg, ShortMoment)
+}
+
+func StoreProtoTimely(key string, arg interface{}, duration time.Duration) error {
+	b, err := proto.Marshal(arg)
+	if err != nil {
+		return err
+	}
+	return StoreBytes(key, b, duration)
+}
+
+func StoreProto(key string, arg interface{}) error {
+	return StoreProtoTimely(key, arg, Permanent)
+}
+
+func StoreProtoTemp(key string, arg interface{}) error {
+	return StoreProtoTimely(key, arg, ShortMoment)
 }
 
 func StoreBytes(key string, data []byte, duration time.Duration) error {
