@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -273,9 +274,9 @@ func leaderboard(args []string, source *command.MessageSource) error {
 
 		getFFDamage := func(player valorant.MatchPlayer) int {
 			if info, ok := ffMap[player.PUuid]; ok {
-				return info.Outgoing
+				return int(math.Round(info.Outgoing))
 			} else {
-				return player.Behaviour.FriendlyFire.Outgoing
+				return int(math.Round(player.Behaviour.FriendlyFire.Outgoing))
 			}
 		}
 

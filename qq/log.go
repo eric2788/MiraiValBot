@@ -28,6 +28,11 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 
 	qBot.GroupMessageEvent.Subscribe(func(cli *client.QQClient, msg *message.GroupMessage) {
 		logger.Infof("%s (%d) 在群 %s 發送了消息: %s", msg.Sender.Nickname, msg.Sender.Uin, msg.GroupName, msg.ToString())
+
+		// 瓦群
+		if msg.GroupCode == ValGroupInfo.Code {
+			go saveImages(msg.Elements)
+		}
 	})
 
 	qBot.PrivateMessageEvent.Subscribe(func(cli *client.QQClient, msg *message.PrivateMessage) {
