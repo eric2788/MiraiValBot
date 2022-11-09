@@ -11,6 +11,7 @@ import (
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/compress"
 	"github.com/eric2788/common-utils/request"
 )
 
@@ -61,7 +62,8 @@ func saveGroupImages(msg *message.GroupMessage) {
 			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
 			continue
 		}
-		err = os.WriteFile(cacheDirPath+imagePath+name, b, os.ModePerm)
+		compressed := compress.DoZlibCompress(b)
+		err = os.WriteFile(cacheDirPath+imagePath+name, compressed, os.ModePerm)
 		if err != nil {
 			logger.Errorf("緩存圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
 		} else {
@@ -75,11 +77,12 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 	for _, element := range sending.Elements {
 		if groupImage, ok := element.(*message.GroupImageElement); ok {
 			name := hex.EncodeToString(groupImage.Md5)
-			b, err := os.ReadFile(cacheDirPath + "images/" + name)
+			compressed, err := os.ReadFile(cacheDirPath + "images/" + name)
 
 			var img *message.GroupImageElement
 
 			if err == nil {
+				b := compress.DoZlibUnCompress(compressed)
 				img, err = NewImagesByByteWithGroup(gp, b)
 				if err != nil {
 					logger.Errorf("群圖片上傳失敗: %v, 將使用QQ查詢", err)
@@ -168,7 +171,8 @@ func saveGroupEssenceErr(msg *message.GroupMessage) error {
 		return err
 	}
 
-	err = os.WriteFile(cacheDirPath+essencePath+fmt.Sprint(msg.Id), buffer.Bytes(), os.ModePerm)
+	compressed := compress.DoZlibCompress(buffer.Bytes())
+	err = os.WriteFile(cacheDirPath+essencePath+fmt.Sprint(msg.Id), compressed, os.ModePerm)
 	if err != nil {
 		logger.Errorf("缓存群精华消息时出现错误: %v", err)
 	} else {
@@ -232,9 +236,10 @@ func FetchEssenceListToCache() (int, error) {
 
 // GetGroupEssenceMessage 获取瓦群群精华消息
 func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error) {
-	b, err := os.ReadFile(cacheDirPath + essencePath + fmt.Sprint(msg))
+	compressed, err := os.ReadFile(cacheDirPath + essencePath + fmt.Sprint(msg))
 
 	if err == nil {
+		b := compress.DoZlibUnCompress(compressed)
 		persit := &PersistentGroupMessage{}
 		buffer := bytes.NewBuffer(b)
 		dec := gob.NewDecoder(buffer)
