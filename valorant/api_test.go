@@ -28,11 +28,6 @@ var (
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
-	file.ApplicationYaml.Redis = file.RedisConfig{
-		Host:     "127.0.0.1",
-		Port:     6379,
-		Database: 0,
-	}
 	redis.Init()
 }
 

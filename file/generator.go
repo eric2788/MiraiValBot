@@ -52,9 +52,9 @@ var defaultConfig = Configuration{
 		TwitterLookUpUrl: "http://192.168.0.127:8989/twitter/userExist",
 	},
 	Redis: RedisConfig{
-		Host:     "192.168.0.127",
+		Host:     "127.0.0.1",
 		Port:     6379,
-		Database: 1,
+		Database: 0,
 		Password: "",
 		Buffer:   1024,
 	},

@@ -4,16 +4,18 @@ import (
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/redis"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetAgents(t *testing.T) {
-	req := NewResourceRequest("/agents")
-	req.SetLanguage(TC)
-	req.AddQuery("isPlayableCharacter", "true")
-	var agents []AgentData
+func init() {
+	logrus.SetLevel(logrus.DebugLevel)
+	redis.Init()
+}
 
-	if err := req.DoRequest(&agents); err != nil {
+func TestGetAgents(t *testing.T) {
+	agents, err := GetAgents(AllAgents, TC)
+	if err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
@@ -28,11 +30,9 @@ func TestGetAgents(t *testing.T) {
 }
 
 func TestGetWeapons(t *testing.T) {
-	req := NewResourceRequest("/weapons")
-	req.SetLanguage(TC)
-	var weapons []WeaponData
 
-	if err := req.DoRequest(&weapons); err != nil {
+	weapons, err := GetWeapons(AllWeapons, TC)
+	if err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
@@ -47,11 +47,9 @@ func TestGetWeapons(t *testing.T) {
 }
 
 func TestGetBundles(t *testing.T) {
-	req := NewResourceRequest("/bundles")
-	req.SetLanguage(TC)
-	var bundles []BundleData
 
-	if err := req.DoRequest(&bundles); err != nil {
+	bundles, err := GetBundles(TC)
+	if err != nil {
 		if isAllowedStatus(err) {
 			return
 		}
