@@ -3,11 +3,12 @@ package timer
 import (
 	"context"
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/eric2788/MiraiValBot/eventhook"
 	"sync"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
 )
 
 const Tag = "valbot.timer"
@@ -54,7 +55,7 @@ func (t *Timer) Serve(bot *bot.Bot) {
 }
 
 func (t *Timer) HookEvent(bot *bot.Bot) {
-	for name, _ := range t.timerMap {
+	for name := range t.timerMap {
 		_, err := t.StartTimer(name, bot)
 		if err != nil {
 			logger.Warnf("啟動計時器任務 %s 時出現錯誤: %v", name, err)

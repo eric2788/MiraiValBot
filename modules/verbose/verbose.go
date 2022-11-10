@@ -8,10 +8,10 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/file"
-	qq "github.com/eric2788/MiraiValBot/qq"
-	"github.com/eric2788/MiraiValBot/redis"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	qq "github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/internal/redis"
 )
 
 type verbose struct {
@@ -89,7 +89,7 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
 		key := qq.GroupKey(gm.GroupCode, fmt.Sprintf("msg:%d", gm.Id))
 		persist := &qq.PersistentGroupMessage{}
-		
+
 		if err := persist.Parse(gm); err != nil {
 			logger.Warnf("嘗試序列化群組消息時出現錯誤: %v", err)
 			return

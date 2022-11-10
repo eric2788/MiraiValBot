@@ -1,20 +1,21 @@
 package main
 
 import (
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/simulate"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"time"
 
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/simulate"
+
 	// 最吃CPU的是 broadcaster module
 	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
 
 	// 所有廣播訂閱平台
-	_ "github.com/eric2788/MiraiValBot/sites/bilibili"
-	_ "github.com/eric2788/MiraiValBot/sites/twitter"
-	_ "github.com/eric2788/MiraiValBot/sites/youtube"
+	_ "github.com/eric2788/MiraiValBot/hooks/sites/bilibili"
+	_ "github.com/eric2788/MiraiValBot/hooks/sites/twitter"
+	_ "github.com/eric2788/MiraiValBot/hooks/sites/youtube"
 )
 
 func main() {

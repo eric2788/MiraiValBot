@@ -3,13 +3,14 @@ package verbose
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/file"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	qq2 "github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/broadcaster"
-	qq2 "github.com/eric2788/MiraiValBot/qq"
 	"github.com/go-redis/redis/v8"
-	"strings"
 )
 
 var translation = map[string]string{

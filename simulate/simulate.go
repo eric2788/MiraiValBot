@@ -2,13 +2,14 @@ package simulate
 
 import (
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Logiase/MiraiGo-Template/config"
-	"github.com/eric2788/MiraiValBot/file"
-	"github.com/eric2788/MiraiValBot/qq"
-	"github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/config"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/sirupsen/logrus"
 )
 
 func EnableDebug() {

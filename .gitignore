@@ -8,4 +8,5 @@ session.token
 **/file/*.yaml
 **/*.exe
 **/cache/**
+!**/cache/*.go
 **/codec/**
