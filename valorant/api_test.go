@@ -4,6 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/eric2788/MiraiValBot/compress"
+	"github.com/eric2788/MiraiValBot/file"
+	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/common-utils/datetime"
 
 	"github.com/eric2788/common-utils/request"
@@ -25,6 +28,32 @@ var (
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
+}
+
+func TestRedisSaveGet(t *testing.T) {
+
+	compress.SwitchType("zlib")
+
+	file.ApplicationYaml.Redis = file.RedisConfig{
+		Host:     "127.0.0.1",
+		Port:     6379,
+		Database: 0,
+	}
+	redis.Init()
+
+	for i := 0; i < 2; i++ {
+		t.Logf("========== %d ============", i+1)
+		_, err := GetMatchDetails("1762e9a2-e9e1-4fdc-9aaf-0654d44b5f0c")
+		<-time.After(time.Second * 3)
+		if err != nil {
+			if isAllowedStatus(err) {
+				continue
+			}
+			t.Fatal(err)
+		} else {
+			t.Log("data get success")
+		}
+	}
 }
 
 func isAllowedStatus(err error) bool {

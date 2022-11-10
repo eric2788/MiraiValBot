@@ -153,7 +153,7 @@ func GetMatchDetailsAPI(matchId string) (*MatchData, error) {
 func GetMatchDetails(matchId string) (*MatchData, error) {
 	matchDetails := &MatchData{}
 
-	if exist, err := redis.Get(matchId, matchDetails); exist {
+	if exist, err := redis.Get(matchKey(matchId), matchDetails); exist {
 		logger.Debugf("從 redis 中找到對戰數據 %s 的緩存，已使用緩存數據。", matchId)
 		return matchDetails, nil
 	} else if err != nil {
