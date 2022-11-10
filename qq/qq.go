@@ -2,11 +2,12 @@ package qq
 
 import (
 	"fmt"
-	"github.com/eric2788/common-utils/set"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/eric2788/common-utils/set"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -207,7 +208,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	} else if exist {
 		if msg, err := persistGroupMsg.ToGroupMessage(); err == nil {
 			//修復圖片
-			fixGroupImages(groupCode, msg)
+			FixGroupImages(groupCode, msg)
 			return msg, nil
 		} else {
 			logger.Errorf("嘗試從 redis 解析 群組消息 時出現錯誤: %v, 將使用 API 獲取", err)
@@ -247,7 +248,7 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 
 		}
 		//修復圖片
-		fixGroupImages(groupCode, msg)
+		FixGroupImages(groupCode, msg)
 		return msg, nil
 	} else {
 		return nil, nil

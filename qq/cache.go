@@ -72,7 +72,7 @@ func saveGroupImages(msg *message.GroupMessage) {
 	}
 }
 
-func fixGroupImages(gp int64, sending *message.GroupMessage) {
+func FixGroupImages(gp int64, sending *message.GroupMessage) {
 	fixed := make([]message.IMessageElement, len(sending.Elements))
 	for _, element := range sending.Elements {
 		if groupImage, ok := element.(*message.GroupImageElement); ok {
@@ -140,6 +140,30 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 	}
 
 	sending.Elements = fixed
+}
+
+func GetImageList() [][]byte {
+	result := make([][]byte, 0)
+
+	files, err := os.ReadDir(cacheDirPath + imagePath)
+	if err != nil {
+		logger.Errorf("获取圖片缓存列表时错误: %v", err)
+		return result
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		b, err := os.ReadFile(file.Name())
+		if err != nil {
+			logger.Errorf("讀取圖片 %s 時出現錯誤: %v, 已略過.", file.Name(), err)
+			continue
+		}
+		result = append(result, b)
+	}
+
+	return result
 }
 
 // essence
@@ -247,7 +271,7 @@ func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error)
 			logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)
 		} else {
 			if result, err = persit.ToGroupMessage(); err == nil {
-				fixGroupImages(ValGroupInfo.Code, result)
+				FixGroupImages(ValGroupInfo.Code, result)
 				logger.Infof("群精华消息 %d 获取成功.", msg)
 			} else {
 				logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)

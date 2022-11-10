@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -30,6 +31,11 @@ func HandleDanmuMsg(bot *bot.Bot, data *bilibili.LiveData) error {
 	uid := int64(userInfo[0].(float64))
 
 	if !bilibili.IsHighlighter(uid) {
+		return nil
+	}
+
+	if strings.HasPrefix(danmu,"【") {
+		logger.Debugf("房間 %d 來自 %s 的彈幕為同傳彈幕，已略過。", room, uname)
 		return nil
 	}
 

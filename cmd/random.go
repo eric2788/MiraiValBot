@@ -26,7 +26,7 @@ func randomMember(args []string, source *command.MessageSource) error {
 
 	chosen := members[rand.Intn(len(members))]
 	at := message.NewAt(chosen.Uin)
-	at.Display = chosen.Nickname
+	at.Display = "@" + chosen.Nickname
 	reply := message.NewSendingMessage().Append(at)
 	return qq.SendGroupMessage(reply)
 }
@@ -96,6 +96,17 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	}
 
 	return qq.SendGroupMessage(reply)
+}
+
+func randomPhoto(args []string, source *command.MessageSource) error {
+	rand.Seed(time.Now().UnixMicro())
+	imgs := qq.GetImageList()
+	chosen := imgs[rand.Intn(len(imgs))]
+	img, err := qq.NewImageByByte(chosen)
+	if err != nil {
+		return err
+	}
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
 }
 
 func randomEssence(args []string, source *command.MessageSource) error {
@@ -369,6 +380,7 @@ var (
 	randomBundleCommand  = command.NewNode([]string{"bundle", "套装"}, "随机抽选一个瓦套装", false, randomBundle)
 	randomSkinCommand    = command.NewNode([]string{"skin", "皮肤"}, "随机抽选一个瓦皮肤", false, randomSkin, "<武器名称>")
 	randomDragonCommand  = command.NewNode([]string{"long", "dragon", "龙图"}, "随机抽选一张龙图", false, randomLong)
+	randomPhotoCommand   = command.NewNode([]string{"photo", "image", "图片"}, "随机抽选一张群图片", false, randomPhoto)
 )
 
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
@@ -381,6 +393,7 @@ var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指�
 	randomBundleCommand,
 	randomSkinCommand,
 	randomDragonCommand,
+	randomPhotoCommand,
 )
 
 func init() {
