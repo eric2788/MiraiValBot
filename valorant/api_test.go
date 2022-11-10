@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/eric2788/MiraiValBot/compress"
-	"github.com/eric2788/MiraiValBot/file"
 	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/common-utils/datetime"
 
