@@ -28,19 +28,17 @@ var (
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
-}
-
-func TestRedisSaveGet(t *testing.T) {
-
-	compress.SwitchType("zlib")
-
 	file.ApplicationYaml.Redis = file.RedisConfig{
 		Host:     "127.0.0.1",
 		Port:     6379,
 		Database: 0,
 	}
 	redis.Init()
+}
 
+func TestRedisSaveGet(t *testing.T) {
+
+	compress.SwitchType("zlib")
 	for i := 0; i < 2; i++ {
 		t.Logf("========== %d ============", i+1)
 		_, err := GetMatchDetails("1762e9a2-e9e1-4fdc-9aaf-0654d44b5f0c")
@@ -111,7 +109,7 @@ func TestGetAccountDetails(t *testing.T) {
 }
 
 func TestGetMatchHistories(t *testing.T) {
-	histories, err := GetMatchHistoriesAPI("麻將", "4396", AsiaSpecific)
+	histories, err := GetMatchHistories("麻將", "4396", AsiaSpecific)
 	if err != nil {
 		if isAllowedStatus(err) {
 			return
@@ -127,7 +125,7 @@ func TestGetMatchHistories(t *testing.T) {
 }
 
 func TestGetMatchDetails(t *testing.T) {
-	data, err := GetMatchDetailsAPI("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
+	data, err := GetMatchDetails("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
 	if err != nil {
 		if isAllowedStatus(err) {
 			return
