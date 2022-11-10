@@ -72,7 +72,7 @@ func saveGroupImages(msg *message.GroupMessage) {
 	}
 }
 
-func fixGroupImages(gp int64, sending *message.GroupMessage) {
+func FixGroupImages(gp int64, sending *message.GroupMessage) {
 	fixed := make([]message.IMessageElement, len(sending.Elements))
 	for _, element := range sending.Elements {
 		if groupImage, ok := element.(*message.GroupImageElement); ok {
@@ -271,7 +271,7 @@ func GetGroupEssenceMessage(msg int64) (result *message.GroupMessage, err error)
 			logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)
 		} else {
 			if result, err = persit.ToGroupMessage(); err == nil {
-				fixGroupImages(ValGroupInfo.Code, result)
+				FixGroupImages(ValGroupInfo.Code, result)
 				logger.Infof("群精华消息 %d 获取成功.", msg)
 			} else {
 				logger.Errorf("群精华消息 %d 反序列化失败: %v", msg, err)

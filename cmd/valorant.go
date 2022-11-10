@@ -11,7 +11,6 @@ import (
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/paste"
 	"github.com/eric2788/MiraiValBot/qq"
-	"github.com/eric2788/MiraiValBot/redis"
 	"github.com/eric2788/MiraiValBot/valorant"
 	"github.com/eric2788/common-utils/datetime"
 
@@ -873,15 +872,6 @@ func appendDetails(msg *message.SendingMessage, maintenance valorant.MaintainInf
 
 func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageElement, error) {
 
-	key := fmt.Sprintf("valorant:match_player:%s", match.MetaData.MatchId)
-
-	var imgCache = &message.GroupImageElement{}
-	if exist, err := redis.Get(key, imgCache); err == nil && exist {
-		return imgCache, nil
-	} else if err != nil {
-		logger.Warnf("从 redis 获取对战玩家图片(%s)时出现错误: %v, 将重新生成。", match.MetaData.MatchId, err)
-	}
-
 	ffInfo := valorant.GetFriendlyFireInfo(match)
 	ranking := valorant.GetMatchRanking(match)
 
@@ -955,19 +945,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
 	}
 
-	img, err := msg.ToGroupImageElement()
-
-	if err != nil {
-		return nil, err
-	}
-
-	if err = redis.Store(key, img); err != nil {
-		logger.Warnf("储存对战玩家图片(%s)到redis时出现错误: %v", match.MetaData.MatchId, err)
-	} else {
-		logger.Infof("储存对战玩家图片(%s)到redis成功", match.MetaData.MatchId)
-	}
-
-	return img, nil
+	return msg.ToGroupImageElement()
 }
 
 func getShortIdHint(uuid string) (string, int64) {
