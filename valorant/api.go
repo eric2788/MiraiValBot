@@ -157,6 +157,8 @@ func GetMatchDetails(matchId string) (*MatchData, error) {
 		return matchDetails, nil
 	} else if err != nil {
 		logger.Warnf("从 redis 提取快取时出现错误: %v, 将使用 HTTP 请求.", err)
+	} else if !exist {
+		logger.Warnf("从 redis 找不到对战数据缓存 (%s), 将使用 HTTP 请求.", matchId)
 	}
 
 	matchDetails, err := GetMatchDetailsAPI(matchId)

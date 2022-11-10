@@ -8,14 +8,18 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/RomiChan/protobuf/proto"
 	"github.com/eric2788/MiraiValBot/compress"
 	"github.com/eric2788/MiraiValBot/file"
 	rgo "github.com/go-redis/redis/v8"
 )
 
-var rdb *rgo.Client
-var ctx = context.Background()
+var (
+	rdb    *rgo.Client
+	ctx    = context.Background()
+	logger = utils.GetModuleLogger("valbot.redis")
+)
 
 var posArg rgo.LPosArgs
 
@@ -83,14 +87,18 @@ func StoreProtoTemp(key string, arg interface{}) error {
 }
 
 func StoreBytes(key string, data []byte, duration time.Duration) error {
+	logger.Debugf("original data size of %s: %dB", key, len(data))
 	data = compress.DoCompress(data)
+	logger.Debugf("compressed data size of %s: %dB", key, len(data))
 	return rdb.Set(ctx, key, data, duration).Err()
 }
 
 func GetBytes(key string) ([]byte, bool, error) {
 	b, err := rdb.Get(ctx, key).Bytes()
 	if b != nil {
+		logger.Debugf("compressed data size of %s: %dB", key, len(b))
 		b = compress.DoUnCompress(b)
+		logger.Debugf("original data size of %s: %dB", key, len(b))
 	}
 	return b, err == rgo.Nil, err
 }
