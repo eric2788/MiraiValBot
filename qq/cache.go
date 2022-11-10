@@ -155,7 +155,7 @@ func GetImageList() [][]byte {
 		if file.IsDir() {
 			continue
 		}
-		b, err := os.ReadFile(file.Name())
+		b, err := os.ReadFile(cacheDirPath + imagePath + file.Name())
 		if err != nil {
 			logger.Errorf("讀取圖片 %s 時出現錯誤: %v, 已略過.", file.Name(), err)
 			continue

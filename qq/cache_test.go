@@ -6,11 +6,12 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
+	"os"
+	"testing"
+
 	"github.com/eric2788/MiraiValBot/compress"
 	"github.com/eric2788/common-utils/request"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"testing"
 
 	"github.com/Mrs4s/MiraiGo/message"
 )
@@ -40,6 +41,10 @@ func TestSaveAndGetImage(t *testing.T) {
 	bb, _ := request.GetBytesByUrl(imgUrl)
 
 	assert.Equal(t, bb, b)
+
+	imgs := GetImageList()
+	t.Logf("image list: %d", len(imgs))
+	assert.Equal(t, len(imgs), 1)
 }
 
 func TestSaveMessage(t *testing.T) {
@@ -78,7 +83,6 @@ func TestSaveMessage(t *testing.T) {
 	img := msg.Elements[0].(*message.GroupImageElement)
 	assert.Equal(t, img.Md5, hash[:])
 	assert.Equal(t, img.ImageId, hex.EncodeToString(hash[:])+".png")
-
 }
 
 func TestCompressUnCompressMessage(t *testing.T) {

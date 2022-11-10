@@ -101,6 +101,13 @@ func randomMessage(args []string, source *command.MessageSource) error {
 func randomPhoto(args []string, source *command.MessageSource) error {
 	rand.Seed(time.Now().UnixMicro())
 	imgs := qq.GetImageList()
+
+	if len(imgs) == 0 {
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("群图片缓存列表为空。")))
+	}
+
+	logger.Debugf("成功索取 %d 张群图片缓存。", len(imgs))
+
 	chosen := imgs[rand.Intn(len(imgs))]
 	img, err := qq.NewImageByByte(chosen)
 	if err != nil {
