@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5
 	github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab
+	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/corpix/uarand v0.2.0
 	github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a
@@ -20,7 +21,6 @@ require (
 
 require (
 	github.com/Baozisoftware/qrcode-terminal-go v0.0.0-20170407111555-c0650d8dff0f // indirect
-	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0 // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

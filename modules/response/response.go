@@ -3,17 +3,18 @@ package response
 import (
 	"crypto/md5"
 	"encoding/binary"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/Mrs4s/MiraiGo/client"
-	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/file"
-	"github.com/eric2788/MiraiValBot/qq"
 	"math/rand"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/Mrs4s/MiraiGo/client"
+	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/internal/qq"
 )
 
 const Tag = "valbot.response"

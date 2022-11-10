@@ -3,13 +3,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/simulate"
 	"log"
 	"os"
 
-	_ "github.com/eric2788/MiraiValBot/cmd"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/simulate"
+
+	_ "github.com/eric2788/MiraiValBot/hooks/cmd"
 )
 
 func main() {

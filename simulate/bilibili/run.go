@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/simulate"
-	"github.com/eric2788/MiraiValBot/sites/bilibili"
 	"time"
 
-	_ "github.com/eric2788/MiraiValBot/handlers"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/simulate"
+	"github.com/eric2788/MiraiValBot/hooks/sites/bilibili"
+
+	_ "github.com/eric2788/MiraiValBot/hooks/handlers"
 )
 
 var bilibiliRooms = []int64{

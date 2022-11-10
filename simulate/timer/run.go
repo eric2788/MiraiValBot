@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/modules/timer"
-	"github.com/eric2788/MiraiValBot/simulate"
 	"time"
 
-	_ "github.com/eric2788/MiraiValBot/timer_tasks"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/modules/timer"
+	"github.com/eric2788/MiraiValBot/simulate"
+
+	_ "github.com/eric2788/MiraiValBot/hooks/timer_tasks"
 )
 
 func main() {
