@@ -142,6 +142,30 @@ func fixGroupImages(gp int64, sending *message.GroupMessage) {
 	sending.Elements = fixed
 }
 
+func GetImageList() [][]byte {
+	result := make([][]byte, 0)
+
+	files, err := os.ReadDir(cacheDirPath + imagePath)
+	if err != nil {
+		logger.Errorf("获取圖片缓存列表时错误: %v", err)
+		return result
+	}
+
+	for _, file := range files {
+		if file.IsDir() {
+			continue
+		}
+		b, err := os.ReadFile(file.Name())
+		if err != nil {
+			logger.Errorf("讀取圖片 %s 時出現錯誤: %v, 已略過.", file.Name(), err)
+			continue
+		}
+		result = append(result, b)
+	}
+
+	return result
+}
+
 // essence
 
 func saveGroupEssence(msg *message.GroupMessage) {
