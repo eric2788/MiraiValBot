@@ -154,11 +154,12 @@ func GetMatchDetails(matchId string) (*MatchData, error) {
 	matchDetails := &MatchData{}
 
 	if exist, err := redis.Get(matchId, matchDetails); exist {
+		logger.Debugf("從 redis 中找到對戰數據 %s 的緩存，已使用緩存數據。", matchId)
 		return matchDetails, nil
 	} else if err != nil {
 		logger.Warnf("从 redis 提取快取时出现错误: %v, 将使用 HTTP 请求.", err)
 	} else if !exist {
-		logger.Warnf("从 redis 找不到对战数据缓存 (%s), 将使用 HTTP 请求.", matchId)
+		logger.Debugf("从 redis 找不到对战数据缓存 (%s), 将使用 HTTP 请求.", matchId)
 	}
 
 	matchDetails, err := GetMatchDetailsAPI(matchId)
