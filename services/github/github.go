@@ -26,17 +26,17 @@ var (
 )
 
 func Init() {
-	githubYaml := file.ApplicationYaml.Github
-	token := githubYaml.AccessToken
-	if token == "" {
-		token = os.Getenv("GITHUB_PAT_TOKEN")
+	githubYaml := &file.ApplicationYaml.Github
+	if githubYaml.AccessToken == "" {
+		logger.Debugf("github access token is empty, try to get from environment variable")
+		githubYaml.AccessToken = os.Getenv("GH_PAT_TOKEN")
 	}
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: token},
+		&oauth2.Token{AccessToken: githubYaml.AccessToken},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client = gh.NewClient(tc)
-	config = &githubYaml
+	config = githubYaml
 }
 
 // VerifySuccess verify that the api is working

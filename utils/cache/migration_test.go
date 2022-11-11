@@ -2,28 +2,23 @@ package cache
 
 import (
 	"fmt"
-	"os"
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"testing"
 	"time"
 
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/services/github"
-	"github.com/sirupsen/logrus"
-	"github.com/subosito/gotenv"
 )
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
-	if err := gotenv.Load("../../services/github/.env.local"); err == nil {
-		logger.Debugf("successfully loaded local environment variables.")
-	}
-	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_PAT_TOKEN")
+	test.InitTesting()
 	github.Init()
 }
 
 func TestMigration(t *testing.T) {
 
 	if file.ApplicationYaml.Github.AccessToken == "" {
+		logger.Debugf("skipping migration test because no github access token is provided")
 		return
 	}
 

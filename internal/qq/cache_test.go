@@ -6,11 +6,12 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
+	"github.com/eric2788/MiraiValBot/utils/cache"
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	"github.com/eric2788/common-utils/request"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Mrs4s/MiraiGo/message"
@@ -155,6 +156,8 @@ func md5Str(b []byte) string {
 }
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
+	test.InitTesting()
 	compress.SwitchType("zlib")
+	imgCache = cache.NewCache(imagePath)
+	essenceCache = cache.NewCache(essencePath)
 }

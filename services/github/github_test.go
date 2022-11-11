@@ -1,19 +1,18 @@
 package github
 
 import (
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	gh "github.com/google/go-github/v48/github"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGithubAccess(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -33,7 +32,7 @@ func TestGithubAccess(t *testing.T) {
 }
 
 func TestGithubRepo(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -67,7 +66,7 @@ func TestGithubRepo(t *testing.T) {
 }
 
 func TestGithubUploadAndRead(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -90,7 +89,7 @@ func TestGithubUploadAndRead(t *testing.T) {
 }
 
 func TestUploadReadCompressed(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -122,7 +121,7 @@ func TestUploadReadCompressed(t *testing.T) {
 }
 
 func TestUploadExistError(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -136,7 +135,7 @@ func TestUploadExistError(t *testing.T) {
 }
 
 func TestNotExistError(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -151,7 +150,7 @@ func TestNotExistError(t *testing.T) {
 }
 
 func TestListDir(t *testing.T) {
-	if file.ApplicationYaml.Github.AccessToken == "" {
+	if config.AccessToken == "" {
 		t.Log("token is empty, skipped test.")
 		return
 	}
@@ -166,6 +165,6 @@ func TestListDir(t *testing.T) {
 }
 
 func init() {
-	logrus.SetLevel(logrus.DebugLevel)
+	test.InitTesting()
 	Init()
 }
