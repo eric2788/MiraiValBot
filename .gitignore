@@ -10,3 +10,4 @@ session.token
 **/cache/**
 !**/cache/*.go
 **/codec/**
+*.local

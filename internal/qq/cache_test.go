@@ -9,9 +9,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/services/github"
+	"github.com/eric2788/MiraiValBot/utils/cache"
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	"github.com/eric2788/common-utils/request"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/subosito/gotenv"
 
 	"github.com/Mrs4s/MiraiGo/message"
 )
@@ -31,7 +36,7 @@ func TestSaveAndGetImage(t *testing.T) {
 	saveGroupImages(groupMessage)
 
 	fileName := hex.EncodeToString(hash[:])
-	b, err := os.ReadFile(cacheDirPath + imagePath + fileName)
+	b, err := GetCacheImage(fileName)
 	if err != nil {
 		t.Fatal(err)
 	} else {
@@ -60,7 +65,8 @@ func TestSaveMessage(t *testing.T) {
 
 	saveGroupEssence(groupMessage)
 
-	compressed, err := os.ReadFile(cacheDirPath + essencePath + "1")
+	compressed, err := essenceCache.Get("1")
+
 	if err != nil {
 		t.Fatal(err)
 	} else {
@@ -151,4 +157,17 @@ func TestCompressUnCompressMessage(t *testing.T) {
 func md5Str(b []byte) string {
 	m := md5.Sum(b)
 	return hex.EncodeToString(m[:])
+}
+
+func init() {
+	logrus.SetLevel(logrus.DebugLevel)
+	if err := gotenv.Load("../../services/github/.env.local"); err == nil {
+		logger.Debugf("successfully loaded local environment variables.")
+	}
+	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_TOKEN")
+	github.Init()
+	os.Setenv(cache.StrategyEnvVar, "github")
+	imgCache = cache.NewCache(imagePath)
+	essenceCache = cache.NewCache(essencePath)
+	compress.SwitchType("zlib")
 }

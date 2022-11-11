@@ -37,7 +37,8 @@ type (
 )
 
 var cacheDbMap = map[string]CacheDatabase{
-	"local": &LocalCache{},
+	"local":  &LocalCache{},
+	"github": &GitCache{},
 }
 
 func (s *Service) Set(name string, data []byte) error {
