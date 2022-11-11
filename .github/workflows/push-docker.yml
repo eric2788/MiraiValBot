@@ -14,6 +14,7 @@ on:
 jobs:
   test_program:
     permissions: write-all
+    environment: GITHUB_PAT_TOKEN
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
