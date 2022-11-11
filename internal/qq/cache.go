@@ -16,9 +16,8 @@ import (
 )
 
 const (
-	cacheDirPath = "cache/"
-	imagePath    = "images/"
-	essencePath  = "essences/"
+	imagePath   = "images"
+	essencePath = "essences"
 )
 
 // images
@@ -76,7 +75,7 @@ func FixGroupImages(gp int64, sending *message.GroupMessage) {
 	for _, element := range sending.Elements {
 		if groupImage, ok := element.(*message.GroupImageElement); ok {
 			name := hex.EncodeToString(groupImage.Md5)
-			b, err := imgCache.Get(name)
+			b, err := GetCacheImage(name)
 
 			var img *message.GroupImageElement
 

@@ -27,12 +27,12 @@ func (c *LocalCache) Remove(path, name string) error {
 }
 
 func (c *LocalCache) List(path string) []CachedData {
-	
+
 	results := make([]CachedData, 0)
-	files, err := os.ReadDir(localDirPath+path)
+	files, err := os.ReadDir(localDirPath + path)
 
 	if err != nil {
-		logger.Errorf("获取缓存列表时出现错误: %v")
+		logger.Errorf("获取缓存列表时出现错误: %v", err)
 		return results
 	}
 

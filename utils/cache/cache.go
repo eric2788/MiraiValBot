@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/subosito/gotenv"
 )
 
 const StrategyEnvVar = "CACHE_STRATEGY"
@@ -37,7 +38,8 @@ type (
 )
 
 var cacheDbMap = map[string]CacheDatabase{
-	"local": &LocalCache{},
+	"local":  &LocalCache{},
+	"github": &GitCache{},
 }
 
 func (s *Service) Set(name string, data []byte) error {
@@ -102,6 +104,9 @@ func WithType(t string) func(*Options) {
 }
 
 func init() {
+	if err := gotenv.Load(".env.local"); err == nil {
+		logger.Debugf("successfully loaded local environment variables.")
+	}
 	if os.Getenv(StrategyEnvVar) == "" {
 		logger.Warn("緩存方式沒有設置, 已默認改用local。")
 		os.Setenv(StrategyEnvVar, "local")

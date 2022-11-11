@@ -12,6 +12,15 @@ type Configuration struct {
 	Val     ValConfig     `yaml:"val"`
 	Redis   RedisConfig   `yaml:"redis"`
 	Discord DiscordConfig `yaml:"discord"`
+	Github GithubConfig `yaml:"github"` 
+}
+
+type GithubConfig struct {
+	AccessToken string `yaml:"access_token"`
+	Name string `yaml:"name"`
+	Email string `yaml:"email"`
+	Repository string `yaml:"repository"`
+	Branch string `yaml:"branch"`
 }
 
 type BotConfig struct {
@@ -57,6 +66,12 @@ var defaultConfig = Configuration{
 		Database: 0,
 		Password: "",
 		Buffer:   1024,
+	},
+	Github: GithubConfig{
+		Name: "sysnapse",
+		Email: "tester123@gmail.com",
+		Repository: "cloud",
+		Branch: "main",
 	},
 }
 

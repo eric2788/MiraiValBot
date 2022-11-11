@@ -6,11 +6,11 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
-	"os"
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	"github.com/eric2788/common-utils/request"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Mrs4s/MiraiGo/message"
@@ -31,7 +31,7 @@ func TestSaveAndGetImage(t *testing.T) {
 	saveGroupImages(groupMessage)
 
 	fileName := hex.EncodeToString(hash[:])
-	b, err := os.ReadFile(cacheDirPath + imagePath + fileName)
+	b, err := GetCacheImage(fileName)
 	if err != nil {
 		t.Fatal(err)
 	} else {
@@ -60,7 +60,8 @@ func TestSaveMessage(t *testing.T) {
 
 	saveGroupEssence(groupMessage)
 
-	compressed, err := os.ReadFile(cacheDirPath + essencePath + "1")
+	compressed, err := essenceCache.Get("1")
+
 	if err != nil {
 		t.Fatal(err)
 	} else {
@@ -151,4 +152,9 @@ func TestCompressUnCompressMessage(t *testing.T) {
 func md5Str(b []byte) string {
 	m := md5.Sum(b)
 	return hex.EncodeToString(m[:])
+}
+
+func init() {
+	logrus.SetLevel(logrus.DebugLevel)
+	compress.SwitchType("zlib")
 }
