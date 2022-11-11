@@ -13,6 +13,7 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	gh "github.com/google/go-github/v48/github"
+	"github.com/subosito/gotenv"
 	"golang.org/x/oauth2"
 )
 
@@ -26,8 +27,12 @@ var (
 
 func Init() {
 	githubYaml := file.ApplicationYaml.Github
+	token := githubYaml.AccessToken
+	if token == "" {
+		token = os.Getenv("GITHUB_PAT_TOKEN")
+	}
 	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{AccessToken: githubYaml.AccessToken},
+		&oauth2.Token{AccessToken: token},
 	)
 	tc := oauth2.NewClient(ctx, ts)
 	client = gh.NewClient(tc)
@@ -199,5 +204,11 @@ func generateAuthor() *gh.CommitAuthor {
 		Name:  &name,
 		Email: &email,
 		Date:  &now,
+	}
+}
+
+func init() {
+	if err := gotenv.Load(".env.local"); err == nil {
+		logger.Debugf("successfully loaded local environment variables.")
 	}
 }

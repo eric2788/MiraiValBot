@@ -17,11 +17,16 @@ func init() {
 	if err := gotenv.Load("../../services/github/.env.local"); err == nil {
 		logger.Debugf("successfully loaded local environment variables.")
 	}
-	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_TOKEN")
+	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_PAT_TOKEN")
 	github.Init()
 }
 
 func TestMigration(t *testing.T) {
+
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		return
+	}
+
 	git, err := New(
 		WithType("github"),
 		WithPath("test_migration"),

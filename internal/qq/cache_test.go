@@ -6,17 +6,12 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
-	"os"
 	"testing"
 
-	"github.com/eric2788/MiraiValBot/internal/file"
-	"github.com/eric2788/MiraiValBot/services/github"
-	"github.com/eric2788/MiraiValBot/utils/cache"
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	"github.com/eric2788/common-utils/request"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/subosito/gotenv"
 
 	"github.com/Mrs4s/MiraiGo/message"
 )
@@ -161,13 +156,5 @@ func md5Str(b []byte) string {
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
-	if err := gotenv.Load("../../services/github/.env.local"); err == nil {
-		logger.Debugf("successfully loaded local environment variables.")
-	}
-	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_TOKEN")
-	github.Init()
-	os.Setenv(cache.StrategyEnvVar, "github")
-	imgCache = cache.NewCache(imagePath)
-	essenceCache = cache.NewCache(essencePath)
 	compress.SwitchType("zlib")
 }

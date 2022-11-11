@@ -10,10 +10,13 @@ import (
 	gh "github.com/google/go-github/v48/github"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"github.com/subosito/gotenv"
 )
 
 func TestGithubAccess(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	user, resp, err := client.Users.Get(ctx, "")
 	if err != nil {
 		t.Fatal(err)
@@ -30,6 +33,10 @@ func TestGithubAccess(t *testing.T) {
 }
 
 func TestGithubRepo(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	_, files, resp, err := client.Repositories.GetContents(ctx, "sysnapse", "cloud", "", nil)
 	if err != nil {
 		t.Fatal(err)
@@ -60,6 +67,10 @@ func TestGithubRepo(t *testing.T) {
 }
 
 func TestGithubUploadAndRead(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	path := "test/upload.txt"
 	text := "this is a file that uploaded from github v3 api, date: " + time.Now().Format(time.UnixDate)
 	err := UpdateFile(path, []byte(text))
@@ -79,6 +90,10 @@ func TestGithubUploadAndRead(t *testing.T) {
 }
 
 func TestUploadReadCompressed(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	compress.SwitchType("zlib")
 	path := "test/binaryfile"
 	text := "this is a binary file that compressed and uploaded from github v3 api, date: " + time.Now().Format(time.UnixDate)
@@ -107,6 +122,10 @@ func TestUploadReadCompressed(t *testing.T) {
 }
 
 func TestUploadExistError(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	path := "test/test_err.txt"
 	// upload first
 	_ = UploadFile(path, []byte("hawidhaiwhdiahdiawhida"))
@@ -117,6 +136,10 @@ func TestUploadExistError(t *testing.T) {
 }
 
 func TestNotExistError(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	_, err1 := GetFileInfo("test/awdawdawdawda")
 	_, err2 := DownloadFile("test/awdawdawdadaw")
 
@@ -128,6 +151,10 @@ func TestNotExistError(t *testing.T) {
 }
 
 func TestListDir(t *testing.T) {
+	if file.ApplicationYaml.Github.AccessToken == "" {
+		t.Log("token is empty, skipped test.")
+		return
+	}
 	dir, err := ListDir("test")
 	if err != nil {
 		t.Fatal(err)
@@ -140,9 +167,5 @@ func TestListDir(t *testing.T) {
 
 func init() {
 	logrus.SetLevel(logrus.DebugLevel)
-	if err := gotenv.Load(".env.local"); err == nil {
-		logger.Debugf("successfully loaded local environment variables.")
-	}
-	file.ApplicationYaml.Github.AccessToken = os.Getenv("GITHUB_TOKEN")
 	Init()
 }
