@@ -2,13 +2,14 @@ package file
 
 import (
 	"encoding/json"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/eric2788/MiraiValBot/modules/timer"
 	"io/fs"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/Logiase/MiraiGo-Template/utils"
+	"github.com/eric2788/MiraiValBot/modules/timer"
 )
 
 var logger = utils.GetModuleLogger("file.storage")
@@ -20,8 +21,8 @@ var DataStorage *StorageData = makeWrapper(&defaultStorageData)
 var locker sync.Mutex
 
 var defaultStorageData = storageData{
-	Answers:   make(map[string]bool),
-	Responses: make(map[string]string),
+	Answers:    make(map[string]bool),
+	Responses:  make(map[string]string),
 	WordCounts: make(map[string]map[int64]int64),
 	Bilibili: &bilibiliSettings{
 		HighLightedUsers: []int64{},
@@ -34,11 +35,12 @@ var defaultStorageData = storageData{
 		ShowReply: true,
 	},
 	Setting: &setting{
-		VerboseDelete: false,
-		Verbose:       false,
-		YearlyCheck:   true,
-		LastChecked:   0,
-		MsgSeqAfter:   0,
+		VerboseDelete:  false,
+		Verbose:        false,
+		YearlyCheck:    true,
+		LastChecked:    0,
+		MsgSeqAfter:    0,
+		TimesPerNotify: 1,
 	},
 	Listening: &listening{
 		Bilibili: []int64{},

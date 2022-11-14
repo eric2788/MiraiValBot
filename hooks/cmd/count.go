@@ -81,7 +81,7 @@ func listWorldCount(args []string, source *command.MessageSource) error {
 		return a.Times > b.Times
 	})
 
-	msg.Append(qq.NewTextLn("字词 %q 的群聊记录次数: (由高到低)"))
+	msg.Append(qq.NewTextfLn("字词 %q 的群聊记录次数: (由高到低)", word))
 
 	for d, c := range wc {
 

@@ -64,15 +64,18 @@ func (w *wordCounting) HookEvent(bot *bot.Bot) {
 
 		times++
 
-		send := message.NewSendingMessage()
-		send.Append(qq.NewTextf("%s 已经在本群说了 %q 合共 %d 次", event.Sender.DisplayName(), msg, times))
-
 		file.UpdateStorage(func() {
 			file.DataStorage.WordCounts[msg][event.Sender.Uin] = times
 		})
 
 		logger.Infof("%s 字词已在本群说了合共 %d 次。", msg, w.sum(msg))
 
+		if times%int64(file.DataStorage.Setting.TimesPerNotify) != 0 {
+			return
+		}
+
+		send := message.NewSendingMessage()
+		send.Append(qq.NewTextf("%s 已经在本群说了 %q 合共 %d 次", event.Sender.DisplayName(), msg, times))
 		_ = qq.SendGroupMessage(send)
 	})
 }
