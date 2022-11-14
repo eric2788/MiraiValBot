@@ -44,7 +44,13 @@ func (w *wordCounting) Serve(bot *bot.Bot) {
 func (w *wordCounting) HookEvent(bot *bot.Bot) {
 	bot.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
 
+		// 非瓦群无视
 		if event.GroupCode != qq.ValGroupInfo.Code {
+			return
+		}
+
+		// 机器人无视
+		if event.Sender.Uin == client.Uin {
 			return
 		}
 
