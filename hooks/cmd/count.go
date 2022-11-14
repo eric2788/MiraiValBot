@@ -8,6 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 )
 
 func addWordCount(args []string, source *command.MessageSource) error {
@@ -62,19 +63,37 @@ func listWorldCount(args []string, source *command.MessageSource) error {
 		return qq.SendGroupMessage(msg)
 	}
 
-	msg.Append(qq.NewTextLn("字词 %q 的群聊记录次数:"))
+	type WordCount struct {
+		Uid   int64
+		Times int64
+	}
+
+	wc := make([]WordCount, 0)
 
 	for uid, times := range counts {
+		wc = append(wc, WordCount{
+			Uid:   uid,
+			Times: times,
+		})
+	}
 
-		info := qq.FindGroupMember(uid)
+	slices.SortStableFunc(wc, func(a, b WordCount) bool {
+		return a.Times > b.Times
+	})
+
+	msg.Append(qq.NewTextLn("字词 %q 的群聊记录次数: (由高到低)"))
+
+	for d, c := range wc {
+
+		info := qq.FindGroupMember(c.Uid)
 		var name string
 		if info != nil {
-			name = info.Nickname
+			name = info.DisplayName()
 		} else {
-			name = fmt.Sprintf("(UID: %d)", uid)
+			name = fmt.Sprintf("(UID: %d)", c.Uid)
 		}
 
-		msg.Append(qq.NewTextfLn("%s 说了 %d 次", name, times))
+		msg.Append(qq.NewTextfLn("%d. %s 说了 %d 次", d+1, name, c.Times))
 	}
 
 	return qq.SendWithRandomRiskyStrategy(msg)
@@ -83,7 +102,7 @@ func listWorldCount(args []string, source *command.MessageSource) error {
 var (
 	addWordCountCommand    = command.NewNode([]string{"add", "新增"}, "启动字词记录", true, addWordCount, "<字词>")
 	removeWordCountCommand = command.NewNode([]string{"remove", "移除"}, "移除字词记录", true, removeWordCount, "<字词>")
-	listWorldCountCommand  = command.NewNode([]string{"list", "列表"}, "显示字词记录列表", false, listWorldCount, "<字词>")
+	listWorldCountCommand  = command.NewNode([]string{"list", "列表", "rank", "排行"}, "显示字词记录列表(带排行)", false, listWorldCount, "<字词>")
 )
 
 var countCommand = command.NewParent([]string{"count", "wordcount", "字词记录"}, "字词记录指令",
