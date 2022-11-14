@@ -11,3 +11,4 @@ session.token
 !**/cache/*.go
 **/codec/**
 *.local
+**/.vscode/**

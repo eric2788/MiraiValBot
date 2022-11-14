@@ -22,7 +22,7 @@ const Tag = "valbot.response"
 var (
 	logger               = utils.GetModuleLogger(Tag)
 	instance             = &response{}
-	YesNoPattern         = regexp.MustCompile("^.+是.+吗[\\?？]*$")
+	YesNoPattern         = regexp.MustCompile(`^.+是.+吗[\?？]*$`)
 	questionMarkReplacer = strings.NewReplacer("?", "", "？", "")
 )
 

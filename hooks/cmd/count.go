@@ -101,7 +101,7 @@ func listWorldCount(args []string, source *command.MessageSource) error {
 
 var (
 	addWordCountCommand    = command.NewNode([]string{"add", "新增"}, "启动字词记录", true, addWordCount, "<字词>")
-	removeWordCountCommand = command.NewNode([]string{"remove", "移除"}, "移除字词记录", true, removeWordCount, "<字词>")
+	removeWordCountCommand = command.NewNode([]string{"remove", "移除"}, "移除及清空字词记录", true, removeWordCount, "<字词>")
 	listWorldCountCommand  = command.NewNode([]string{"list", "列表", "rank", "排行"}, "显示字词记录列表(带排行)", false, listWorldCount, "<字词>")
 )
 
