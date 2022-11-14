@@ -1,6 +1,8 @@
 package qq
 
 import (
+	"fmt"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -77,12 +79,21 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 			return
 		}
 
+		nick := event.SenderNick
+		if nick == "" {
+			if info := FindGroupMember(event.SenderUin); info != nil {
+				nick = info.Nickname
+			} else {
+				nick = fmt.Sprintf("(UID: %d)", event.SenderUin)
+			}
+		}
+
 		if add {
 			logger.Infof(
 				"群 %v 内 %v 将 %v 的消息(%v)设为了精华消息.",
 				ValGroupInfo.Name,
 				event.OperatorNick,
-				event.SenderNick,
+				nick,
 				msgId,
 			)
 

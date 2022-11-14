@@ -31,20 +31,19 @@ import (
 
 	// 註冊模組
 	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
+	_ "github.com/eric2788/MiraiValBot/modules/chat_reply"
 	_ "github.com/eric2788/MiraiValBot/modules/command"
+	_ "github.com/eric2788/MiraiValBot/modules/counting"
 	_ "github.com/eric2788/MiraiValBot/modules/response"
 	_ "github.com/eric2788/MiraiValBot/modules/timer"
 	_ "github.com/eric2788/MiraiValBot/modules/verbose"
-
-	// 注册其他事件挂鈎
-	_ "github.com/eric2788/MiraiValBot/internal/chat_reply"
 )
 
 func init() {
 	utils.WriteLogToFS()
 }
 
-var cliDebug = flag.Bool("debug", false, "enable debug logging level")
+var cliDebug = flag.Bool("debug", os.Getenv("DEBUG") == "true", "enable debug logging level")
 
 func main() {
 

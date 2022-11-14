@@ -1,6 +1,8 @@
 package chat_reply
 
 import (
+	"sync"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
@@ -10,10 +12,20 @@ import (
 	"github.com/eric2788/common-utils/array"
 )
 
-var logger = utils.GetModuleLogger("valbot.chat_reply")
+const Tag = "valbot.chat_reply"
+
+var (
+	logger   = utils.GetModuleLogger(Tag)
+	instance = &atResponse{
+		strategies: []ResponseStrategy{
+			&aiChatResponse{},
+			&randomResponse{},
+		},
+	}
+)
 
 type (
-	AtResponse struct {
+	atResponse struct {
 		strategies []ResponseStrategy
 	}
 
@@ -22,7 +34,32 @@ type (
 	}
 )
 
-func (a *AtResponse) HookEvent(bot *bot.Bot) {
+func (a *atResponse) MiraiGoModule() bot.ModuleInfo {
+	return bot.ModuleInfo{
+		ID:       Tag,
+		Instance: instance,
+	}
+}
+
+func (a *atResponse) Init() {
+}
+
+func (a *atResponse) PostInit() {
+}
+
+func (a *atResponse) Serve(bot *bot.Bot) {
+}
+
+func (a *atResponse) Start(bot *bot.Bot) {
+	logger.Infof("聊天回复模组已启动。")
+}
+
+func (a *atResponse) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
+	logger.Infof("聊天回复模组已关闭。")
+}
+
+func (a *atResponse) HookEvent(bot *bot.Bot) {
 	bot.GroupMessageEvent.Subscribe(func(cl *client.QQClient, msg *message.GroupMessage) {
 		content := qq.ParseMsgContent(msg.Elements)
 
@@ -41,10 +78,6 @@ func (a *AtResponse) HookEvent(bot *bot.Bot) {
 }
 
 func init() {
-	eventhook.HookLifeCycle(&AtResponse{
-		strategies: []ResponseStrategy{
-			&aiChatResponse{},
-			&randomResponse{},
-		},
-	})
+	bot.RegisterModule(instance)
+	eventhook.HookLifeCycle(instance)
 }
