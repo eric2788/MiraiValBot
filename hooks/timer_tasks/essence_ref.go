@@ -121,5 +121,5 @@ func tellTime() string {
 }
 
 func init() {
-	timer.RegisterTimer("essence.ref", time.Hour*24, EssenceTask)
+	timer.RegisterTimer("essence.ref", time.Hour, EssenceTask)
 }
