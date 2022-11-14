@@ -7,6 +7,7 @@ import (
 
 const localDirPath = "cache/"
 
+// LocalCache using local, but one day it will full
 type LocalCache struct {
 }
 

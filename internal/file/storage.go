@@ -22,6 +22,7 @@ var locker sync.Mutex
 var defaultStorageData = storageData{
 	Answers:   make(map[string]bool),
 	Responses: make(map[string]string),
+	WordCounts: make(map[string]map[int64]int64),
 	Bilibili: &bilibiliSettings{
 		HighLightedUsers: []int64{},
 	},

@@ -40,7 +40,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 
 	logger.Infof("正在檢查 %s 的今天有無群精華消息被設置...", tellTime())
 
-	essences, err := bot.GetGroupEssenceMsgList(qq.ValGroupInfo.Uin)
+	essences, err := bot.GetGroupEssenceMsgList(qq.ValGroupInfo.Code)
 
 	if err != nil {
 		return
@@ -71,7 +71,7 @@ func EssenceTask(bot *bot.Bot) (err error) {
 	for _, essence := range todayEssences {
 		msg = message.NewSendingMessage()
 		msg.Append(qq.NewTextfLn("%s 设置了一则由 %s 所发送的消息为群精华消息: ", essence.AddDigestNick, essence.SenderNick))
-		essenceMsg, msgErr := qq.GetGroupMessage(qq.ValGroupInfo.Uin, int64(essence.MessageID))
+		essenceMsg, msgErr := qq.GetGroupEssenceMessage(int64(essence.MessageID))
 
 		if msgErr != nil || essenceMsg == nil {
 			msg.Append(qq.NewTextf("获取消息失败: %v", msgErr))

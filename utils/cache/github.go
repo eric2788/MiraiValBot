@@ -6,6 +6,9 @@ import (
 	"github.com/eric2788/MiraiValBot/services/github"
 )
 
+
+// GitCache using github repository as caching
+// Deprecated: github repostiory has size limit, and doing this will against TOS
 type GitCache struct {
 }
 

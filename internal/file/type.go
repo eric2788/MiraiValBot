@@ -5,13 +5,14 @@ import "github.com/eric2788/common-utils/set"
 // Real Type
 type (
 	storageData struct {
-		Answers   map[string]bool   `json:"answers"`
-		Responses map[string]string `json:"responses"`
-		Bilibili  *bilibiliSettings `json:"bilibili"`
-		Youtube   *youtubeSettings  `json:"youtube"`
-		Twitter   *twitterSettings  `json:"twitter"`
-		Setting   *setting          `json:"setting"`
-		Listening *listening        `json:"listening"`
+		Answers    map[string]bool            `json:"answers"`
+		Responses  map[string]string          `json:"responses"`
+		WordCounts map[string]map[int64]int64 `json:"word_counts"`
+		Bilibili   *bilibiliSettings          `json:"bilibili"`
+		Youtube    *youtubeSettings           `json:"youtube"`
+		Twitter    *twitterSettings           `json:"twitter"`
+		Setting    *setting                   `json:"setting"`
+		Listening  *listening                 `json:"listening"`
 	}
 
 	youtubeSettings struct {
@@ -47,13 +48,14 @@ type (
 
 type (
 	StorageData struct {
-		Answers   map[string]bool
-		Responses map[string]string
-		Bilibili  *BilibiliSettings
-		Youtube   *YoutubeSettings
-		Twitter   *TwitterSettings
-		Setting   *Setting
-		Listening *Listening
+		Answers    map[string]bool
+		Responses  map[string]string
+		WordCounts map[string]map[int64]int64
+		Bilibili   *BilibiliSettings
+		Youtube    *YoutubeSettings
+		Twitter    *TwitterSettings
+		Setting    *Setting
+		Listening  *Listening
 	}
 
 	YoutubeSettings struct {
@@ -87,8 +89,9 @@ type (
 
 func (s *StorageData) toRealStorageData() *storageData {
 	return &storageData{
-		Answers:   s.Answers,
-		Responses: s.Responses,
+		Answers:    s.Answers,
+		Responses:  s.Responses,
+		WordCounts: s.WordCounts,
 		Youtube: &youtubeSettings{
 			BroadcastIdle: s.Youtube.BroadcastIdle,
 			AntiDuplicate: s.Youtube.AntiDuplicate,
@@ -118,6 +121,7 @@ func (s *StorageData) toRealStorageData() *storageData {
 func (s *StorageData) parse(sd *storageData) {
 	s.Answers = sd.Answers
 	s.Responses = sd.Responses
+	s.WordCounts = sd.WordCounts
 	s.Bilibili = &BilibiliSettings{
 		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
 	}
