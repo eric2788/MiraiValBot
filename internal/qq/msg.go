@@ -64,35 +64,12 @@ func NewVoiceByUrlWithGroup(gp int64, url string) (*message.GroupVoiceElement, e
 }
 
 func NewTtsWithGroup(gp int64, text string) (voice *message.GroupVoiceElement, err error) {
-
-	key := GroupKey(gp, fmt.Sprintf("tts:%x", md5.Sum([]byte(text))))
-
-	var groupVoiceElement = &message.GroupVoiceElement{}
-
-	if ok, err := redis.Get(key, groupVoiceElement); err != nil {
-		return nil, err
-	} else if ok {
-		logger.Infof("在redis 發現 「%v」 的 voiceElement 緩存， 將使用緩存", text)
-		return groupVoiceElement, nil
-	}
-
-	logger.Infof("從 redis 找不到 voiceElement (%s), 將使用QQ上傳", key)
-
 	data, err := getTts(text)
 
 	if err != nil {
 		return nil, err
 	}
-
 	voice, err = bot.Instance.UploadVoice(NewGroupSource(gp), bytes.NewReader(data))
-	if err == nil {
-		redisError := redis.Store(key, voice)
-		if redisError != nil {
-			logger.Warnf("Redis 儲存 群組語音消息 時出現錯誤: %v", redisError)
-		} else {
-			logger.Infof("Redis 儲存 群組語音消息 成功。")
-		}
-	}
 	return
 }
 

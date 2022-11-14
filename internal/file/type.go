@@ -36,11 +36,12 @@ type (
 	}
 
 	setting struct {
-		VerboseDelete bool  `json:"verboseDelete"`
-		Verbose       bool  `json:"verbose"`
-		YearlyCheck   bool  `json:"yearlyCheck"`
-		LastChecked   int64 `json:"lastChecked"`
-		MsgSeqAfter   int64 `json:"msgSeqAfter"`
+		VerboseDelete  bool  `json:"verboseDelete"`
+		Verbose        bool  `json:"verbose"`
+		YearlyCheck    bool  `json:"yearlyCheck"`
+		LastChecked    int64 `json:"lastChecked"`
+		MsgSeqAfter    int64 `json:"msgSeqAfter"`
+		TimesPerNotify int   `json:"timesPerNotify"`
 	}
 )
 
@@ -79,11 +80,12 @@ type (
 	}
 
 	Setting struct {
-		VerboseDelete bool
-		Verbose       bool
-		YearlyCheck   bool
-		LastChecked   int64
-		MsgSeqAfter   int64
+		VerboseDelete  bool
+		Verbose        bool
+		YearlyCheck    bool
+		LastChecked    int64
+		MsgSeqAfter    int64
+		TimesPerNotify int
 	}
 )
 
@@ -103,11 +105,12 @@ func (s *StorageData) toRealStorageData() *storageData {
 			ShowReply: s.Twitter.ShowReply,
 		},
 		Setting: &setting{
-			VerboseDelete: s.Setting.VerboseDelete,
-			Verbose:       s.Setting.Verbose,
-			YearlyCheck:   s.Setting.YearlyCheck,
-			LastChecked:   s.Setting.LastChecked,
-			MsgSeqAfter:   s.Setting.MsgSeqAfter,
+			VerboseDelete:  s.Setting.VerboseDelete,
+			Verbose:        s.Setting.Verbose,
+			YearlyCheck:    s.Setting.YearlyCheck,
+			LastChecked:    s.Setting.LastChecked,
+			MsgSeqAfter:    s.Setting.MsgSeqAfter,
+			TimesPerNotify: s.Setting.TimesPerNotify,
 		},
 		Listening: &listening{
 			Bilibili: s.Listening.Bilibili.ToArr(),
@@ -133,11 +136,12 @@ func (s *StorageData) parse(sd *storageData) {
 		ShowReply: sd.Twitter.ShowReply,
 	}
 	s.Setting = &Setting{
-		VerboseDelete: sd.Setting.VerboseDelete,
-		Verbose:       sd.Setting.Verbose,
-		YearlyCheck:   sd.Setting.YearlyCheck,
-		LastChecked:   sd.Setting.LastChecked,
-		MsgSeqAfter:   sd.Setting.MsgSeqAfter,
+		VerboseDelete:  sd.Setting.VerboseDelete,
+		Verbose:        sd.Setting.Verbose,
+		YearlyCheck:    sd.Setting.YearlyCheck,
+		LastChecked:    sd.Setting.LastChecked,
+		MsgSeqAfter:    sd.Setting.MsgSeqAfter,
+		TimesPerNotify: sd.Setting.TimesPerNotify,
 	}
 	s.Listening = &Listening{
 		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),
