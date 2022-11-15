@@ -82,12 +82,32 @@ func (r *response) HookEvent(bot *bot.Bot) {
 
 			// 1/20 机率会回复
 			if rand.Intn(20) == 19 {
+
+				// 没有文字信息, 略过
+				if len(qq.ParseMsgContent(msg.Elements).Texts) == 0 {
+					return
+				}
+
+
 				// 透过 AI 回复信息
 				reply, err := r.res.Response(msg)
 				if err != nil {
 					logger.Errorf("透过 AI 回复对话时出现错误: %v", err)
 				} else {
-					_ = qq.SendGroupMessageByGroup(msg.GroupCode, reply)
+
+					// create a message with no reply element
+					send := message.NewSendingMessage()
+
+					for _, r := range reply.Elements {
+
+						if _, ok := r.(*message.ReplyElement); ok {
+							continue
+						}
+
+						send.Append(r)
+					}
+
+					_ = qq.SendGroupMessageByGroup(msg.GroupCode, send)
 				}
 			}
 
