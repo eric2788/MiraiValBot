@@ -25,10 +25,10 @@ func RandomChat(bot *bot.Bot) error {
 	var getMsg func() (*message.SendingMessage, error)
 
 	// 70% 发送群图片, 30% 发送群消息
-	if rand.Intn(100) > 70 {
-		getMsg = getRandomImage
-	} else {
+	if rand.Intn(100)+1 > 70 {
 		getMsg = getRandomMessage
+	} else {
+		getMsg = getRandomImage
 	}
 
 	if msg, err := getMsg(); err != nil {

@@ -65,7 +65,7 @@ func (b *BroadCastHandle[Data]) handleLiveData(bot *bot.Bot, data *Data) {
 	handle, ok := b.handlerMap[command]
 
 	if !ok {
-		b.logger.Warnf("找不到 %s 指令的處理方法，已略過。", command)
+		b.logger.Debugf("找不到 %s 指令的處理方法，已略過。", command)
 		b.exception.Add(command)
 		return
 	}
