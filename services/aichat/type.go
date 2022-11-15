@@ -1,7 +1,6 @@
 package aichat
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/eric2788/common-utils/request"
@@ -14,7 +13,8 @@ type AIReply interface {
 
 func getAiReply(url, msg string) ([]byte, error) {
 	msg = strings.ReplaceAll(msg, " ", "")
-	return request.GetBytesByUrl(fmt.Sprintf(url, msg))
+	url = strings.ReplaceAll(url, "{msg}", msg)
+	return request.GetBytesByUrl(url)
 }
 
 func replaces(msg string, replacer map[string]string) string {

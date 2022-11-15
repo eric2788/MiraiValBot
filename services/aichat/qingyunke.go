@@ -7,7 +7,7 @@ import (
 	"github.com/Logiase/MiraiGo-Template/bot"
 )
 
-const qingyunkeURL = "http://api.qingyunke.com/api.php?key=free&appid=0&msg=%v"
+const qingyunkeURL = "http://api.qingyunke.com/api.php?key=free&appid=0&msg={msg}"
 
 type (
 	qingYunKeReply struct {

@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	xiaoAiURL = "http://jintia.jintias.cn/api/xatx.php?type=text&msg=%v"
+	xiaoAiURL = "http://jintia.jintias.cn/api/xatx.php?type=text&msg={msg}"
 )
 
 var xiaoAiWarningMsg = regexp.MustCompile(`(?s)<.+>`)

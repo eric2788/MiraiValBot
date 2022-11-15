@@ -21,6 +21,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 	aichats := []aichat.AIReply{
 		&aichat.XiaoAi{},
 		&aichat.QingYunKe{},
+		&aichat.TianXing{},
 	}
 
 	rand.Seed(time.Now().UnixMicro())
