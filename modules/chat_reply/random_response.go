@@ -5,10 +5,10 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 )
 
-type randomResponse struct {
+type RandomResponse struct {
 }
 
-func (a *randomResponse) Response(msg *message.GroupMessage) (*message.SendingMessage, error) {
+func (a *RandomResponse) Response(msg *message.GroupMessage) (*message.SendingMessage, error) {
 	random, err := qq.GetRandomGroupMessage(msg.GroupCode)
 	if err != nil {
 		logger.Warnf("嘗試發送隨機群消息時出現錯誤: %v, 已略過發送。", err)

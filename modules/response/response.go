@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -15,6 +16,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/modules/chat_reply"
 )
 
 const Tag = "valbot.response"
@@ -27,6 +29,7 @@ var (
 )
 
 type response struct {
+	res *chat_reply.AIChatResponse
 }
 
 func (r *response) MiraiGoModule() bot.ModuleInfo {
@@ -37,6 +40,7 @@ func (r *response) MiraiGoModule() bot.ModuleInfo {
 }
 
 func (r *response) Init() {
+	r.res = new(chat_reply.AIChatResponse)
 }
 
 func (r *response) PostInit() {
@@ -72,6 +76,21 @@ func (r *response) HookEvent(bot *bot.Bot) {
 				m.Append(message.NewText(getResponse(ans)))
 			}
 			_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
+		} else {
+
+			rand.Seed(time.Now().UnixMicro())
+
+			// 1/20 机率会回复
+			if rand.Intn(20) == 19 {
+				// 透过 AI 回复信息
+				reply, err := r.res.Response(msg)
+				if err != nil {
+					logger.Errorf("透过 AI 回复对话时出现错误: %v", err)
+				} else {
+					_ = qq.SendGroupMessageByGroup(msg.GroupCode, reply)
+				}
+			}
+
 		}
 	})
 }

@@ -11,12 +11,12 @@ import (
 	"github.com/eric2788/MiraiValBot/services/aichat"
 )
 
-type aiChatResponse struct {
+type AIChatResponse struct {
 }
 
-func (a *aiChatResponse) Response(msg *message.GroupMessage) (*message.SendingMessage, error) {
+func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMessage, error) {
 
-	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, ", ")
+	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "，")
 
 	aichats := []aichat.AIReply{
 		&aichat.XiaoAi{},

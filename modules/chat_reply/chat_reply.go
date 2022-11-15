@@ -18,8 +18,8 @@ var (
 	logger   = utils.GetModuleLogger(Tag)
 	instance = &atResponse{
 		strategies: []ResponseStrategy{
-			&aiChatResponse{},
-			&randomResponse{},
+			&AIChatResponse{},
+			&RandomResponse{},
 		},
 	}
 )
