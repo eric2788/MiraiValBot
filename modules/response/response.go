@@ -17,6 +17,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/chat_reply"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 const Tag = "valbot.response"
@@ -83,11 +84,24 @@ func (r *response) HookEvent(bot *bot.Bot) {
 			// 1/20 机率会回复
 			if rand.Intn(20) == 19 {
 
-				// 没有文字信息, 略过
+				// 没有文字信息，随机发送龙图?
 				if len(qq.ParseMsgContent(msg.Elements).Texts) == 0 {
+					send, err := misc.NewRandomDragon()
+
+					if err != nil {
+						logger.Errorf("获取龙图失败: %v, 改为发送随机群消息", err)
+						send, err = misc.NewRandomImage()
+					}
+
+					// 依然失败
+					if err != nil {
+						logger.Errorf("获取图片失败: %v, 放弃发送。", err)
+						return
+					}
+
+					_ = qq.SendGroupMessageByGroup(msg.GroupCode, send)
 					return
 				}
-
 
 				// 透过 AI 回复信息
 				reply, err := r.res.Response(msg)

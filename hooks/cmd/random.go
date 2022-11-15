@@ -11,6 +11,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/valorant"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 	"github.com/eric2788/common-utils/datetime"
 )
 
@@ -32,20 +33,10 @@ func randomMember(args []string, source *command.MessageSource) error {
 }
 
 func randomLong(args []string, source *command.MessageSource) error {
-	msg := qq.CreateReply(source.Message)
-	backup := "https://phqghume.github.io/img/"
-	rand.Seed(time.Now().UnixMicro())
-	random := rand.Intn(58) + 1
-	ext := ".jpg"
-	if random > 48 {
-		ext = ".gif"
-	}
-	imgLink := fmt.Sprintf("%slong%%20(%d)%s", backup, random, ext)
-	img, err := qq.NewImageByUrl(imgLink)
+	msg, err := misc.NewRandomDragon()
 	if err != nil {
 		return err
 	}
-	msg.Append(img)
 	return qq.SendGroupMessage(msg)
 }
 
