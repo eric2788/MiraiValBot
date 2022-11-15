@@ -1,7 +1,6 @@
 package timer_tasks
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/timer"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 func RandomChat(bot *bot.Bot) error {
@@ -26,9 +26,9 @@ func RandomChat(bot *bot.Bot) error {
 
 	// 70% 发送群图片, 30% 发送群消息
 	if rand.Intn(100)+1 > 70 {
-		getMsg = getRandomMessage
+		getMsg = misc.NewRandomMessage
 	} else {
-		getMsg = getRandomImage
+		getMsg = misc.NewRandomImage
 	}
 
 	if msg, err := getMsg(); err != nil {
@@ -40,56 +40,4 @@ func RandomChat(bot *bot.Bot) error {
 
 func init() {
 	timer.RegisterTimer("random.chat", time.Minute*20, RandomChat)
-}
-
-func getRandomMessage() (*message.SendingMessage, error) {
-	random, err := qq.GetRandomGroupMessage(qq.ValGroupInfo.Code)
-	if err != nil {
-		return nil, err
-	}
-
-	send := message.NewSendingMessage()
-
-	for _, ele := range random.Elements {
-
-		switch ele.(type) {
-		case *message.ReplyElement:
-			continue
-		case *message.ForwardElement:
-			continue
-		default:
-			break
-		}
-		send.Append(ele)
-	}
-
-	// 没有元素也略过
-	if len(send.Elements) == 0 {
-		return nil, fmt.Errorf("讯息元素为空。")
-	}
-
-	return send, nil
-}
-
-func getRandomImage() (*message.SendingMessage, error) {
-	rand.Seed(time.Now().UnixMicro())
-	imgs := qq.GetImageList()
-
-	if len(imgs) == 0 {
-		return nil, fmt.Errorf("群图片缓存列表为空。")
-	}
-
-	logger.Debugf("成功索取 %d 张群图片缓存。", len(imgs))
-
-	chosen := imgs[rand.Intn(len(imgs))]
-
-	b, err := qq.GetCacheImage(chosen)
-	if err != nil {
-		return nil, err
-	}
-	img, err := qq.NewImageByByte(b)
-	if err != nil {
-		return nil, err
-	}
-	return message.NewSendingMessage().Append(img), nil
 }

@@ -6,9 +6,10 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
+	"testing"
+
 	"github.com/eric2788/MiraiValBot/utils/cache"
 	"github.com/eric2788/MiraiValBot/utils/test"
-	"testing"
 
 	"github.com/eric2788/MiraiValBot/utils/compress"
 	"github.com/eric2788/common-utils/request"
@@ -39,7 +40,11 @@ func TestSaveAndGetImage(t *testing.T) {
 		t.Logf("file size: %d", len(b))
 	}
 
-	bb, _ := request.GetBytesByUrl(imgUrl)
+	bb, err := request.GetBytesByUrl(imgUrl)
+	if err != nil {
+		t.Logf("获取图片失败: %v, 测试中止。", err)
+		return
+	}
 
 	assert.Equal(t, bb, b)
 
