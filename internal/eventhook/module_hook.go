@@ -8,7 +8,6 @@ import (
 )
 
 type eventHookModule struct {
-	EventHooker
 	tag    string
 	name   string
 	logger logrus.FieldLogger
@@ -41,11 +40,10 @@ func (e *eventHookModule) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 
 func RegisterAsModule(hooker EventHooker, name, tag string, logger logrus.FieldLogger) {
 	module := &eventHookModule{
-		EventHooker: hooker,
-		tag:         tag,
-		name:        name,
-		logger:      logger,
+		tag:    tag,
+		name:   name,
+		logger: logger,
 	}
 	bot.RegisterModule(module)
-	HookLifeCycle(module)
+	HookLifeCycle(hooker)
 }
