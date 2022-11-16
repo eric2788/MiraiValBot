@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+
 	"math"
 	"strings"
 	"time"
@@ -9,9 +10,9 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/services/paste"
 	"github.com/eric2788/MiraiValBot/services/valorant"
 	"github.com/eric2788/MiraiValBot/utils/imgtxt"
-	"github.com/eric2788/MiraiValBot/utils/paste"
 	"github.com/eric2788/common-utils/datetime"
 
 	v "github.com/eric2788/MiraiValBot/hooks/sites/valorant"

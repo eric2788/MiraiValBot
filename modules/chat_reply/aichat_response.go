@@ -31,16 +31,16 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 
 	reply := qq.CreateReply(msg)
 
-	for _, aichat := range aichats {
+	for _, ai := range aichats {
 
-		msg, err := aichat.Reply(content)
+		msg, err := ai.Reply(content)
 
 		if err != nil {
-			logger.Errorf("AI %s 回復訊息時出現錯誤: %v, 將使用其他AI", aichat.Name(), err)
+			logger.Errorf("AI %s 回復訊息時出現錯誤: %v, 將使用其他AI", ai.Name(), err)
 			continue
 		} else {
 			a.buildMessage(reply, msg)
-			logger.Infof("AI %s 回复信息成功。", aichat.Name())
+			logger.Infof("AI %s 回复信息成功。", ai.Name())
 			return reply, nil
 		}
 	}
@@ -51,7 +51,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 
 func (a *AIChatResponse) buildMessage(reply *message.SendingMessage, content string) {
 
-	face, err := regexp.Compile(`{face:(\d)}`)
+	face, err := regexp.Compile(`\{face:(\d)}`)
 	if err != nil {
 		logger.Error(err)
 		return

@@ -65,7 +65,7 @@ require (
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tuotoo/qrcode v0.0.0-20220425170535-52ccc2bebf5d // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/exp v0.0.0-20221111204811-129d8d6c17ab
+	golang.org/x/exp v0.0.0-20221114191408-850992195362
 	golang.org/x/image v0.1.0 // indirect
 	golang.org/x/oauth2 v0.2.0
 	golang.org/x/sync v0.1.0 // indirect

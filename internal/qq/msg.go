@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
+	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -189,6 +190,36 @@ func NewVideoByUrlWithGroup(gp int64, url, thumbUrl string) (*message.ShortVideo
 		return nil, fmt.Errorf("封面解析失敗(%v)", err)
 	}
 	return bot.Instance.UploadShortVideo(NewGroupSource(gp), bytes.NewReader(video), bytes.NewReader(thumb), 5)
+}
+
+func NewForwardNodeByGroup(msg *message.GroupMessage) *message.ForwardNode {
+	return &message.ForwardNode{
+		GroupId:    msg.GroupCode,
+		SenderId:   msg.Sender.Uin,
+		Time:       msg.Time,
+		SenderName: msg.Sender.DisplayName(),
+		Message:    msg.Elements,
+	}
+}
+
+func NewForwardNodeByPrivate(msg *message.PrivateMessage) *message.ForwardNode {
+	return &message.ForwardNode{
+		SenderId:   msg.Sender.Uin,
+		Time:       msg.Time,
+		SenderName: msg.Sender.DisplayName(),
+		Message:    msg.Elements,
+	}
+}
+
+// NewForwardNode 以發送信息生成轉發信息節點
+// 信息發送身份將為機器人自身
+func NewForwardNode(msg *message.SendingMessage) *message.ForwardNode {
+	return &message.ForwardNode{
+		SenderId:   bot.Instance.Uin,
+		Time:       int32(time.Now().Unix()),
+		SenderName: bot.Instance.Nickname,
+		Message:    msg.Elements,
+	}
 }
 
 func NewGroupSource(gp int64) message.Source {
