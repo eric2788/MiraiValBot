@@ -78,6 +78,8 @@ func (a *AIChatResponse) buildMessage(reply *message.SendingMessage, content str
 		if lastTo < len(content) {
 			reply.Append(message.NewText(content[lastTo:]))
 		}
+	} else { // normal
+		reply.Append(message.NewText(content))
 	}
 	// ===============
 }
