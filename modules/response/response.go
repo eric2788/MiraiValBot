@@ -81,8 +81,8 @@ func (r *response) HookEvent(bot *bot.Bot) {
 
 			rand.Seed(time.Now().UnixMicro())
 
-			// 1/20 机率会回复
-			if rand.Intn(20) == 19 {
+			// 1/25 机率会回复
+			if rand.Intn(25) == 15 {
 
 				// 没有文字信息，随机发送龙图?
 				if len(qq.ParseMsgContent(msg.Elements).Texts) == 0 {
