@@ -2,7 +2,6 @@ package counting
 
 import (
 	"strings"
-	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -23,22 +22,6 @@ var (
 )
 
 type wordCounting struct {
-}
-
-func (w *wordCounting) MiraiGoModule() bot.ModuleInfo {
-	return bot.ModuleInfo{
-		ID:       Tag,
-		Instance: instance,
-	}
-}
-
-func (w *wordCounting) Init() {
-}
-
-func (w *wordCounting) PostInit() {
-}
-
-func (w *wordCounting) Serve(bot *bot.Bot) {
 }
 
 func (w *wordCounting) HookEvent(bot *bot.Bot) {
@@ -94,16 +77,6 @@ func (w *wordCounting) sum(msg string) int64 {
 	return sum
 }
 
-func (w *wordCounting) Start(bot *bot.Bot) {
-	logger.Infof("字词计算模组已启动。")
-}
-
-func (w *wordCounting) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
-	defer wg.Done()
-	logger.Infof("字词计算模组已关闭。")
-}
-
 func init() {
-	bot.RegisterModule(instance)
-	eventhook.HookLifeCycle(instance)
+	eventhook.RegisterAsModule(instance, "字詞計算", Tag, logger)
 }

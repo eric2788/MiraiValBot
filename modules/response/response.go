@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"regexp"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
@@ -23,40 +22,16 @@ import (
 const Tag = "valbot.response"
 
 var (
-	logger               = utils.GetModuleLogger(Tag)
-	instance             = &response{}
+	logger   = utils.GetModuleLogger(Tag)
+	instance = &response{
+		res: new(chat_reply.AIChatResponse),
+	}
 	YesNoPattern         = regexp.MustCompile(`^.+是.+吗[\?？]*$`)
 	questionMarkReplacer = strings.NewReplacer("?", "", "？", "")
 )
 
 type response struct {
 	res *chat_reply.AIChatResponse
-}
-
-func (r *response) MiraiGoModule() bot.ModuleInfo {
-	return bot.ModuleInfo{
-		ID:       Tag,
-		Instance: instance,
-	}
-}
-
-func (r *response) Init() {
-	r.res = new(chat_reply.AIChatResponse)
-}
-
-func (r *response) PostInit() {
-}
-
-func (r *response) Serve(bot *bot.Bot) {
-}
-
-func (r *response) Start(bot *bot.Bot) {
-	logger.Info("自定義回應模組已啟動")
-}
-
-func (r *response) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
-	defer wg.Done()
-	logger.Info("自定義回應模組已關閉")
 }
 
 func (r *response) HookEvent(bot *bot.Bot) {
@@ -147,6 +122,5 @@ func getResponse(is bool) string {
 }
 
 func init() {
-	bot.RegisterModule(instance)
-	eventhook.HookLifeCycle(instance)
+	eventhook.RegisterAsModule(instance, "自定義回應", Tag, logger)
 }

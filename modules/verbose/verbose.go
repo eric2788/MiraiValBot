@@ -2,7 +2,6 @@ package verbose
 
 import (
 	"fmt"
-	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -23,32 +22,6 @@ var (
 	logger   = utils.GetModuleLogger(Tag)
 	instance = &verbose{}
 )
-
-func (v *verbose) MiraiGoModule() bot.ModuleInfo {
-	return bot.ModuleInfo{
-		ID:       Tag,
-		Instance: instance,
-	}
-}
-
-func (v *verbose) Init() {
-}
-
-func (v *verbose) PostInit() {
-}
-
-func (v *verbose) Serve(bot *bot.Bot) {
-}
-
-func (v *verbose) Start(bot *bot.Bot) {
-	logger.Infof("Verbose 模组已启动")
-}
-
-func (v *verbose) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
-	defer wg.Done()
-	file.SaveStorage()
-	logger.Infof("verbose 模组已关闭")
-}
 
 func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
@@ -106,6 +79,5 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 }
 
 func init() {
-	bot.RegisterModule(instance)
-	eventhook.HookLifeCycle(instance)
+	eventhook.RegisterAsModule(instance, "Verbose", Tag, logger)
 }

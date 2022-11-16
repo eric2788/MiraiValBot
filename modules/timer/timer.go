@@ -69,7 +69,6 @@ func (t *Timer) Start(bot *bot.Bot) {
 
 func (t *Timer) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 	defer wg.Done()
-
 	for name := range t.timerMap {
 		go func(name string) {
 			logger.Debugf("正在中止計時器任務 %s ...", name)

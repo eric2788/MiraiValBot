@@ -89,5 +89,5 @@ func main() {
 	signal.Notify(ch, os.Interrupt, os.Kill)
 	<-ch
 	bot.Stop()
-
+	file.SaveStorage()
 }
