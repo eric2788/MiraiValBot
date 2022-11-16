@@ -59,7 +59,16 @@ func randomChoice(args []string, source *command.MessageSource) error {
 
 func randomMessage(args []string, source *command.MessageSource) error {
 
-	msg, err := qq.GetRandomGroupMessage(source.Message.GroupCode)
+	var msg *message.GroupMessage
+	var err error
+
+	ats := qq.ParseMsgContent(source.Message.Elements).At
+	if len(ats) > 0 {
+		msg, err = qq.GetRandomGroupMessageMember(source.Message.GroupCode, ats[0])
+	} else {
+		msg, err = qq.GetRandomGroupMessage(source.Message.GroupCode)
+	}
+
 	if err != nil {
 		return err
 	} else if msg == nil || len(msg.Elements) == 0 {
@@ -376,7 +385,7 @@ func randomSkin(args []string, source *command.MessageSource) error {
 var (
 	randomEssenceCommand = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
 	randomMemberCommand  = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
-	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage)
+	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage, "[@群成员]")
 	randomChoiceCommand  = command.NewNode([]string{"choice", "选项"}, "随机选项指令", false, randomChoice)
 	randomAgentCommand   = command.NewNode([]string{"agent", "特务", "角色"}, "随机抽选一个瓦角色", false, randomAgent, "[角色类型]")
 	randomWeaponCommand  = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
