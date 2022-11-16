@@ -11,6 +11,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 const Tag = "valbot.repeatchat"
@@ -28,7 +29,7 @@ type repeatChat struct {
 // 参考了 FloatTech/ZeroBot-Plugin 的复读判断
 func (r *repeatChat) HookEvent(bot *bot.Bot) {
 	bot.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
-		
+
 		// 無視群機器人的消息
 		if event.Sender.Uin == client.Uin {
 			return
@@ -59,15 +60,24 @@ func (r *repeatChat) HookEvent(bot *bot.Bot) {
 					// 60% 复读, 40% 打断复读
 					if rand.Intn(100)+1 > 60 {
 						logger.Debugf("操作为: 复读")
-						msg.Append(message.NewText(lastContent))
+
+						// 完完全全的跟随格式
+						for _, element := range event.Elements {
+							msg.Append(element)
+						}
+
 					} else {
 						logger.Debugf("操作为: 打断复读")
-						lcrune := []rune(lastContent)
-						rand.Shuffle(len(lcrune), func(i, j int) {
-							lcrune[i], lcrune[j] = lcrune[j], lcrune[i]
-						})
 
-						msg.Append(message.NewText(string(lcrune)))
+						// 完完全全的跟随格式 (除了文字)
+						for _, element := range event.Elements {
+							if txt, ok := element.(*message.TextElement); ok {
+								shuffled := misc.ShuffleText(txt.Content)
+								msg.Append(message.NewText(shuffled))
+							} else {
+								msg.Append(element)
+							}
+						}
 					}
 
 					_ = qq.SendGroupMessageByGroup(event.GroupCode, msg)
