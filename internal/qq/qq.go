@@ -23,11 +23,12 @@ var ValGroupInfo = &client.GroupInfo{
 }
 
 type MsgContent struct {
-	Texts   []string
-	At      []int64
-	Faces   []string
-	Images  []string
-	Replies []int32
+	Texts     []string
+	At        []int64
+	AtDisplay []string
+	Faces     []string
+	Images    []string
+	Replies   []int32
 }
 
 func (msg *MsgContent) String() string {
@@ -107,11 +108,12 @@ func GetGroupEssenceMsgIds() ([]int64, error) {
 func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 
 	var content = &MsgContent{
-		Texts:   []string{},
-		At:      []int64{},
-		Replies: []int32{},
-		Faces:   []string{},
-		Images:  []string{},
+		Texts:     []string{},
+		At:        []int64{},
+		Replies:   []int32{},
+		Faces:     []string{},
+		Images:    []string{},
+		AtDisplay: []string{},
 	}
 
 	// find all texts and at targets
@@ -122,6 +124,7 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 			content.Texts = append(content.Texts, e.Content)
 		case *message.AtElement:
 			content.At = append(content.At, e.Target)
+			content.AtDisplay = append(content.AtDisplay, e.Display)
 		case *message.FaceElement:
 			content.Faces = append(content.Faces, e.Name)
 		case *message.GroupImageElement:
@@ -167,16 +170,60 @@ func GetRandomGroupMessage(gp int64) (*message.GroupMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	return getRandomGroupMessageWithInfo(gp, info)
+	return getRandomGroupMessageWithInfo(info)
 }
 
-func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.GroupMessage, error) {
-	rand.Seed(time.Now().UnixMicro())
+func GetRandomGroupMessageMember(gp, uid int64) (*message.GroupMessage, error) {
+	info, err := bot.Instance.GetGroupInfo(gp)
+	if err != nil {
+		return nil, err
+	}
+	return getRandomGroupMessageWithMember(info, uid, 10)
+}
+
+func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64) (*message.GroupMessage, error) {
+	gp := info.Code
+	rand.Seed(time.Now().UnixNano())
+	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
+	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
+	if botSaid.Contains(id) {
+		// 略過機器人訊息
+		return getRandomGroupMessageWithMember(info, uid, plus)
+	}
+	msgs, err := GetGroupMessages(gp, id, plus)
+	if err != nil {
+		// 不知是什麽，總之重新獲取
+		if strings.Contains(err.Error(), "108") {
+			logger.Errorf("嘗試獲取隨機消息時出現錯誤: %v, 將重新獲取...", err)
+			<-time.After(time.Second) // 緩衝
+			return getRandomGroupMessageWithMember(info, uid, plus)
+		}
+		return nil, err
+	}
+
+	for _, msg := range msgs {
+		if msg.Sender.Uin == bot.Instance.Uin {
+			// 不要機器人自己發過的訊息
+			logger.Infof("獲取的隨機群訊息為機器人訊息，已略过")
+			botSaid.Add(msg.Id)
+		} else if msg.Sender.Uin == uid {
+			return msg, nil
+		}
+	}
+
+	logger.Warnf("找不到 %d 所发送的消息，正在重新获取...")
+	<-time.After(time.Second) // 緩衝
+	return getRandomGroupMessageWithMember(info, uid, plus)
+}
+
+func getRandomGroupMessageWithInfo(info *client.GroupInfo) (*message.GroupMessage, error) {
+	gp := info.Code
+	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
 	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter
 	if botSaid.Contains(id) {
 		// 略過機器人訊息
-		return getRandomGroupMessageWithInfo(gp, info)
+		return getRandomGroupMessageWithInfo(info)
 	}
 	msg, err := GetGroupMessage(gp, id)
 	if err != nil {
@@ -195,6 +242,66 @@ func getRandomGroupMessageWithInfo(gp int64, info *client.GroupInfo) (*message.G
 		return GetRandomGroupMessage(gp)
 	}
 	return msg, nil
+}
+
+func GetGroupMessages(groupCode int64, seq, plus int64) (map[int64]*message.GroupMessage, error) {
+
+	results := make(map[int64]*message.GroupMessage)
+
+	for i := seq; i < seq+plus; i++ {
+		key := GroupKey(groupCode, fmt.Sprintf("msg:%d", i))
+		persistGroupMsg := &PersistentGroupMessage{}
+		exist, err := redis.Get(key, persistGroupMsg)
+		if err != nil {
+			logger.Errorf("嘗試從 redis 獲取群組消息 %d 時出現錯誤: %v, 將使用 API 獲取", i, err)
+		} else if exist {
+			if msg, err := persistGroupMsg.ToGroupMessage(); err == nil {
+				FixGroupImages(groupCode, msg)
+				results[i] = msg
+			} else {
+				logger.Errorf("嘗試從 redis 解析 群組消息 %d 時出現錯誤: %v, 將使用 API 獲取", i, err)
+			}
+		}
+	}
+
+	if len(results) >= int(plus) {
+		return results, nil
+	}
+
+	msgList, err := bot.Instance.GetGroupMessages(groupCode, seq, seq+plus)
+	if err != nil {
+		logger.Warnf("尝试获取群 %d 的群消息 (%d ~ %d) 时出现错误: %v", groupCode, seq, seq+plus, err)
+
+		// get msg error: 104 <= 消息不存在
+		// 即 機器人加群前的消息，需要略過
+		if strings.Contains(err.Error(), "104") {
+			file.UpdateStorage(func() {
+				if file.DataStorage.Setting.MsgSeqAfter < seq {
+					file.DataStorage.Setting.MsgSeqAfter = seq
+					logger.Warnf("已調整機器人消息獲取最低範圍為 %v", seq)
+				}
+			})
+		}
+		return nil, err
+	}
+
+	for _, msg := range msgList {
+		key := GroupKey(groupCode, fmt.Sprintf("msg:%d", msg.Id))
+		persistGroupMsg := &PersistentGroupMessage{}
+		err = persistGroupMsg.Parse(msg)
+		if err != nil {
+			logger.Warnf("嘗試序列化群組消息時出現錯誤: %v", err)
+		} else {
+			err = redis.Store(key, persistGroupMsg)
+			if err != nil {
+				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
+			}
+		}
+		FixGroupImages(groupCode, msg)
+		results[int64(msg.Id)] = msg
+	}
+
+	return results, nil
 }
 
 func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) {
