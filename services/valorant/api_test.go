@@ -38,13 +38,17 @@ func TestRedisSaveGet(t *testing.T) {
 		_, err := GetMatchDetails("1762e9a2-e9e1-4fdc-9aaf-0654d44b5f0c")
 		<-time.After(time.Second * 3)
 		if err != nil {
-			if isAllowedStatus(err) {
-				continue
-			}
+			passAllowedStatus(t, err)
 			t.Fatal(err)
 		} else {
 			t.Log("data get success")
 		}
+	}
+}
+
+func passAllowedStatus(t *testing.T, err error) {
+	if isAllowedStatus(err) {
+		t.Skip("status code is in allowed status code")
 	}
 }
 
@@ -77,9 +81,7 @@ func formatTime(timeStr string) string {
 func TestGetGameStatus(t *testing.T) {
 	status, err := GetGameStatus(AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	for _, inc := range status.Data.Incidents {
@@ -91,9 +93,7 @@ func TestGetGameStatus(t *testing.T) {
 func TestGetAccountDetails(t *testing.T) {
 	detail, err := GetAccountDetails("勝たんしかrinrin", "JP1")
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", detail.Name)
@@ -105,9 +105,7 @@ func TestGetAccountDetails(t *testing.T) {
 func TestGetMatchHistories(t *testing.T) {
 	histories, err := GetMatchHistories("麻將", "4396", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 
@@ -121,9 +119,7 @@ func TestGetMatchHistories(t *testing.T) {
 func TestGetMatchDetails(t *testing.T) {
 	data, err := GetMatchDetails("33ae90f4-76b4-4aa0-aa16-331214c7c1dd")
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, "33ae90f4-76b4-4aa0-aa16-331214c7c1dd", data.MetaData.MatchId)
@@ -135,9 +131,7 @@ func TestGetMatchDetails(t *testing.T) {
 func TestGetMMRHistories(t *testing.T) {
 	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrHistories.Name)
@@ -147,9 +141,7 @@ func TestGetMMRHistories(t *testing.T) {
 func TestGetMMRDetailsV1(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV1("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
@@ -160,9 +152,7 @@ func TestGetMMRDetailsV1(t *testing.T) {
 func TestGetMMRDetailsV2(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
@@ -172,9 +162,7 @@ func TestGetMMRDetailsV2(t *testing.T) {
 func TestGetMMRDetailsBySeason(t *testing.T) {
 	mmrDetails, err := GetMMRDetailsBySeason("勝たんしかrinrin", "JP1", "e3a3", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	assert.Equal(t, 7, mmrDetails.Wins)

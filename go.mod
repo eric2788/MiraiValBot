@@ -20,6 +20,8 @@ require (
 )
 
 require (
+	github.com/dghubble/sling v1.4.0 // indirect
+	github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	golang.org/x/net v0.2.0 // indirect

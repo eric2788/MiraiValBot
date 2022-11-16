@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/hex"
+	"strings"
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/utils/cache"
@@ -36,6 +37,8 @@ func TestSaveAndGetImage(t *testing.T) {
 	b, err := GetCacheImage(fileName)
 	if err != nil {
 		t.Fatal(err)
+	} else if strings.HasPrefix(string(b), "<!DOCTYPE html>") {
+		t.Skip("image fetching got blocked")
 	} else {
 		t.Logf("file size: %d", len(b))
 	}

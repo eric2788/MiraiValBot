@@ -12,21 +12,27 @@ type Configuration struct {
 	Val     ValConfig     `yaml:"val"`
 	Redis   RedisConfig   `yaml:"redis"`
 	Discord DiscordConfig `yaml:"discord"`
-	Github GithubConfig `yaml:"github"` 
+	Github  GithubConfig  `yaml:"github"`
+	Pixiv   PixivConfig   `yaml:"pixiv"`
 }
 
 type GithubConfig struct {
 	AccessToken string `yaml:"access_token"`
-	Name string `yaml:"name"`
-	Email string `yaml:"email"`
-	Repository string `yaml:"repository"`
-	Branch string `yaml:"branch"`
+	Name        string `yaml:"name"`
+	Email       string `yaml:"email"`
+	Repository  string `yaml:"repository"`
+	Branch      string `yaml:"branch"`
 }
 
 type BotConfig struct {
 	LoginMethod string `yaml:"login-method"`
 	Account     int64  `yaml:"account"`
 	Password    string `yaml:"password"`
+}
+
+type PixivConfig struct {
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type ValConfig struct {
@@ -68,10 +74,10 @@ var defaultConfig = Configuration{
 		Buffer:   1024,
 	},
 	Github: GithubConfig{
-		Name: "sysnapse",
-		Email: "tester123@gmail.com",
+		Name:       "sysnapse",
+		Email:      "tester123@gmail.com",
 		Repository: "cloud",
-		Branch: "main",
+		Branch:     "main",
 	},
 }
 

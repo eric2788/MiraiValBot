@@ -11,9 +11,7 @@ import (
 func TestGetDeathMatchRanking(t *testing.T) {
 	match, err := GetMatchDetailsAPI("a4e99fec-647d-4a15-9015-967c8e29355a")
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	players := GetDeathMatchRanking(match)
@@ -33,9 +31,7 @@ func TestGetStatistics(t *testing.T) {
 	name, tag := "麻將", "4396"
 	stats, err := GetStatistics(name, tag, "", AsiaSpecific)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	t.Logf("%s#%s 在最近五场对战中的统计数据: ", name, tag)
@@ -53,16 +49,12 @@ func TestGetStatistics(t *testing.T) {
 func TestGetPerformance(t *testing.T) {
 	match, err := GetMatchDetailsAPI("c82f5416-a4b6-4720-be13-a05414049210")
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 	performances, err := GetPerformances(match, "麻將", "4396")
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 

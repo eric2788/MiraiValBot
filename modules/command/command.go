@@ -2,13 +2,15 @@ package command
 
 import (
 	"fmt"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/services/waifu"
 	"runtime/debug"
+	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 )
@@ -16,6 +18,32 @@ import (
 const Tag = "valbot.command"
 
 type command struct {
+}
+
+func (c *command) MiraiGoModule() bot.ModuleInfo {
+	return bot.ModuleInfo{
+		ID:       Tag,
+		Instance: instance,
+	}
+}
+
+func (c *command) Init() {
+	waifu.Init()
+}
+
+func (c *command) PostInit() {
+}
+
+func (c *command) Serve(bot *bot.Bot) {
+}
+
+func (c *command) Start(bot *bot.Bot) {
+	logger.Infof("指令管理模組 已啟動。")
+}
+
+func (c *command) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
+	logger.Infof("指令管理 模組已關閉。")
 }
 
 func (c *command) HookEvent(bot *bot.Bot) {
@@ -119,5 +147,6 @@ var (
 )
 
 func init() {
-	eventhook.RegisterAsModule(instance, "指令管理", Tag, logger)
+	bot.RegisterModule(instance)
+	eventhook.HookLifeCycle(instance)
 }

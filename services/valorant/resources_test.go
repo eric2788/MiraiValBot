@@ -16,9 +16,7 @@ func init() {
 func TestGetAgents(t *testing.T) {
 	agents, err := GetAgents(AllAgents, TC)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 
@@ -33,9 +31,7 @@ func TestGetWeapons(t *testing.T) {
 
 	weapons, err := GetWeapons(AllWeapons, TC)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 
@@ -50,9 +46,7 @@ func TestGetBundles(t *testing.T) {
 
 	bundles, err := GetBundles(TC)
 	if err != nil {
-		if isAllowedStatus(err) {
-			return
-		}
+		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
 
