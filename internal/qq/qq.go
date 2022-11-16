@@ -178,17 +178,22 @@ func GetRandomGroupMessageMember(gp, uid int64) (*message.GroupMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	return getRandomGroupMessageWithMember(info, uid, 10)
+	return getRandomGroupMessageWithMember(info, uid, 10, 0)
 }
 
-func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64) (*message.GroupMessage, error) {
+func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, times int) (*message.GroupMessage, error) {
+
+	if times >= 10 {
+		return nil, fmt.Errorf("已搜索十次依然找不到该群成员的群信息，请稍后再尝试。")
+	}
+
 	gp := info.Code
 	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
 	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
 	if botSaid.Contains(id) {
 		// 略過機器人訊息
-		return getRandomGroupMessageWithMember(info, uid, plus)
+		return getRandomGroupMessageWithMember(info, uid, plus, times)
 	}
 	msgs, err := GetGroupMessages(gp, id, plus)
 	if err != nil {
@@ -196,7 +201,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64) (*
 		if strings.Contains(err.Error(), "108") {
 			logger.Errorf("嘗試獲取隨機消息時出現錯誤: %v, 將重新獲取...", err)
 			<-time.After(time.Second) // 緩衝
-			return getRandomGroupMessageWithMember(info, uid, plus)
+			return getRandomGroupMessageWithMember(info, uid, plus, times)
 		}
 		return nil, err
 	}
@@ -211,9 +216,9 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64) (*
 		}
 	}
 
-	logger.Warnf("找不到 %d 所发送的消息，正在重新获取...")
+	logger.Warnf("找不到 %d 所发送的消息，正在重新获取... (%d次)", uid, times+1)
 	<-time.After(time.Second) // 緩衝
-	return getRandomGroupMessageWithMember(info, uid, plus)
+	return getRandomGroupMessageWithMember(info, uid, plus, times+1)
 }
 
 func getRandomGroupMessageWithInfo(info *client.GroupInfo) (*message.GroupMessage, error) {
