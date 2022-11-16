@@ -18,6 +18,8 @@ func RandomChat(bot *bot.Bot) error {
 	// 随机略过
 	if rand.Intn(2) == 0 {
 		return nil
+	} else if h := time.Now().Hour(); h > 2 && h < 7 { // 凌晨两点都七点期间暂停屁话发送
+		return nil
 	}
 
 	rand.Seed(time.Now().UnixNano())
