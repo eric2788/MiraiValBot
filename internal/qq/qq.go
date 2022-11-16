@@ -195,7 +195,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, ti
 		// 略過機器人訊息
 		return getRandomGroupMessageWithMember(info, uid, plus, times)
 	}
-	msgs, err := GetGroupMessages(gp, id, plus)
+	msgs, err := GetGroupMessages(gp, id, plus, false)
 	if err != nil {
 		// 不知是什麽，總之重新獲取
 		if strings.Contains(err.Error(), "108") {
@@ -212,6 +212,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, ti
 			logger.Infof("獲取的隨機群訊息為機器人訊息，已略过")
 			botSaid.Add(msg.Id)
 		} else if msg.Sender.Uin == uid {
+			FixGroupImages(msg.GroupCode, msg)
 			return msg, nil
 		}
 	}
@@ -249,7 +250,7 @@ func getRandomGroupMessageWithInfo(info *client.GroupInfo) (*message.GroupMessag
 	return msg, nil
 }
 
-func GetGroupMessages(groupCode int64, seq, plus int64) (map[int64]*message.GroupMessage, error) {
+func GetGroupMessages(groupCode int64, seq, plus int64, fixImg bool) (map[int64]*message.GroupMessage, error) {
 
 	results := make(map[int64]*message.GroupMessage)
 
@@ -261,7 +262,9 @@ func GetGroupMessages(groupCode int64, seq, plus int64) (map[int64]*message.Grou
 			logger.Errorf("嘗試從 redis 獲取群組消息 %d 時出現錯誤: %v, 將使用 API 獲取", i, err)
 		} else if exist {
 			if msg, err := persistGroupMsg.ToGroupMessage(); err == nil {
-				FixGroupImages(groupCode, msg)
+				if fixImg {
+					FixGroupImages(groupCode, msg)
+				}
 				results[i] = msg
 			} else {
 				logger.Errorf("嘗試從 redis 解析 群組消息 %d 時出現錯誤: %v, 將使用 API 獲取", i, err)
@@ -302,7 +305,9 @@ func GetGroupMessages(groupCode int64, seq, plus int64) (map[int64]*message.Grou
 				logger.Warnf("Redis 儲存群組消息時出現錯誤: %v", err)
 			}
 		}
-		FixGroupImages(groupCode, msg)
+		if fixImg {
+			FixGroupImages(groupCode, msg)
+		}
 		results[int64(msg.Id)] = msg
 	}
 
