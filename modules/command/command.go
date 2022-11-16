@@ -3,7 +3,6 @@ package command
 import (
 	"fmt"
 	"runtime/debug"
-	"sync"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -119,32 +118,6 @@ var (
 	logger   = utils.GetModuleLogger(Tag)
 )
 
-func (c *command) MiraiGoModule() bot.ModuleInfo {
-	return bot.ModuleInfo{
-		ID:       Tag,
-		Instance: instance,
-	}
-}
-
-func (c *command) Init() {
-}
-
-func (c *command) PostInit() {
-}
-
-func (c *command) Serve(bot *bot.Bot) {
-}
-
-func (c *command) Start(bot *bot.Bot) {
-	logger.Info("指令管理模組已啟動。")
-}
-
-func (c *command) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
-	defer wg.Done()
-	logger.Info("指令管理模組已關閉")
-}
-
 func init() {
-	bot.RegisterModule(instance)
-	eventhook.HookLifeCycle(instance)
+	eventhook.RegisterAsModule(instance, "指令管理", Tag, logger)
 }

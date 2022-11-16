@@ -64,7 +64,7 @@ func NewRandomImage() (*message.SendingMessage, error) {
 	return message.NewSendingMessage().Append(img), nil
 }
 
-func NewRandomDragon() (*message.SendingMessage, error){
+func NewRandomDragon() (*message.SendingMessage, error) {
 	backup := "https://phqghume.github.io/img/"
 	rand.Seed(time.Now().UnixMicro())
 	random := rand.Intn(58) + 1
@@ -78,4 +78,12 @@ func NewRandomDragon() (*message.SendingMessage, error){
 		return nil, err
 	}
 	return message.NewSendingMessage().Append(img), nil
+}
+
+func ShuffleText(content string) string {
+	lcrune := []rune(content)
+	rand.Shuffle(len(lcrune), func(i, j int) {
+		lcrune[i], lcrune[j] = lcrune[j], lcrune[i]
+	})
+	return string(lcrune)
 }
