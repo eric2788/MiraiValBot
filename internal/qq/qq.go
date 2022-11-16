@@ -23,11 +23,12 @@ var ValGroupInfo = &client.GroupInfo{
 }
 
 type MsgContent struct {
-	Texts   []string
-	At      []int64
-	Faces   []string
-	Images  []string
-	Replies []int32
+	Texts     []string
+	At        []int64
+	AtDisplay []string
+	Faces     []string
+	Images    []string
+	Replies   []int32
 }
 
 func (msg *MsgContent) String() string {
@@ -107,11 +108,12 @@ func GetGroupEssenceMsgIds() ([]int64, error) {
 func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 
 	var content = &MsgContent{
-		Texts:   []string{},
-		At:      []int64{},
-		Replies: []int32{},
-		Faces:   []string{},
-		Images:  []string{},
+		Texts:     []string{},
+		At:        []int64{},
+		Replies:   []int32{},
+		Faces:     []string{},
+		Images:    []string{},
+		AtDisplay: []string{},
 	}
 
 	// find all texts and at targets
@@ -122,6 +124,7 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 			content.Texts = append(content.Texts, e.Content)
 		case *message.AtElement:
 			content.At = append(content.At, e.Target)
+			content.AtDisplay = append(content.AtDisplay, e.Display)
 		case *message.FaceElement:
 			content.Faces = append(content.Faces, e.Name)
 		case *message.GroupImageElement:
@@ -175,17 +178,17 @@ func GetRandomGroupMessageMember(gp, uid int64) (*message.GroupMessage, error) {
 	if err != nil {
 		return nil, err
 	}
-	return getRandomGroupMessageWithMember(info, uid)
+	return getRandomGroupMessageWithMember(info, uid, 10)
 }
 
-func getRandomGroupMessageWithMember(info *client.GroupInfo, uid int64) (*message.GroupMessage, error) {
+func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64) (*message.GroupMessage, error) {
 	gp := info.Code
-	plus := int64(10)
 	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
 	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
 	if botSaid.Contains(id) {
-		return getRandomGroupMessageWithMember(info, uid)
+		// 略過機器人訊息
+		return getRandomGroupMessageWithMember(info, uid, plus)
 	}
 	msgs, err := GetGroupMessages(gp, id, plus)
 	if err != nil {
@@ -193,7 +196,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid int64) (*messag
 		if strings.Contains(err.Error(), "108") {
 			logger.Errorf("嘗試獲取隨機消息時出現錯誤: %v, 將重新獲取...", err)
 			<-time.After(time.Second) // 緩衝
-			return GetRandomGroupMessage(gp)
+			return getRandomGroupMessageWithMember(info, uid, plus)
 		}
 		return nil, err
 	}
@@ -210,7 +213,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid int64) (*messag
 
 	logger.Warnf("找不到 %d 所发送的消息，正在重新获取...")
 	<-time.After(time.Second) // 緩衝
-	return getRandomGroupMessageWithMember(info, uid)
+	return getRandomGroupMessageWithMember(info, uid, plus)
 }
 
 func getRandomGroupMessageWithInfo(info *client.GroupInfo) (*message.GroupMessage, error) {
@@ -261,7 +264,7 @@ func GetGroupMessages(groupCode int64, seq, plus int64) (map[int64]*message.Grou
 		}
 	}
 
-	if len(results) == int(plus) {
+	if len(results) >= int(plus) {
 		return results, nil
 	}
 

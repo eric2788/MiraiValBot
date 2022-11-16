@@ -62,9 +62,14 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	var msg *message.GroupMessage
 	var err error
 
-	ats := qq.ParseMsgContent(source.Message.Elements).At
-	if len(ats) > 0 {
-		msg, err = qq.GetRandomGroupMessageMember(source.Message.GroupCode, ats[0])
+	content := qq.ParseMsgContent(source.Message.Elements)
+	if len(content.At) > 0 {
+
+		reply := qq.CreateReply(source.Message)
+		reply.Append(qq.NewTextf("正在获取成员 %s 的群随机消息，所需时间视乎该群成员在本群的活跃度...", content.AtDisplay[0]))
+		_ = qq.SendGroupMessage(reply)
+
+		msg, err = qq.GetRandomGroupMessageMember(source.Message.GroupCode, content.At[0])
 	} else {
 		msg, err = qq.GetRandomGroupMessage(source.Message.GroupCode)
 	}
