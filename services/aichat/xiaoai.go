@@ -4,8 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-
-	"github.com/Logiase/MiraiGo-Template/bot"
 )
 
 const (
@@ -23,17 +21,11 @@ func (ai *XiaoAi) Reply(msg string) (string, error) {
 		return "", err
 	}
 
-	nick := "Bot"
-
-	if bot.Instance != nil {
-		nick = bot.Instance.Nickname
-	}
-
 	plain := strings.ReplaceAll(string(data), "\r\n", "")
 	replaced := xiaoAiWarningMsg.ReplaceAll([]byte(plain), []byte(""))
 	reply := replaces(string(replaced), map[string]string{
 		"\n":     "",
-		"小爱":     nick,
+		"小爱":     "我",
 		"小米智能助理": "爹",
 	})
 	if reply == "" {

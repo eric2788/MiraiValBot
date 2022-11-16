@@ -3,8 +3,6 @@ package aichat
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/Logiase/MiraiGo-Template/bot"
 )
 
 const qingyunkeURL = "http://api.qingyunke.com/api.php?key=free&appid=0&msg={msg}"
@@ -31,17 +29,10 @@ func (q *QingYunKe) Reply(msg string) (string, error) {
 	if reply.Result != 0 {
 		return "", fmt.Errorf("%d: %s", reply.Result, reply.Content)
 	} else {
-
-		nick := "Bot"
-
-		if bot.Instance != nil {
-			nick = bot.Instance.Nickname
-		}
-
 		return replaces(reply.Content, map[string]string{
 			"小美人菲菲": "你爹",
 			"小美人":   "你爹",
-			"菲菲":    nick,
+			"菲菲":    "我",
 		}), nil
 	}
 }
