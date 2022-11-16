@@ -79,7 +79,7 @@ func (r *response) HookEvent(bot *bot.Bot) {
 			_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
 		} else {
 
-			rand.Seed(time.Now().UnixMicro())
+			rand.Seed(time.Now().UnixNano())
 
 			// 1/25 机率会回复
 			if rand.Intn(25) == 15 {
