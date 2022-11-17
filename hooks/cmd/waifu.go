@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"sync"
@@ -18,6 +19,8 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
 		return err
+	} else if amount > 40 {
+		return errors.New("最高每次获取40张。")
 	}
 	isKeyword := len(tags) == 1
 
