@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,6 +45,8 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
 	if err != nil {
 		return err
+	} else if len(imgs) == 0 {
+		return fmt.Errorf("搜索 %s 的结果为空。", strings.Join(tags, ","))
 	}
 
 	forwarder := message.NewForwardMessage()
