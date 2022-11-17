@@ -74,7 +74,7 @@ func fetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync
 	img, err := qq.NewImageByUrl(url)
 	if err != nil {
 		logger.Errorf("尝试获取图片 %s 失败: %v, 将使用URL链接。", url, err)
-		msg.Append(qq.NewTextf("[图片获取失败, 原链接: %s]", url))
+		msg.Append(qq.NewTextf("%s", url))
 	} else {
 		msg.Append(img)
 	}
