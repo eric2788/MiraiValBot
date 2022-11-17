@@ -69,6 +69,7 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 		data, err := getIllust(id)
 		if err != nil {
 			logger.Errorf("獲取 pixiv 圖片 %d 失敗: %v", id, err)
+			continue
 		}
 		results = append(results, ImageData{
 			Pid:    data.ID,
@@ -80,6 +81,12 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 			Tags:   p.toArr(data.Tags),
 		})
 	}
+
+	// 所有pixiv图片均无法获取
+	if len(results) == 0 && len(ids) > 0 {
+		return nil, fmt.Errorf("无法索取所有 pixiv 图片, 原因请查看服务端输出。")
+	}
+	
 	return results, nil
 }
 

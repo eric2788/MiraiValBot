@@ -18,18 +18,19 @@ type (
 	LolicronResp struct {
 		Error string `json:"error"`
 		Data  []struct {
-			Pid    uint64            `json:"pid"`
-			Uid    uint64            `json:"uid"`
-			Title  string            `json:"title"`
-			Author string            `json:"author"`
-			R18    bool              `json:"r18"`
-			Width  int               `json:"width"`
-			Height int               `json:"height"`
-			Tags   []string          `json:"tags"`
-			Ext    string            `json:"ext"`
-			AiType int               `json:"aiType"`
-			Urls   map[string]string `json:"urls"`
-		}
+			Pid        uint64            `json:"pid"`
+			Uid        uint64            `json:"uid"`
+			Title      string            `json:"title"`
+			Author     string            `json:"author"`
+			R18        bool              `json:"r18"`
+			Width      int               `json:"width"`
+			Height     int               `json:"height"`
+			Tags       []string          `json:"tags"`
+			Ext        string            `json:"ext"`
+			AiType     int               `json:"aiType"`
+			Urls       map[string]string `json:"urls"`
+			UploadDate int64             `json:"uploadDate"`
+		} `json:"data"`
 	}
 )
 

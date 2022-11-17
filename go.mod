@@ -8,7 +8,7 @@ require (
 	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/corpix/uarand v0.2.0
-	github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a
+	github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a
 	github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

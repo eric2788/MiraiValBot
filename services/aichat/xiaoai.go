@@ -12,6 +12,8 @@ const (
 
 var xiaoAiWarningMsg = regexp.MustCompile(`(?s)<.+>`)
 
+// XiaoAi 已经死了
+// Deprecated: 死了 404
 type XiaoAi struct {
 }
 

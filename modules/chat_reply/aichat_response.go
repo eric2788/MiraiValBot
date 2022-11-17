@@ -21,7 +21,6 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "，")
 
 	aichats := []aichat.AIReply{
-		&aichat.XiaoAi{},
 		&aichat.QingYunKe{},
 		&aichat.TianXing{},
 	}

@@ -79,6 +79,8 @@ github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.m
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a h1:AWdDNwWdth4fEycsdrbqRZHnRBsAQHsfcUTykhWhT8k=
 github.com/eric2788/common-utils v0.0.0-20220920151602-fe46ee86cd5a/go.mod h1:9r5dFvjmEyc6dZY7EP5JZ7M2gkFFzUnOBmoNicgieNo=
+github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a h1:nEjX518ApDs/rcK3E5s5aZlT1Mu+DJJ1vTugK3tOw2Y=
+github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a/go.mod h1:QVU3LSh/++wosX93mHQkxSQanA7uKPcuq/AW4bB8M1Y=
 github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879 h1:jh0xGmjpB8ZDwNT6QAo4PPJ7AS+QFzWNElq2vwG7ZKM=
 github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879/go.mod h1:lygYC4OHWPQiQfSPG0VAykfLg5q7CP54ePlKRFeLcKE=
 github.com/frankban/quicktest v1.14.3 h1:FJKSZTDHjyhriyC81FLQ0LY93eSai0ZyR/ZIkd3ZUKE=
