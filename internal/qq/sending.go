@@ -33,6 +33,102 @@ func SendGroupMessage(msg *message.SendingMessage) error {
 	return SendGroupMessageByGroup(ValGroupInfo.Uin, msg)
 }
 
+func SendGroupForwardMessage(msg *message.ForwardMessage) error {
+	if ValGroupInfo == nil {
+		return fmt.Errorf("群资料尚未加载。")
+	}
+	return SendGroupForwardMessageByGroup(ValGroupInfo.Uin, msg)
+}
+
+func SendGroupForwardMessageByGroup(gp int64, msg *message.ForwardMessage) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("致命错误 => %v", recovered)
+			debug.PrintStack()
+		}
+		if err != nil {
+			logger.Errorf("向群 %d 發送合并轉發訊息時出現錯誤: %v", gp, err)
+			logger.Errorf("厡訊息: %s", msg.Brief())
+		}
+	}()
+	if msg == nil || bot.Instance == nil {
+		err = &MessageSendError{
+			Msg:    "讯息或机器人为 NULL",
+			Reason: Nil,
+		}
+		return
+	}
+
+	if IsMuted(bot.Instance.Uin) {
+		err = &MessageSendError{
+			Msg:    fmt.Sprintf("机器人在群 %d 被禁言，无法发送合并转发消息", gp),
+			Reason: Muted,
+		}
+		return
+	}
+
+	builder := bot.Instance.NewForwardMessageBuilder(gp)
+	fe := builder.Main(msg)
+
+	if fe == nil {
+		err = &MessageSendError{
+			Msg:    "合并转发讯息为 NULL",
+			Reason: Nil,
+		}
+		return
+	}
+
+	result := bot.Instance.SendGroupForwardMessage(gp, fe)
+
+	if result == nil || result.Id == -1 {
+		err = &MessageSendError{
+			Msg:    "群合并转发消息发送失败，该消息可能被风控",
+			Reason: Risked,
+		}
+	}
+	return
+}
+
+func SendPrivateForwardMessage(uid int64, msg *message.ForwardMessage) (err error) {
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf(fmt.Sprintf("recovered while sending private message: %v", recovered))
+		}
+		if err != nil {
+			logger.Error(err)
+		}
+	}()
+
+	if msg == nil || bot.Instance == nil {
+		err = &MessageSendError{
+			Msg:    "讯息或机器人为 NULL",
+			Reason: Nil,
+		}
+		return
+	}
+
+	builder := bot.Instance.NewForwardMessageBuilder(0)
+	fe := builder.Main(msg)
+
+	if fe == nil {
+		err = &MessageSendError{
+			Msg:    "合并转发讯息为 NULL",
+			Reason: Nil,
+		}
+		return
+	}
+
+	result := bot.Instance.SendPrivateMessage(uid, message.NewSendingMessage().Append(fe))
+
+	if result == nil || result.Id == -1 {
+		err = &MessageSendError{
+			Msg:    "私人消息发送失败，帐号可能被风控",
+			Reason: Risked,
+		}
+	}
+	return
+}
+
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
 	defer func() {
 		if recovered := recover(); recovered != nil {

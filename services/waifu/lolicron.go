@@ -3,11 +3,13 @@ package waifu
 import (
 	"errors"
 	"fmt"
-	"github.com/eric2788/common-utils/request"
+	"net/url"
 	"strings"
+
+	"github.com/eric2788/common-utils/request"
 )
 
-const lolicronApi = "https://api.lolicon.app/setu/v2?tag=%s&r18=%d&num=%d&size=original"
+const lolicronApi = "https://api.lolicon.app/setu/v2?tag=%s&r18=%d&num=%d&size=original&keyword=%s"
 
 type (
 	Lolicron struct {
@@ -37,7 +39,7 @@ func (l *Lolicron) GetImages(option *SearchOptions) ([]ImageData, error) {
 	if option.R18 {
 		r18 = 1
 	}
-	err := request.Get(fmt.Sprintf(lolicronApi, strings.Join(option.Tags, ","), r18, option.Amount), &resp)
+	err := request.Get(fmt.Sprintf(lolicronApi, strings.Join(option.Tags, ","), r18, option.Amount, url.QueryEscape(option.Keyword)), &resp)
 	if err != nil {
 		return nil, err
 	} else if resp.Error != "" {
