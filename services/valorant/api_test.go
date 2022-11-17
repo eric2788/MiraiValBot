@@ -129,13 +129,11 @@ func TestGetMatchDetails(t *testing.T) {
 }
 
 func TestGetMMRHistories(t *testing.T) {
-	mmrHistories, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
+	_, err := GetMMRHistories("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
 		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
-	assert.Equal(t, "勝たんしかrinrin", mmrHistories.Name)
-	assert.Equal(t, "JP1", mmrHistories.Tag)
 }
 
 func TestGetMMRDetailsV1(t *testing.T) {
