@@ -89,6 +89,19 @@ func ShuffleText(content string) string {
 	return string(lcrune)
 }
 
+func FetchImageByteToForward(forwarder *message.ForwardMessage, b []byte, wg *sync.WaitGroup) {
+	defer wg.Done()
+	msg := message.NewSendingMessage()
+	img, err := qq.NewImageByByte(b)
+	if err != nil {
+		logger.Errorf("上傳圖片失败: %v, 已略過。", err)
+		msg.Append(message.NewText("[圖片]"))
+	} else {
+		msg.Append(img)
+	}
+	forwarder.AddNode(qq.NewForwardNode(msg))
+}
+
 func FetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	msg := message.NewSendingMessage()

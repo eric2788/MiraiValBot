@@ -2,6 +2,7 @@ package waifu
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -84,14 +85,20 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 			continue
 		}
 
+		imgByte, err := p.getImageByte(imgUrl)
+		if err != nil {
+			logger.Errorf("獲取 pixiv 圖片 %d 失敗: %v", id, err)
+			continue
+		}
+
 		results = append(results, ImageData{
 			Pid:    data.ID,
 			Uid:    data.User.ID,
 			R18:    p.checkTagIsR18(data.Tags),
 			Author: data.User.Name,
 			Title:  data.Title,
-			Url:    imgUrl,
 			Tags:   p.toArr(data.Tags),
+			Image:  imgByte,
 		})
 
 	}
@@ -115,6 +122,27 @@ func (p *PixelMoe) tryGetImage(images *pixiv.Images) string {
 		return images.SquareMedium
 	}
 	return ""
+}
+
+func (p *PixelMoe) getImageByte(url string) ([]byte, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Referer", "https://pixiv.net")
+	req.Header.Set("User-Agent", uarand.GetRandom())
+
+	res, err := http.DefaultClient.Do(req)
+
+	if err != nil {
+		return nil, err
+	} else if res.StatusCode != 200 {
+		return nil, fmt.Errorf(res.Status)
+	}
+
+	defer res.Body.Close()
+
+	return io.ReadAll(res.Body)
 }
 
 func (p *PixelMoe) toArr(tags []pixiv.Tag) []string {

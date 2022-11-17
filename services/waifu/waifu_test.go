@@ -4,11 +4,9 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/utils/test"
 	"io"
-	"net/http"
 	"strings"
 	"testing"
 
-	"github.com/corpix/uarand"
 	"github.com/eric2788/common-utils/request"
 )
 
@@ -39,31 +37,12 @@ func TestGetPixivMoe(t *testing.T) {
 
 func TestGetPixivIcon(t *testing.T) {
 	url := "https://i.pximg.net/user-profile/img/2022/09/26/02/35/44/23383020_ad04155d3b239285249e6d0837123609_50.jpg"
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	req.Header.Set("Referer", "https://pixiv.net")
-	req.Header.Set("User-Agent", uarand.GetRandom())
-
-	res, err := http.DefaultClient.Do(req)
-
+	moe := &PixelMoe{}
+	b, err := moe.getImageByte(url)
 	if err != nil {
 		t.Skip(err)
 	}
-
-	if res.StatusCode == 403 {
-		t.Fatal(err)
-	}
-
-	defer res.Body.Close()
-
-	b, err := io.ReadAll(res.Body)
-	if err != nil {
-		t.Skip(err)
-	}
-
-	t.Log(string(b))
+	t.Logf("%d B", len(b))
 }
 
 func TestGetLolicron(t *testing.T) {

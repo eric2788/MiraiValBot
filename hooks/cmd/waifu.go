@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,7 +12,6 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/waifu"
-	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 func getWaifuMultiple(args []string, source *command.MessageSource) error {
@@ -59,7 +59,15 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
 	for _, img := range imgs {
 		wg.Add(1)
-		go misc.FetchImageToForward(forwarder, img.Url, wg)
+		if img.Url == "" && len(img.Image) > 0 {
+			go misc.FetchImageByteToForward(forwarder, img.Image, wg)
+		} else if img.Url != "" {
+			go misc.FetchImageToForward(forwarder, img.Url, wg)
+		} else {
+			// nothing
+			logger.Warnf("图片 %d (%q) 的 Url 和 Image 均为空。", img.Pid, img.Title)
+			wg.Done()
+		}
 	}
 
 	wg.Wait()

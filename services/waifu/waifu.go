@@ -20,6 +20,7 @@ type (
 		Author string
 		Url    string
 		Tags   []string
+		Image  []byte // 與 Url 二選一
 	}
 
 	SearchOptions struct {
