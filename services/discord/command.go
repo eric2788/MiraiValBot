@@ -136,7 +136,7 @@ func handleSetu(s *discordgo.Session, i *discordgo.InteractionCreate) {
 	for _, img := range imgs {
 		SendNSFWImage(img)
 	}
-	content = "发送成功。"
+	content = fmt.Sprintf("已成功发送到频道 <#%d>。", config.NsfwChannel)
 	_, err = s.InteractionResponseEdit(i.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})

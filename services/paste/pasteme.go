@@ -74,6 +74,7 @@ func CreatePasteMe(lang, content string) (string, error) {
 
 	req.Header.Set("User-Agent", userAgent)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Referer", "https://pasteme.cn/")
 
 	if url, err := url.Parse(PasteMeBaseURL); err == nil && url != nil {
 		logger.Debugf("cookies of api client: %+v", client.Jar.Cookies(url))
