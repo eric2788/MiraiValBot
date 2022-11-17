@@ -28,6 +28,9 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 		search = waifu.WithTags(tags...)
 	}
 
+	reply := qq.CreateReply(source.Message)
+	_ = qq.SendGroupMessage(reply.Append(qq.NewTextf("正在索取 %s 的相关图片...", strings.Join(tags, ","))))
+
 	imgs, err := waifu.GetRandomImages(
 		waifu.NewOptions(
 			search,
@@ -48,6 +51,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 		go fetchImageToForward(forwarder, img.Url, wg)
 	}
 
+	wg.Wait()
 	return qq.SendGroupForwardMessage(forwarder)
 }
 
