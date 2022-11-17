@@ -14,6 +14,9 @@ var chats = map[string]AIReply{
 }
 
 func TestGetXiaoAi(t *testing.T) {
+
+	t.Skip("xiaoai is dead")
+
 	aichat := chats["xiaoai"]
 
 	msg, err := aichat.Reply("你好，你叫什么？")
