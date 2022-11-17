@@ -1,7 +1,6 @@
 package privatechat
 
 import (
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -19,8 +18,7 @@ import (
 const Tag = "valbot.privatechat"
 
 var (
-	logger      = utils.GetModuleLogger(Tag)
-	setuPattern = regexp.MustCompile(`来点色图 (.+)`)
+	logger = utils.GetModuleLogger(Tag)
 )
 
 type privateChatResponse struct {
