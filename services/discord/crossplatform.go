@@ -12,8 +12,6 @@ import (
 )
 
 func StartChatListen() {
-
-	client.Identify.Intents = discordgo.IntentsGuildMessages
 	client.AddHandler(messageCreate)
 
 	err := client.Open()

@@ -2,9 +2,10 @@ package file
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"gopkg.in/yaml.v3"
-	"os"
 )
 
 type Configuration struct {
@@ -54,6 +55,7 @@ type DiscordConfig struct {
 	LogChannel       int64  `yaml:"logChannel"`
 	NewsChannel      int64  `yaml:"newsChannel"`
 	CrossPlatChannel int64  `yaml:"crossPlatChannel"`
+	NsfwChannel      int64  `yaml:"nsfwChannel"`
 }
 
 var defaultConfig = Configuration{
@@ -72,12 +74,6 @@ var defaultConfig = Configuration{
 		Database: 0,
 		Password: "",
 		Buffer:   1024,
-	},
-	Github: GithubConfig{
-		Name:       "sysnapse",
-		Email:      "tester123@gmail.com",
-		Repository: "cloud",
-		Branch:     "main",
 	},
 }
 
