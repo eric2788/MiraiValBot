@@ -2,16 +2,24 @@ package waifu
 
 import (
 	"fmt"
-	"github.com/eric2788/common-utils/request"
-	"github.com/everpcpc/pixiv"
+	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/corpix/uarand"
+	"github.com/eric2788/common-utils/request"
+	"github.com/everpcpc/pixiv"
+	"github.com/lucas-clemente/quic-go/http3"
 )
 
 const (
 	pixivMoeApi    = "https://api.pixivel.moe/v2/pixiv/illust/search/%s?page=%d&sortpop=true"
 	pixivMoeTagApi = "https://api.pixivel.moe/v2/pixiv/tag/search/%s?page=%d&sortpop=true"
 )
+
+var http3Client = http.Client{
+	Transport: &http3.RoundTripper{},
+}
 
 type (
 	PixelMoe struct {
@@ -92,9 +100,32 @@ func (p *PixelMoe) checkTagIsR18(tags []pixiv.Tag) bool {
 	return false
 }
 
+func (p *PixelMoe) httpGet(url string, response interface{}) error {
+
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", uarand.GetRandom())
+	req.Header.Set("Referer", "https://pixivel.moe/")
+	res, err := http3Client.Do(req)
+
+	if err != nil {
+		return err
+	} else if res.StatusCode != 200 {
+		return &request.HttpError{
+			Code:     res.StatusCode,
+			Status:   res.Status,
+			Response: res,
+		}
+	}
+
+	return request.Read(res, response)
+}
+
 func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64, error) {
 	var resp PixivMoeResp
-	err := request.Get(fmt.Sprintf(pixivMoeTagApi, url.QueryEscape(strings.Join(tags, ",")), page), &resp)
+	err := p.httpGet(fmt.Sprintf(pixivMoeTagApi, url.QueryEscape(strings.Join(tags, ",")), page), &resp)
 	if err != nil {
 		return nil, err
 	} else if resp.Error {
@@ -116,7 +147,7 @@ func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64,
 
 func (p *PixelMoe) getPixivIdsByKeyword(keyword string, page, amount int) ([]uint64, error) {
 	var resp PixivMoeResp
-	err := request.Get(fmt.Sprintf(pixivMoeApi, url.QueryEscape(keyword), page), &resp)
+	err := p.httpGet(fmt.Sprintf(pixivMoeApi, url.QueryEscape(keyword), page), &resp)
 	if err != nil {
 		return nil, err
 	} else if resp.Error {

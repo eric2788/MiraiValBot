@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"errors"
+	"sync"
+
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/cosplayer"
-	"sync"
 )
 
 func cosplaySingle(args []string, source *command.MessageSource) error {
@@ -50,8 +51,7 @@ func cosplayMultiple(args []string, source *command.MessageSource) error {
 		go fetchImageToForward(forwarder, url, wg)
 	}
 	wg.Wait()
-	msg := message.NewSendingMessage().Append(forwarder)
-	return qq.SendGroupMessage(msg)
+	return qq.SendGroupForwardMessage(forwarder)
 }
 
 var (
