@@ -20,7 +20,7 @@ func TestGetPixivMoe(t *testing.T) {
 	Init()
 
 	pixivmoe := &PixelMoe{}
-	ids, err := pixivmoe.getPixivIdsByKeyword("草神", 0, 5, false)
+	ids, err := pixivmoe.getPixivIdsByKeyword("大雄", 0, 5, false)
 	if err != nil {
 		t.Skip(err)
 	}
@@ -29,6 +29,8 @@ func TestGetPixivMoe(t *testing.T) {
 		data, err := getIllust(id)
 		if err != nil {
 			t.Log(err)
+			continue
+		} else if data == nil || data.Images == nil {
 			continue
 		}
 		t.Logf("title: %s, tags: %s, url: %s", data.Title, strings.Join(pixivmoe.toArr(data.Tags), ", "), data.Images.Original)
