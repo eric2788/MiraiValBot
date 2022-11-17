@@ -10,7 +10,7 @@ import (
 
 func TestGetPixivMoe(t *testing.T) {
 	pixivmoe := &PixelMoe{}
-	ids, err := pixivmoe.getPixivIdsByKeyword("草神", 0, 5)
+	ids, err := pixivmoe.getPixivIdsByKeyword("草神", 0, 5, false)
 	if err != nil {
 		t.Skip(err)
 	}

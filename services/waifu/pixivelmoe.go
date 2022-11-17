@@ -31,16 +31,13 @@ type (
 		Data    struct {
 			HasNext bool `json:"has_next"`
 			Illusts []struct {
-				ID       uint64 `json:"id"`
-				Title    string `json:"title"`
-				AltTitle string `json:"altTitle"`
-				Sanity   int    `json:"sanity"`
-				Width    int    `json:"width"`
-				Height   int    `json:"height"`
-				Tags     []struct {
-					Name        string `json:"name"`
-					Translation string `json:"translation"`
-				} `json:"tags"`
+				ID        uint64        `json:"id"`
+				Title     string        `json:"title"`
+				AltTitle  string        `json:"altTitle"`
+				Sanity    int           `json:"sanity"`
+				Width     int           `json:"width"`
+				Height    int           `json:"height"`
+				Tags      []PixivMoeTag `json:"tags"`
 				Statistic struct {
 					Views     int `json:"views"`
 					Likes     int `json:"likes"`
@@ -49,15 +46,20 @@ type (
 			} `json:"illusts"`
 		} `json:"data"`
 	}
+
+	PixivMoeTag struct {
+		Name        string `json:"name"`
+		Translation string `json:"translation"`
+	}
 )
 
 func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 	var ids []uint64
 	var err error
 	if option.Keyword != "" {
-		ids, err = p.getPixivIdsByKeyword(option.Keyword, 0, option.Amount)
+		ids, err = p.getPixivIdsByKeyword(option.Keyword, 0, option.Amount, option.R18)
 	} else if len(option.Tags) > 0 {
-		ids, err = p.getPixivIdsByTags(option.Tags, 0, option.Amount)
+		ids, err = p.getPixivIdsByTags(option.Tags, 0, option.Amount, option.R18)
 	} else {
 		return nil, fmt.Errorf("unknown search option")
 	}
@@ -107,6 +109,15 @@ func (p *PixelMoe) checkTagIsR18(tags []pixiv.Tag) bool {
 	return false
 }
 
+func (p *PixelMoe) _checkTagIsR18(tags []PixivMoeTag) bool {
+	for _, tag := range tags {
+		if tag.Name == "R-18" {
+			return true
+		}
+	}
+	return false
+}
+
 func (p *PixelMoe) httpGet(url string, response interface{}) error {
 
 	req, err := http.NewRequest(http.MethodGet, url, nil)
@@ -130,7 +141,7 @@ func (p *PixelMoe) httpGet(url string, response interface{}) error {
 	return request.Read(res, response)
 }
 
-func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64, error) {
+func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int, r18 bool) ([]uint64, error) {
 	var resp PixivMoeResp
 	err := p.httpGet(fmt.Sprintf(pixivMoeTagApi, url.QueryEscape(strings.Join(tags, ",")), page), &resp)
 	if err != nil {
@@ -140,14 +151,17 @@ func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64,
 	}
 	var results []uint64
 	for _, illust := range resp.Data.Illusts {
+		if p._checkTagIsR18(illust.Tags) && !r18 {
+			continue
+		}
 		results = append(results, illust.ID)
 		// 获取特定数量
 		if len(results) >= amount {
 			break
 		}
 	}
-	if amount > len(resp.Data.Illusts) && resp.Data.HasNext {
-		ids, err := p.getPixivIdsByTags(tags, page+1, amount-len(resp.Data.Illusts))
+	if amount > len(results) && resp.Data.HasNext {
+		ids, err := p.getPixivIdsByTags(tags, page+1, amount-len(results), r18)
 		if err != nil {
 			return nil, err
 		}
@@ -156,7 +170,7 @@ func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64,
 	return results, nil
 }
 
-func (p *PixelMoe) getPixivIdsByKeyword(keyword string, page, amount int) ([]uint64, error) {
+func (p *PixelMoe) getPixivIdsByKeyword(keyword string, page, amount int, r18 bool) ([]uint64, error) {
 	var resp PixivMoeResp
 	err := p.httpGet(fmt.Sprintf(pixivMoeApi, url.QueryEscape(keyword), page), &resp)
 	if err != nil {
@@ -166,14 +180,17 @@ func (p *PixelMoe) getPixivIdsByKeyword(keyword string, page, amount int) ([]uin
 	}
 	var results []uint64
 	for _, illust := range resp.Data.Illusts {
+		if p._checkTagIsR18(illust.Tags) && !r18 {
+			continue
+		}
 		results = append(results, illust.ID)
 		// 获取特定数量
 		if len(results) >= amount {
 			break
 		}
 	}
-	if amount > len(resp.Data.Illusts) && resp.Data.HasNext {
-		ids, err := p.getPixivIdsByKeyword(keyword, page+1, amount-len(resp.Data.Illusts))
+	if amount > len(results) && resp.Data.HasNext {
+		ids, err := p.getPixivIdsByKeyword(keyword, page+1, amount-len(results), r18)
 		if err != nil {
 			return nil, err
 		}
