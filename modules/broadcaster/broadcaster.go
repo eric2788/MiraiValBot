@@ -97,6 +97,7 @@ func (b *Broadcaster) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 		logger.Info("Redis 已成功關閉連接")
 	}
 
+	_ = discord.Close()
 }
 
 func RegisterHandler(site string, handler MessageHandler) bool {

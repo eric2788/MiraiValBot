@@ -11,21 +11,28 @@ import (
 
 var (
 	client *discordgo.Session
-	config file.DiscordConfig
+	config *file.DiscordConfig
 	logger = utils.GetModuleLogger("discord.bot")
 )
 
 func Start() {
-	config = file.ApplicationYaml.Discord
+	config = &file.ApplicationYaml.Discord
 	discord, err := discordgo.New("Bot " + file.ApplicationYaml.Discord.Token)
 	if err != nil {
 		logger.Errorf("啟動 discord 機器人時出現錯誤: %v\n", err)
 		return
 	}
 	client = discord
-
+	client.Identify.Intents = discordgo.IntentsGuildMessages
 	go StartChatListen() // 啟動跨平台聊天
 	Log("Discord 機器人已成功啟動。")
+}
+
+func Close() error {
+	if client != nil {
+		return client.Close()
+	}
+	return nil
 }
 
 func Log(msg string, arg ...interface{}) {
