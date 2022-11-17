@@ -84,9 +84,9 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 
 	// 所有pixiv图片均无法获取
 	if len(results) == 0 && len(ids) > 0 {
-		return nil, fmt.Errorf("无法索取所有 pixiv 图片, 原因请查看服务端输出。")
+		return nil, fmt.Errorf("无法索取所有 pixiv 图片, 原因请查看服务端输出")
 	}
-	
+
 	return results, nil
 }
 
@@ -141,6 +141,10 @@ func (p *PixelMoe) getPixivIdsByTags(tags []string, page, amount int) ([]uint64,
 	var results []uint64
 	for _, illust := range resp.Data.Illusts {
 		results = append(results, illust.ID)
+		// 获取特定数量
+		if len(results) >= amount {
+			break
+		}
 	}
 	if amount > len(resp.Data.Illusts) && resp.Data.HasNext {
 		ids, err := p.getPixivIdsByTags(tags, page+1, amount-len(resp.Data.Illusts))
@@ -163,6 +167,10 @@ func (p *PixelMoe) getPixivIdsByKeyword(keyword string, page, amount int) ([]uin
 	var results []uint64
 	for _, illust := range resp.Data.Illusts {
 		results = append(results, illust.ID)
+		// 获取特定数量
+		if len(results) >= amount {
+			break
+		}
 	}
 	if amount > len(resp.Data.Illusts) && resp.Data.HasNext {
 		ids, err := p.getPixivIdsByKeyword(keyword, page+1, amount-len(resp.Data.Illusts))
