@@ -24,8 +24,17 @@ func Start() {
 	}
 	client = discord
 	client.Identify.Intents = discordgo.IntentsGuildMessages
-	go StartChatListen() // 啟動跨平台聊天
-	Log("Discord 機器人已成功啟動。")
+
+	client.AddHandlerOnce(func(s *discordgo.Session, e *discordgo.Ready) {
+		go StartChatListen() // 啟動跨平台聊天
+		go HookCommand()
+		Log("Discord 機器人已成功啟動。")
+	})
+	err = client.Open()
+	if err != nil {
+		logger.Error("error opening discord connection: ", err)
+	}
+
 }
 
 func Close() error {

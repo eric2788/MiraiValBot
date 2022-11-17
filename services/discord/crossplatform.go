@@ -13,11 +13,6 @@ import (
 
 func StartChatListen() {
 	client.AddHandler(messageCreate)
-
-	err := client.Open()
-	if err != nil {
-		logger.Error("error opening discord connection: ", err)
-	}
 }
 
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {

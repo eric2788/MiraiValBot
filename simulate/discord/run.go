@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,7 +13,10 @@ import (
 
 var logger = logrus.WithField("simulate", "discord")
 
-func Start() {
+func main() {
+
+	test.InitTesting()
+
 	file.GenerateConfig()
 	file.LoadApplicationYaml()
 	file.LoadStorage()
