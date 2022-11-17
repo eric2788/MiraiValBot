@@ -1,6 +1,8 @@
 package waifu
 
 import (
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"io"
 	"net/http"
 	"strings"
@@ -11,6 +13,12 @@ import (
 )
 
 func TestGetPixivMoe(t *testing.T) {
+
+	test.InitTesting()
+	file.GenerateConfig()
+	file.LoadApplicationYaml()
+	Init()
+
 	pixivmoe := &PixelMoe{}
 	ids, err := pixivmoe.getPixivIdsByKeyword("草神", 0, 5, false)
 	if err != nil {
