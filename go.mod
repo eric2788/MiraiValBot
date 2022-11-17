@@ -14,6 +14,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/uuid v1.3.0
 	github.com/hqbobo/text2pic v0.0.0-20180823042751-2479e146d720
+	github.com/lucas-clemente/quic-go v0.31.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/stretchr/testify v1.8.1
 	github.com/wdvxdr1123/go-silk v0.0.0-20220304095002-f67345df09ea
@@ -27,7 +28,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20221112000123-84eb7ad69597 // indirect
-	github.com/lucas-clemente/quic-go v0.31.0 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.3 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.1 // indirect

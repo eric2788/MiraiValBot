@@ -34,6 +34,7 @@ import (
 	_ "github.com/eric2788/MiraiValBot/modules/chat_reply"
 	_ "github.com/eric2788/MiraiValBot/modules/command"
 	_ "github.com/eric2788/MiraiValBot/modules/counting"
+	_ "github.com/eric2788/MiraiValBot/modules/privatechat"
 	_ "github.com/eric2788/MiraiValBot/modules/repeatchat"
 	_ "github.com/eric2788/MiraiValBot/modules/response"
 	_ "github.com/eric2788/MiraiValBot/modules/timer"
