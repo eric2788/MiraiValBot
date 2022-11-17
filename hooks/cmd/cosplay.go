@@ -42,10 +42,25 @@ func cosplayMultiple(args []string, source *command.MessageSource) error {
 		return errors.New("获取到的Cosplayer图片为空，请再尝试一次")
 	}
 
+	if err := buildForwardElement(data, true); err != nil {
+		if e, ok := err.(*qq.MessageSendError); ok && e.Reason == qq.Risked {
+			logger.Errorf("发送cosplayer合并消息出现风控，尝试不发送标题...")
+			return buildForwardElement(data, false)
+		} else {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func buildForwardElement(data *cosplayer.Data, addTitle bool) error {
 	forwarder := message.NewForwardMessage()
-	title := message.NewSendingMessage()
-	title.Append(message.NewText(data.Title))
-	forwarder.AddNode(qq.NewForwardNode(title))
+	if addTitle {
+		title := message.NewSendingMessage()
+		title.Append(message.NewText(data.Title))
+		forwarder.AddNode(qq.NewForwardNode(title))
+	}
 	wg := &sync.WaitGroup{}
 	for _, url := range data.Urls {
 		wg.Add(1)
