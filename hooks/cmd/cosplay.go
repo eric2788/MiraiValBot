@@ -8,6 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/cosplayer"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 func cosplaySingle(args []string, source *command.MessageSource) error {
@@ -48,7 +49,7 @@ func cosplayMultiple(args []string, source *command.MessageSource) error {
 	wg := &sync.WaitGroup{}
 	for _, url := range data.Urls {
 		wg.Add(1)
-		go fetchImageToForward(forwarder, url, wg)
+		go misc.FetchImageToForward(forwarder, url, wg)
 	}
 	wg.Wait()
 	return qq.SendGroupForwardMessage(forwarder)
@@ -66,17 +67,4 @@ var cosplayCommand = command.NewParent([]string{"cosplay", "角色扮演"}, "Cos
 
 func init() {
 	command.AddCommand(cosplayCommand)
-}
-
-func fetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync.WaitGroup) {
-	defer wg.Done()
-	msg := message.NewSendingMessage()
-	img, err := qq.NewImageByUrl(url)
-	if err != nil {
-		logger.Errorf("尝试获取图片 %s 失败: %v, 将使用URL链接。", url, err)
-		msg.Append(qq.NewTextf("%s", url))
-	} else {
-		msg.Append(img)
-	}
-	forwarder.AddNode(qq.NewForwardNode(msg))
 }

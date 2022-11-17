@@ -36,6 +36,10 @@ func CreateReply(source *message.GroupMessage) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewReply(source))
 }
 
+func CreatePrivateReply(source *message.PrivateMessage) *message.SendingMessage {
+	return message.NewSendingMessage().Append(message.NewPrivateReply(source))
+}
+
 func NewTts(text string) (*message.GroupVoiceElement, error) {
 	return NewTtsWithGroup(ValGroupInfo.Uin, text)
 }
