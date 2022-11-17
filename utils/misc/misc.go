@@ -3,6 +3,7 @@ package misc
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -86,4 +87,17 @@ func ShuffleText(content string) string {
 		lcrune[i], lcrune[j] = lcrune[j], lcrune[i]
 	})
 	return string(lcrune)
+}
+
+func FetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	msg := message.NewSendingMessage()
+	img, err := qq.NewImageByUrl(url)
+	if err != nil {
+		logger.Errorf("尝试获取图片 %s 失败: %v, 将使用URL链接。", url, err)
+		msg.Append(qq.NewTextf("%s", url))
+	} else {
+		msg.Append(img)
+	}
+	forwarder.AddNode(qq.NewForwardNode(msg))
 }

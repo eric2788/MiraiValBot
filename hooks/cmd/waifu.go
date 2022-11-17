@@ -11,11 +11,16 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/waifu"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
-	amountStr, tags := args[0], strings.Split(args[1], ",")
+	amountStr, tags := args[0], []string{""}
+
+	if len(args) > 1 {
+		tags = strings.Split(args[1], ",")
+	}
 
 	amount, err := strconv.Atoi(amountStr)
 	if err != nil {
@@ -54,14 +59,14 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
 	for _, img := range imgs {
 		wg.Add(1)
-		go fetchImageToForward(forwarder, img.Url, wg)
+		go misc.FetchImageToForward(forwarder, img.Url, wg)
 	}
 
 	wg.Wait()
 	return qq.SendGroupForwardMessage(forwarder)
 }
 
-var waifuCommand = command.NewNode([]string{"waifu", "setu", "色图"}, "色图指令", false, getWaifuMultiple, "<数量>", "<标签>")
+var waifuCommand = command.NewNode([]string{"waifu", "setu", "色图"}, "色图指令", false, getWaifuMultiple, "<数量>", "[标签]")
 
 func init() {
 	command.AddCommand(waifuCommand)
