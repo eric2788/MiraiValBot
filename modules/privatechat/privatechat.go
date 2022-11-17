@@ -44,7 +44,7 @@ func (p *privateChatResponse) HookEvent(bot *bot.Bot) {
 			if len(args) > 1 {
 				i, err := strconv.Atoi(args[1])
 				if err != nil {
-					_ = qq.SendPrivateMessage(event.Target, reply.Append(qq.NewTextf("无效的数字: %s", args[1])))
+					_ = qq.SendPrivateMessage(event.Sender.Uin, reply.Append(qq.NewTextf("无效的数字: %s", args[1])))
 					return
 				}
 				amount = i
@@ -72,10 +72,10 @@ func (p *privateChatResponse) HookEvent(bot *bot.Bot) {
 			)
 
 			if err != nil {
-				_ = qq.SendPrivateMessage(event.Target, reply.Append(qq.NewTextf("获取色图失败: %v", err)))
+				_ = qq.SendPrivateMessage(event.Sender.Uin, reply.Append(qq.NewTextf("获取色图失败: %v", err)))
 				return
 			} else {
-				_ = qq.SendPrivateMessage(event.Target, reply.Append(qq.NewTextf("正在索取 %s 图片...", strings.Join(tags, ","))))
+				_ = qq.SendPrivateMessage(event.Sender.Uin, reply.Append(qq.NewTextf("正在索取 %s 图片...", strings.Join(tags, ","))))
 			}
 
 			forwarder := message.NewForwardMessage()
@@ -88,7 +88,7 @@ func (p *privateChatResponse) HookEvent(bot *bot.Bot) {
 
 			wg.Wait()
 
-			_ = qq.SendPrivateForwardMessage(event.Target, forwarder)
+			_ = qq.SendPrivateForwardMessage(event.Sender.Uin, forwarder)
 		}
 
 	})
