@@ -72,6 +72,9 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 		if err != nil {
 			logger.Errorf("獲取 pixiv 圖片 %d 失敗: %v", id, err)
 			continue
+		} else if data == nil {
+			logger.Warnf("獲取 pixiv 圖片 %d 失敗: 無法獲取圖片資訊", id)
+			continue
 		}
 		results = append(results, ImageData{
 			Pid:    data.ID,

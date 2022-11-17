@@ -19,7 +19,7 @@ func Init() {
 		logger.Errorf("Password 登入 pixiv 失敗: %v", err)
 		if os.Getenv("PIXIV_TOKEN") != "" && os.Getenv("PIXIV_REFRESH_TOKEN") != "" {
 			logger.Infof("將嘗試使用環境變數中的 pixiv token 進行登入")
-			account, err = pixiv.LoadAuth(os.Getenv("PIXIV_TOKEN"), os.Getenv("PIXIV_REFRESH_TOKEN"), time.Now().Add(time.Second*3600))
+			account, err = pixiv.LoadAuth(os.Getenv("PIXIV_TOKEN"), os.Getenv("PIXIV_REFRESH_TOKEN"), time.Now().Add(time.Second*360))
 			if err != nil {
 				logger.Errorf("Token 登入 pixiv 失敗: %v", err)
 			}
