@@ -33,7 +33,7 @@ func TestGetPixivMoe(t *testing.T) {
 		} else if data == nil || data.Images == nil {
 			continue
 		}
-		t.Logf("title: %s, tags: %s, url: %s", data.Title, strings.Join(pixivmoe.toArr(data.Tags), ", "), data.Images.Original)
+		t.Logf("title: %s, tags: %s, url: %+v", data.Title, strings.Join(pixivmoe.toArr(data.Tags), ", "), data.Images)
 	}
 }
 

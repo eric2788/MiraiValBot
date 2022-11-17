@@ -76,15 +76,24 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 			logger.Warnf("獲取 pixiv 圖片 %d 失敗: 無法獲取圖片資訊", id)
 			continue
 		}
+
+		imgUrl := p.tryGetImage(data.Images)
+
+		if imgUrl == "" {
+			logger.Warnf("所有圖像ID %d 的網址為空: %v", id, data.Images)
+			continue
+		}
+
 		results = append(results, ImageData{
 			Pid:    data.ID,
 			Uid:    data.User.ID,
 			R18:    p.checkTagIsR18(data.Tags),
 			Author: data.User.Name,
 			Title:  data.Title,
-			Url:    data.Images.Original,
+			Url:    imgUrl,
 			Tags:   p.toArr(data.Tags),
 		})
+
 	}
 
 	// 所有pixiv图片均无法获取
@@ -93,6 +102,19 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 	}
 
 	return results, nil
+}
+
+func (p *PixelMoe) tryGetImage(images *pixiv.Images) string {
+	if images.Original != "" {
+		return images.Original
+	} else if images.Large != "" {
+		return images.Large
+	} else if images.Medium != "" {
+		return images.Medium
+	} else if images.SquareMedium != "" {
+		return images.SquareMedium
+	}
+	return ""
 }
 
 func (p *PixelMoe) toArr(tags []pixiv.Tag) []string {
