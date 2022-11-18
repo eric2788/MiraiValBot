@@ -89,7 +89,10 @@ func (r *response) HookEvent(bot *bot.Bot) {
 
 					for _, r := range reply.Elements {
 
+						// skip reply and at
 						if _, ok := r.(*message.ReplyElement); ok {
+							continue
+						} else if _, ok = r.(*message.AtElement); ok {
 							continue
 						}
 

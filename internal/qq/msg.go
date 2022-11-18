@@ -36,6 +36,10 @@ func CreateReply(source *message.GroupMessage) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewReply(source))
 }
 
+func CreateAtReply(source *message.GroupMessage) *message.SendingMessage {
+	return CreateReply(source).Append(message.NewAt(source.Sender.Uin, source.Sender.DisplayName()))
+}
+
 func CreatePrivateReply(source *message.PrivateMessage) *message.SendingMessage {
 	return message.NewSendingMessage().Append(message.NewPrivateReply(source))
 }
