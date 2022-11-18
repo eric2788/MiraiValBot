@@ -3,7 +3,13 @@ package huggingface
 import (
 	"os"
 	"testing"
+
+	"github.com/eric2788/MiraiValBot/utils/test"
 )
+
+func init() {
+	test.InitTesting()
+}
 
 func TestWaifuDiffusier(t *testing.T) {
 

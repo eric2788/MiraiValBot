@@ -5,6 +5,8 @@
 **/logs/**
 session.token
 **/imgtxt/*.png
+**/huggingface/*.png
+**/huggingface/*.jpeg
 **/file/*.yaml
 **/*.exe
 **/cache/**
