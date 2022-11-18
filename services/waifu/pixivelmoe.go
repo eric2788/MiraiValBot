@@ -54,7 +54,7 @@ type (
 	}
 )
 
-func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
+func (p *PixelMoe) GetImages(option *SearchOptions) ([]*ImageData, error) {
 	var ids []uint64
 	var err error
 	if option.Keyword != "" {
@@ -67,14 +67,11 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 	if err != nil {
 		return nil, err
 	}
-	var results []ImageData
+	var results []*ImageData
 	for _, id := range ids {
 		data, err := getIllust(id)
 		if err != nil {
 			logger.Errorf("獲取 pixiv 圖片 %d 失敗: %v", id, err)
-			continue
-		} else if data == nil || data.Images == nil {
-			logger.Warnf("獲取 pixiv 圖片 %d 失敗: 無法獲取圖片資訊", id)
 			continue
 		}
 
@@ -91,7 +88,7 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]ImageData, error) {
 			continue
 		}
 
-		results = append(results, ImageData{
+		results = append(results, &ImageData{
 			Pid:    data.ID,
 			Uid:    data.User.ID,
 			R18:    p.checkTagIsR18(data.Tags),

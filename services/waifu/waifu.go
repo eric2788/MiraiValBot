@@ -9,7 +9,7 @@ import (
 
 type (
 	ImageApi interface {
-		GetImages(option *SearchOptions) ([]ImageData, error)
+		GetImages(option *SearchOptions) ([]*ImageData, error)
 	}
 
 	ImageData struct {
@@ -73,7 +73,7 @@ func WithR18(r18 bool) Searcher {
 	}
 }
 
-func GetRandomImages(option *SearchOptions) ([]ImageData, error) {
+func GetRandomImages(option *SearchOptions) ([]*ImageData, error) {
 	rand.Seed(time.Now().UnixNano())
 	keys := maps.Keys(providers)
 	rand.Shuffle(len(keys), func(i, j int) {

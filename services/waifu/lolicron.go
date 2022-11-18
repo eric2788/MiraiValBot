@@ -34,7 +34,7 @@ type (
 	}
 )
 
-func (l *Lolicron) GetImages(option *SearchOptions) ([]ImageData, error) {
+func (l *Lolicron) GetImages(option *SearchOptions) ([]*ImageData, error) {
 	var resp LolicronResp
 	r18 := 0
 	if option.R18 {
@@ -47,9 +47,9 @@ func (l *Lolicron) GetImages(option *SearchOptions) ([]ImageData, error) {
 		return nil, errors.New(resp.Error)
 	}
 
-	var results []ImageData
+	var results []*ImageData
 	for _, data := range resp.Data {
-		results = append(results, ImageData{
+		results = append(results, &ImageData{
 			Pid:    data.Pid,
 			Uid:    data.Uid,
 			Author: data.Author,

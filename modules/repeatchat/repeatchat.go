@@ -37,13 +37,13 @@ func (r *repeatChat) HookEvent(bot *bot.Bot) {
 
 		content := event.ToString()
 		if r.repeatRaw == "" {
-			r.repeatRaw = "0:" + content
+			r.repeatRaw = "1:" + content
 		} else {
 			lastContent := r.repeatRaw[2:]
 			// 复读被打断，重新计算
 			if lastContent != content {
 				logger.Debugf("群消息与上一则不一样: %s, 已重新计算。", lastContent)
-				r.repeatRaw = "0:" + content
+				r.repeatRaw = "1:" + content
 			} else {
 				times := int(r.repeatRaw[0] - '0')
 				c := times + 1
