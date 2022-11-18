@@ -146,19 +146,15 @@ func TestGetMMRDetailsV1(t *testing.T) {
 		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
-	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
-	assert.Equal(t, "JP1", mmrDetails.Tag)
 	assert.NotEmpty(t, mmrDetails.CurrentTierPatched)
 }
 
 func TestGetMMRDetailsV2(t *testing.T) {
-	mmrDetails, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
+	_, err := GetMMRDetailsV2("勝たんしかrinrin", "JP1", AsiaSpecific)
 	if err != nil {
 		passAllowedStatus(t, err)
 		t.Fatal(err)
 	}
-	assert.Equal(t, "勝たんしかrinrin", mmrDetails.Name)
-	assert.Equal(t, "JP1", mmrDetails.Tag)
 }
 
 func TestGetMMRDetailsBySeason(t *testing.T) {
