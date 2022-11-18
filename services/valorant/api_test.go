@@ -22,6 +22,7 @@ var (
 		403: void,
 		429: void,
 		503: void,
+		500: void,
 	}
 )
 
