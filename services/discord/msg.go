@@ -60,7 +60,7 @@ func randomColor() int {
 	return rand.Intn(16777216)
 }
 
-func SendNSFWImage(data waifu.ImageData) {
+func SendNSFWImage(data *waifu.ImageData) {
 	SendEmbed(config.NsfwChannel, &discordgo.MessageEmbed{
 		Title: data.Title,
 		Author: &discordgo.MessageEmbedAuthor{

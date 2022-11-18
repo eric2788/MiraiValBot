@@ -28,7 +28,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 	rand.Seed(time.Now().UnixMicro())
 	rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
 
-	reply := qq.CreateReply(msg)
+	reply := qq.CreateAtReply(msg)
 
 	for _, ai := range aichats {
 
@@ -50,7 +50,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 
 func (a *AIChatResponse) buildMessage(reply *message.SendingMessage, content string) {
 
-	face, err := regexp.Compile(`\{face:(\d)}`)
+	face, err := regexp.Compile(`\{face:(\d+)}`)
 	if err != nil {
 		logger.Error(err)
 		return

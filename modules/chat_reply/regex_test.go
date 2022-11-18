@@ -8,12 +8,12 @@ import (
 )
 
 func TestRegexp(t *testing.T) {
-	face, err := regexp.Compile(`{face:(\d)}`)
+	face, err := regexp.Compile(`{face:(\d+)}`)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	content := "{face:8}好无聊哦,我都快睡着了{face:5}，聊的什么呀{face:1}蛤蛤"
+	content := "{face:8}好无聊哦,我都快睡着了{face:84}，聊的什么呀{face:1}蛤蛤"
 	indexes := face.FindAllStringSubmatchIndex(content, -1)
 
 	lastTo := 0

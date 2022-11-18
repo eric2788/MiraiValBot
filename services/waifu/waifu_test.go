@@ -1,11 +1,14 @@
 package waifu
 
 import (
-	"github.com/eric2788/MiraiValBot/internal/file"
-	"github.com/eric2788/MiraiValBot/utils/test"
+	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/utils/test"
 
 	"github.com/eric2788/common-utils/request"
 )
@@ -18,7 +21,7 @@ func TestGetPixivMoe(t *testing.T) {
 	Init()
 
 	pixivmoe := &PixelMoe{}
-	ids, err := pixivmoe.getPixivIdsByKeyword("大雄", 0, 5, false)
+	ids, err := pixivmoe.getPixivIdsByTags([]string{"猫耳", "萝莉"}, 0, 5, false)
 	if err != nil {
 		t.Skip(err)
 	}
@@ -35,10 +38,31 @@ func TestGetPixivMoe(t *testing.T) {
 	}
 }
 
+func TestQueryEncode(t *testing.T) {
+	option := NewOptions(
+		WithTags("t1", "t2", "t3", "t4"),
+		WithKeyword("hawidhaihdi"),
+		WithR18(true),
+		WithAmount(20),
+	)
+	r18 := 0
+	if option.R18 {
+		r18 = 1
+	}
+	params := &url.Values{
+		"tag":     option.Tags,
+		"r18":     []string{fmt.Sprint(r18)},
+		"num":     []string{fmt.Sprint(option.Amount)},
+		"keyword": []string{option.Keyword},
+		"size":    []string{"original"},
+	}
+
+	t.Log(params.Encode())
+}
+
 func TestGetPixivIcon(t *testing.T) {
 	url := "https://i.pximg.net/user-profile/img/2022/09/26/02/35/44/23383020_ad04155d3b239285249e6d0837123609_50.jpg"
-	moe := &PixelMoe{}
-	b, err := moe.getImageByte(url)
+	b, err := getImageByte(url)
 	if err != nil {
 		t.Skip(err)
 	}
@@ -50,7 +74,7 @@ func TestGetLolicron(t *testing.T) {
 	loli := &Lolicron{}
 
 	data, err := loli.GetImages(NewOptions(
-		WithKeyword("草神"),
+		WithTags("萝莉", "兽耳"),
 		WithAmount(5),
 		WithR18(false),
 	))
@@ -59,8 +83,9 @@ func TestGetLolicron(t *testing.T) {
 
 		if e, ok := err.(*request.HttpError); ok {
 			defer e.Response.Body.Close()
+			t.Logf("%+v", e)
 			if b, err := io.ReadAll(e.Response.Body); err == nil {
-				t.Log(string(b))
+				t.Skip(len(b))
 			}
 		}
 
@@ -68,9 +93,10 @@ func TestGetLolicron(t *testing.T) {
 	}
 
 	for _, d := range data {
-		t.Logf("%+v\n", d)
+		t.Logf("title: %s, Tags: %s, R18: %t\n", d.Title, strings.Join(d.Tags, ","), d.R18)
 		if d.R18 {
 			t.Fatal("should not have r18")
 		}
 	}
+	t.Logf("found %d data", len(data))
 }
