@@ -4,12 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/eric2788/common-utils/request"
 )
 
-const lolicronApi = "https://api.lolicon.app/setu/v2?tag=%s&r18=%d&num=%d&size=original&keyword=%s"
+const lolicronApi = "https://api.lolicon.app/setu/v2?%s"
 
 type (
 	Lolicron struct {
@@ -40,7 +39,14 @@ func (l *Lolicron) GetImages(option *SearchOptions) ([]*ImageData, error) {
 	if option.R18 {
 		r18 = 1
 	}
-	err := request.Get(fmt.Sprintf(lolicronApi, strings.Join(option.Tags, ","), r18, option.Amount, url.QueryEscape(option.Keyword)), &resp)
+	params := &url.Values{
+		"tag":     option.Tags,
+		"r18":     []string{fmt.Sprint(r18)},
+		"num":     []string{fmt.Sprint(option.Amount)},
+		"keyword": []string{option.Keyword},
+		"size":    []string{"original"},
+	}
+	err := request.Get(fmt.Sprintf(lolicronApi, params.Encode()), &resp)
 	if err != nil {
 		return nil, err
 	} else if resp.Error != "" {
@@ -49,6 +55,18 @@ func (l *Lolicron) GetImages(option *SearchOptions) ([]*ImageData, error) {
 
 	var results []*ImageData
 	for _, data := range resp.Data {
+
+		img, err := request.GetBytesByUrl(data.Urls["original"])
+		if err != nil {
+			logger.Errorf("尝试下载图源 %s 时出现错误: %v, 将尝试从pixiv下载", data.Urls["original"], err)
+			img, err = GetImageFromIllust(data.Pid)
+			if err != nil {
+				logger.Errorf("从pixiv下载图源 %d 依然失败: %v, 已略过。", data.Pid, err)
+			} else {
+				logger.Infof("从pixiv下载图源 %d 成功。", data.Pid)
+			}
+		}
+
 		results = append(results, &ImageData{
 			Pid:    data.Pid,
 			Uid:    data.Uid,
@@ -57,6 +75,7 @@ func (l *Lolicron) GetImages(option *SearchOptions) ([]*ImageData, error) {
 			Title:  data.Title,
 			Tags:   data.Tags,
 			Url:    data.Urls["original"],
+			Image:  img,
 		})
 	}
 

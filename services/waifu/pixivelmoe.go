@@ -2,7 +2,6 @@ package waifu
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -14,8 +13,8 @@ import (
 )
 
 const (
-	pixivMoeApi    = "https://api.pixivel.moe/v2/pixiv/illust/search/%s?page=%d&sortpop=true"
-	pixivMoeTagApi = "https://api.pixivel.moe/v2/pixiv/tag/search/%s?page=%d&sortpop=true"
+	pixivMoeApi    = "https://api.pixivel.moe/v2/pixiv/illust/search/%s?page=%d"
+	pixivMoeTagApi = "https://api.pixivel.moe/v2/pixiv/tag/search/%s?page=%d"
 )
 
 var http3Client = http.Client{
@@ -75,14 +74,14 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]*ImageData, error) {
 			continue
 		}
 
-		imgUrl := p.tryGetImage(data.Images)
+		imgUrl := tryGetImage(data.Images)
 
 		if imgUrl == "" {
 			logger.Warnf("所有圖像ID %d 的網址為空: %v", id, data.Images)
 			continue
 		}
 
-		imgByte, err := p.getImageByte(imgUrl)
+		imgByte, err := getImageByte(imgUrl)
 		if err != nil {
 			logger.Errorf("獲取 pixiv 圖片 %d 失敗: %v", id, err)
 			continue
@@ -106,40 +105,6 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]*ImageData, error) {
 	}
 
 	return results, nil
-}
-
-func (p *PixelMoe) tryGetImage(images *pixiv.Images) string {
-	if images.Original != "" {
-		return images.Original
-	} else if images.Large != "" {
-		return images.Large
-	} else if images.Medium != "" {
-		return images.Medium
-	} else if images.SquareMedium != "" {
-		return images.SquareMedium
-	}
-	return ""
-}
-
-func (p *PixelMoe) getImageByte(url string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Referer", "https://pixiv.net")
-	req.Header.Set("User-Agent", uarand.GetRandom())
-
-	res, err := http.DefaultClient.Do(req)
-
-	if err != nil {
-		return nil, err
-	} else if res.StatusCode != 200 {
-		return nil, fmt.Errorf(res.Status)
-	}
-
-	defer res.Body.Close()
-
-	return io.ReadAll(res.Body)
 }
 
 func (p *PixelMoe) toArr(tags []pixiv.Tag) []string {
