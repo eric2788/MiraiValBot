@@ -3,10 +3,11 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	"github.com/eric2788/MiraiValBot/utils/misc"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/eric2788/MiraiValBot/utils/misc"
 
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
@@ -59,7 +60,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
 	for _, img := range imgs {
 		wg.Add(1)
-		if img.Url == "" && len(img.Image) > 0 {
+		if len(img.Image) > 0 {
 			go misc.FetchImageByteToForward(forwarder, img.Image, wg)
 		} else if img.Url != "" {
 			go misc.FetchImageToForward(forwarder, img.Url, wg)

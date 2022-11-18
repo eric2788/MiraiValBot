@@ -50,7 +50,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 
 func (a *AIChatResponse) buildMessage(reply *message.SendingMessage, content string) {
 
-	face, err := regexp.Compile(`\{face:(\d)}`)
+	face, err := regexp.Compile(`\{face:(\d+)}`)
 	if err != nil {
 		logger.Error(err)
 		return
