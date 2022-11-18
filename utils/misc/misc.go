@@ -94,8 +94,8 @@ func FetchImageByteToForward(forwarder *message.ForwardMessage, b []byte, wg *sy
 	msg := message.NewSendingMessage()
 	img, err := qq.NewImageByByte(b)
 	if err != nil {
-		logger.Errorf("上傳圖片失败: %v, 已略過。", err)
-		msg.Append(message.NewText("[圖片]"))
+		logger.Errorf("上傳圖片失败: %v", err)
+		msg.Append(message.NewText("[圖片获取失败]"))
 	} else {
 		msg.Append(img)
 	}
@@ -107,8 +107,8 @@ func FetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync
 	msg := message.NewSendingMessage()
 	img, err := qq.NewImageByUrl(url)
 	if err != nil {
-		logger.Errorf("尝试获取图片 %s 失败: %v, 将使用URL链接。", url, err)
-		msg.Append(qq.NewTextf("%s", url))
+		logger.Errorf("上傳圖片失败: %v", err)
+		msg.Append(message.NewText("[圖片获取失败]"))
 	} else {
 		msg.Append(img)
 	}
