@@ -11,8 +11,7 @@ import (
 
 // putting hugging face api here...
 
-func aiPaint(args []string, source *command.MessageSource) error {
-
+func generateHuggingFaceImage(model string, args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
@@ -25,7 +24,7 @@ func aiPaint(args []string, source *command.MessageSource) error {
 
 	inputs := strings.Join(args, " ")
 
-	b, err := huggingface.GetResultImage("Nilaier/Waifu-Diffusers",
+	b, err := huggingface.GetResultImage(model,
 		huggingface.NewParam(
 			huggingface.Input(inputs),
 		),
@@ -46,12 +45,28 @@ func aiPaint(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(msg)
 }
 
+func aiWaifu(args []string, source *command.MessageSource) error {
+	return generateHuggingFaceImage("Nilaier/Waifu-Diffusers", args, source)
+}
+
+func aiWaifu2(args []string, source *command.MessageSource) error {
+	return generateHuggingFaceImage("hakurei/waifu-diffusion", args, source)
+}
+
+func aiMadoka(args []string, source *command.MessageSource) error {
+	return generateHuggingFaceImage("yuk/madoka-waifu-diffusion", args, source)
+}
+
 var (
-	aiPaintCommand = command.NewNode([]string{"paint", "画图", "画画", "画"}, "文字生成图像", false, aiPaint, "<文字>")
+	aiWaifuCommand  = command.NewNode([]string{"waifu"}, "文字生成图像(waifu)", false, aiWaifu, "<文字>")
+	aiWaifu2Command = command.NewNode([]string{"waifu2"}, "文字生成图像(waifu2)", false, aiWaifu2, "<文字>")
+	aiMadokaCommand = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
 )
 
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
-	aiPaintCommand,
+	aiWaifuCommand,
+	aiWaifu2Command,
+	aiMadokaCommand,
 )
 
 func init() {
