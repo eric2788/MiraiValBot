@@ -1,35 +1,35 @@
 package broadcaster
 
 import (
+	"runtime/debug"
+	"strings"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/common-utils/set"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
-	"runtime/debug"
-	"strings"
 )
 
-type BroadcastHandler interface {
+type BroadcastHandler[Data any] interface {
 	PubSubPrefix() string
 	GetOfflineListening() []string
-	HandleLiveData(bot *bot.Bot, data interface{}, handle interface{}) error
-	ToLiveData(message *redis.Message) (interface{}, error)
+	ToLiveData(message *redis.Message) (*Data, error)
 	HandleError(bot *bot.Bot, error error)
-	GetCommand(data interface{}) string
+	GetCommand(data *Data) string
 }
 
-type BroadCastHandle struct {
-	logger     *logrus.Entry
+type BroadCastHandle[Data any] struct {
+	logger     logrus.FieldLogger
 	exception  set.StringSet
-	handlerMap map[string]interface{}
-	handler    BroadcastHandler
+	handlerMap map[string]func(bot *bot.Bot, data *Data) error
+	handler    BroadcastHandler[Data]
 }
 
-func (b *BroadCastHandle) GetOfflineListening() []string {
+func (b *BroadCastHandle[Data]) GetOfflineListening() []string {
 	return b.handler.GetOfflineListening()
 }
 
-func (b *BroadCastHandle) HandleMessage(bot *bot.Bot, message *redis.Message) {
+func (b *BroadCastHandle[Data]) HandleMessage(bot *bot.Bot, message *redis.Message) {
 
 	if !strings.HasPrefix(message.Channel, b.handler.PubSubPrefix()) {
 		b.logger.Warnf("未知的 topic: %v", message.Channel)
@@ -45,16 +45,16 @@ func (b *BroadCastHandle) HandleMessage(bot *bot.Bot, message *redis.Message) {
 	b.handleLiveData(bot, data)
 }
 
-func (b *BroadCastHandle) HandleError(bot *bot.Bot, error error) {
+func (b *BroadCastHandle[Data]) HandleError(bot *bot.Bot, error error) {
 	b.handler.HandleError(bot, error)
 }
 
-func (b *BroadCastHandle) AddHandler(cmd string, handle interface{}) {
+func (b *BroadCastHandle[Data]) AddHandler(cmd string, handle func(*bot.Bot, *Data) error) {
 	b.handlerMap[cmd] = handle
 	b.logger.Infof("已成功註冊 %s 指令的處理方法。", cmd)
 }
 
-func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
+func (b *BroadCastHandle[Data]) handleLiveData(bot *bot.Bot, data *Data) {
 
 	command := b.handler.GetCommand(data)
 
@@ -65,7 +65,7 @@ func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
 	handle, ok := b.handlerMap[command]
 
 	if !ok {
-		b.logger.Warnf("找不到 %s 指令的處理方法，已略過。", command)
+		b.logger.Debugf("找不到 %s 指令的處理方法，已略過。", command)
 		b.exception.Add(command)
 		return
 	}
@@ -78,18 +78,18 @@ func (b *BroadCastHandle) handleLiveData(bot *bot.Bot, data interface{}) {
 		}
 	}()
 
-	err := b.handler.HandleLiveData(bot, data, handle)
+	err := handle(bot, data)
 
 	if err != nil {
 		b.logger.Warnf("處理 %s 指令時出現錯誤: %v", command, err)
 	}
 }
 
-func BuildHandle(logger *logrus.Entry, handler BroadcastHandler) *BroadCastHandle {
-	return &BroadCastHandle{
+func BuildHandle[Data any](logger logrus.FieldLogger, handler BroadcastHandler[Data]) *BroadCastHandle[Data] {
+	return &BroadCastHandle[Data]{
 		logger:     logger,
 		exception:  *set.NewString(),
-		handlerMap: make(map[string]interface{}),
+		handlerMap: make(map[string]func(bot *bot.Bot, data *Data) error),
 		handler:    handler,
 	}
 }

@@ -3,13 +3,14 @@ package broadcaster
 import (
 	"context"
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/file"
-	rdb "github.com/eric2788/MiraiValBot/redis"
-	"github.com/eric2788/common-utils/set"
-	"github.com/go-redis/redis/v8"
 	"runtime/debug"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	rdb "github.com/eric2788/MiraiValBot/internal/redis"
+	"github.com/eric2788/common-utils/set"
+	"github.com/go-redis/redis/v8"
 )
 
 // waitForPubSubClose this set is to avoid subscribe while that channel is closing PubSub

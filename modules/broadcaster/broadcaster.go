@@ -2,11 +2,12 @@ package broadcaster
 
 import (
 	"context"
+	"sync"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
-	"github.com/eric2788/MiraiValBot/discord"
-	"github.com/eric2788/MiraiValBot/redis"
-	"sync"
+	"github.com/eric2788/MiraiValBot/internal/redis"
+	"github.com/eric2788/MiraiValBot/services/discord"
 )
 
 const Tag = "valbot.broadcaster"
@@ -96,6 +97,7 @@ func (b *Broadcaster) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 		logger.Info("Redis 已成功關閉連接")
 	}
 
+	_ = discord.Close()
 }
 
 func RegisterHandler(site string, handler MessageHandler) bool {

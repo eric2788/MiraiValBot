@@ -2,15 +2,17 @@ package command
 
 import (
 	"fmt"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/services/waifu"
+	"runtime/debug"
+	"sync"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/eventhook"
-	"github.com/eric2788/MiraiValBot/file"
-	"github.com/eric2788/MiraiValBot/qq"
-	"runtime/debug"
-	"sync"
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/internal/qq"
 )
 
 const Tag = "valbot.command"
@@ -18,8 +20,34 @@ const Tag = "valbot.command"
 type command struct {
 }
 
+func (c *command) MiraiGoModule() bot.ModuleInfo {
+	return bot.ModuleInfo{
+		ID:       Tag,
+		Instance: instance,
+	}
+}
+
+func (c *command) Init() {
+	waifu.Init()
+}
+
+func (c *command) PostInit() {
+}
+
+func (c *command) Serve(bot *bot.Bot) {
+}
+
+func (c *command) Start(bot *bot.Bot) {
+	logger.Infof("指令管理模組 已啟動。")
+}
+
+func (c *command) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
+	defer wg.Done()
+	logger.Infof("指令管理 模組已關閉。")
+}
+
 func (c *command) HookEvent(bot *bot.Bot) {
-	bot.OnGroupMessage(func(ct *client.QQClient, msg *message.GroupMessage) {
+	bot.GroupMessageEvent.Subscribe(func(ct *client.QQClient, msg *message.GroupMessage) {
 
 		// 非瓦群無視
 		if msg.GroupCode != file.ApplicationYaml.Val.GroupId {
@@ -103,7 +131,7 @@ func (c *command) HookEvent(bot *bot.Bot) {
 	})
 
 	// 瓦群成员自动接受好友邀请
-	bot.OnNewFriendRequest(func(ct *client.QQClient, req *client.NewFriendRequest) {
+	bot.NewFriendRequestEvent.Subscribe(func(ct *client.QQClient, req *client.NewFriendRequest) {
 		if qq.FindGroupMember(req.RequesterUin) == nil {
 			logger.Infof("%s (%d) 非瓦群成員，已無視好友邀請。", req.RequesterNick, req.RequesterUin)
 			req.Reject()
@@ -117,31 +145,6 @@ var (
 	instance = &command{}
 	logger   = utils.GetModuleLogger(Tag)
 )
-
-func (c *command) MiraiGoModule() bot.ModuleInfo {
-	return bot.ModuleInfo{
-		ID:       Tag,
-		Instance: instance,
-	}
-}
-
-func (c *command) Init() {
-}
-
-func (c *command) PostInit() {
-}
-
-func (c *command) Serve(bot *bot.Bot) {
-}
-
-func (c *command) Start(bot *bot.Bot) {
-	logger.Info("指令管理模組已啟動。")
-}
-
-func (c *command) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
-	defer wg.Done()
-	logger.Info("指令管理模組已關閉")
-}
 
 func init() {
 	bot.RegisterModule(instance)
