@@ -2,10 +2,11 @@ package command
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/common-utils/array"
-	"strings"
 )
 
 const Prefix = "!"
@@ -175,7 +176,7 @@ func showHelpLine(parents []string, node Node) string {
 		line += parent + " "
 	}
 	line += node.Command
-	for _, placeholder := range filterNecessary(node.Placeholders) {
+	for _, placeholder := range node.Placeholders {
 		line += " " + placeholder
 	}
 	return fmt.Sprintf("%s - %s", line, node.Description)
