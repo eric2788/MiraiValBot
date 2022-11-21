@@ -51,7 +51,7 @@ func doRequest(model string, param *FaceParam) (res *http.Response, err error) {
 	res, err = http.DefaultClient.Do(req)
 	if err == nil && res.StatusCode != 200 {
 		defer res.Body.Close() // only close when no err but non 200 code
-		if b, berr := io.ReadAll(res.Body); berr != nil {
+		if b, berr := io.ReadAll(res.Body); berr == nil {
 			err = fmt.Errorf(string(b))
 		} else {
 			err = fmt.Errorf(res.Status)

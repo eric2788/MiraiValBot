@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -99,16 +100,52 @@ func listWorldCount(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
+func rankWords(args []string, source *command.MessageSource) error {
+
+	msg := qq.CreateReply(source.Message)
+
+	if len(file.DataStorage.WordCounts) == 0 {
+		msg.Append(message.NewText("没有正在记录的字词。"))
+		return qq.SendGroupMessage(msg)
+	}
+
+	var counts = make(map[string]int64, len(file.DataStorage.WordCounts))
+	for word, users := range file.DataStorage.WordCounts {
+		c := int64(0)
+		for _, times := range users {
+			c += times
+		}
+		counts[word] = c
+	}
+
+	sortedKeys := maps.Keys(counts)
+
+	slices.SortStableFunc(sortedKeys, func(a, b string) bool {
+		return a > b
+	})
+
+	msg.Append(qq.NewTextf("群聊字词记录排行: (由高到低)"))
+
+	for i, word := range sortedKeys {
+		times := counts[word]
+		msg.Append(qq.NewTextfLn("%d. %q 说了 %d 次", i+1, word, times))
+	}
+
+	return qq.SendWithRandomRiskyStrategy(msg)
+}
+
 var (
 	addWordCountCommand    = command.NewNode([]string{"add", "新增"}, "启动字词记录", true, addWordCount, "<字词>")
 	removeWordCountCommand = command.NewNode([]string{"remove", "移除"}, "移除及清空字词记录", true, removeWordCount, "<字词>")
-	listWorldCountCommand  = command.NewNode([]string{"list", "列表", "rank", "排行"}, "显示字词记录列表(带排行)", false, listWorldCount, "<字词>")
+	listWordCountCommand   = command.NewNode([]string{"list", "列表", "rank", "排行"}, "显示该字词的玩家记录列表(带排行)", false, listWorldCount, "<字词>")
+	rankWordsCommand       = command.NewNode([]string{"words", "wordrank", "字词", "字词列表"}, "显示群聊字词列表(带排行)", false, rankWords)
 )
 
 var countCommand = command.NewParent([]string{"count", "wordcount", "字词记录"}, "字词记录指令",
 	addWordCountCommand,
 	removeWordCountCommand,
-	listWorldCountCommand,
+	listWordCountCommand,
+	rankWordsCommand,
 )
 
 func init() {
