@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/eric2788/common-utils/set"
+	"golang.org/x/exp/maps"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -198,7 +199,7 @@ func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*mes
 		// 略過機器人訊息
 		return GetRandomGroupMessagesInfo(info, plus)
 	}
-	list, err := GetGroupMessages(gp, id, plus, false)
+	list, err := GetGroupMessages(gp, id, plus, true)
 	if err != nil {
 		// 不知是什麽，總之重新獲取
 		if strings.Contains(err.Error(), "108") {
@@ -208,16 +209,7 @@ func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*mes
 		}
 		return nil, err
 	}
-	for _, msg := range list {
-		if msg.Sender.Uin == bot.Instance.Uin {
-			// 不要機器人自己發過的訊息
-			logger.Infof("獲取的隨機群訊息 %d 為機器人訊息，已略过", msg.Id)
-			botSaid.Add(msg.Id)
-		} else {
-			FixGroupImages(msg.GroupCode, msg)
-			msgs = append(msgs, msg)
-		}
-	}
+	msgs = maps.Values(list)
 	return
 }
 
