@@ -181,6 +181,46 @@ func GetRandomGroupMessageMember(gp, uid int64) (*message.GroupMessage, error) {
 	return getRandomGroupMessageWithMember(info, uid, 10, 0)
 }
 
+func GetRandomGroupMessages(gp, plus int64) ([]*message.GroupMessage, error) {
+	info, err := bot.Instance.GetGroupInfo(gp)
+	if err != nil {
+		return nil, err
+	}
+	return GetRandomGroupMessagesInfo(info, plus)
+}
+
+func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*message.GroupMessage, err error) {
+	gp := info.Code
+	rand.Seed(time.Now().UnixNano())
+	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
+	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
+	if botSaid.Contains(id) {
+		// 略過機器人訊息
+		return GetRandomGroupMessagesInfo(info, plus)
+	}
+	list, err := GetGroupMessages(gp, id, plus, false)
+	if err != nil {
+		// 不知是什麽，總之重新獲取
+		if strings.Contains(err.Error(), "108") {
+			logger.Errorf("嘗試獲取隨機消息時出現錯誤: %v, 將重新獲取...", err)
+			<-time.After(time.Second) // 緩衝
+			return GetRandomGroupMessagesInfo(info, plus)
+		}
+		return nil, err
+	}
+	for _, msg := range list {
+		if msg.Sender.Uin == bot.Instance.Uin {
+			// 不要機器人自己發過的訊息
+			logger.Infof("獲取的隨機群訊息 %d 為機器人訊息，已略过", msg.Id)
+			botSaid.Add(msg.Id)
+		} else {
+			FixGroupImages(msg.GroupCode, msg)
+			msgs = append(msgs, msg)
+		}
+	}
+	return
+}
+
 func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, times int) (*message.GroupMessage, error) {
 
 	if times >= 10 {
@@ -209,7 +249,7 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, ti
 	for _, msg := range msgs {
 		if msg.Sender.Uin == bot.Instance.Uin {
 			// 不要機器人自己發過的訊息
-			logger.Infof("獲取的隨機群訊息為機器人訊息，已略过")
+			logger.Infof("獲取的隨機群訊息 %d 為機器人訊息，已略过", msg.Id)
 			botSaid.Add(msg.Id)
 		} else if msg.Sender.Uin == uid {
 			FixGroupImages(msg.GroupCode, msg)
