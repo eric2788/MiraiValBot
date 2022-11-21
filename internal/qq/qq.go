@@ -9,6 +9,7 @@ import (
 
 	"github.com/eric2788/common-utils/set"
 	"golang.org/x/exp/maps"
+	"golang.org/x/exp/slices"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -210,6 +211,12 @@ func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*mes
 		return nil, err
 	}
 	msgs = maps.Values(list)
+
+	// sort back to asc
+	slices.SortStableFunc(msgs, func(a, b *message.GroupMessage) bool {
+		return a.Id < b.Id
+	})
+
 	return
 }
 
