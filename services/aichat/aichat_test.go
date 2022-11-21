@@ -1,10 +1,11 @@
 package aichat
 
 import (
-	"github.com/eric2788/MiraiValBot/utils/test"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/eric2788/MiraiValBot/utils/test"
 )
 
 var chats = map[string]AIReply{
@@ -15,16 +16,12 @@ var chats = map[string]AIReply{
 
 func TestGetXiaoAi(t *testing.T) {
 
-	t.Skip("xiaoai is dead")
-
 	aichat := chats["xiaoai"]
 
-	msg, err := aichat.Reply("你好，你叫什么？")
+	msg, err := aichat.Reply("小米是垃圾")
 	if err != nil {
-		if strings.Contains(err.Error(), "timeout") || err.Error() == "无法获取回复讯息" {
-			t.Skip(err)
-		}
-		t.Fatal(err)
+		// maybe dead
+		t.Skip(err)
 	}
 
 	t.Logf("Reply: %s", msg)
@@ -33,7 +30,7 @@ func TestGetXiaoAi(t *testing.T) {
 func TestQingYunKe(t *testing.T) {
 	aichat := chats["qingyunke"]
 
-	msg, err := aichat.Reply("你好，你叫什么？")
+	msg, err := aichat.Reply("你真垃圾")
 	if err != nil {
 		if strings.Contains(err.Error(), "timeout") {
 			t.Skip(err)
