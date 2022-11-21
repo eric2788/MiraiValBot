@@ -64,6 +64,10 @@ func randomMessages(args []string, source *command.MessageSource) error {
 		return err
 	}
 
+	if amount > 40 {
+		return fmt.Errorf("每次最多可以获取40则。")
+	}
+
 	randoms, err := qq.GetRandomGroupMessages(source.Message.GroupCode, amount)
 	if err != nil {
 		return err
