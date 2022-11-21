@@ -58,7 +58,7 @@ func saveGroupImages(msg *message.GroupMessage) {
 
 		b, err := request.GetBytesByUrl(url)
 		if err != nil {
-			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), name, err)
+			logger.Errorf("下載圖片 %s 時出現錯誤: %v", strings.ToLower(imageId), err)
 			continue
 		}
 		err = imgCache.Set(name, b)
