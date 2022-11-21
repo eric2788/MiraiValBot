@@ -121,10 +121,10 @@ func rankWords(args []string, source *command.MessageSource) error {
 	sortedKeys := maps.Keys(counts)
 
 	slices.SortStableFunc(sortedKeys, func(a, b string) bool {
-		return a > b
+		return counts[a] > counts[b]
 	})
 
-	msg.Append(qq.NewTextf("群聊字词记录排行: (由高到低)"))
+	msg.Append(qq.NewTextfLn("群聊字词记录排行: (由高到低)"))
 
 	for i, word := range sortedKeys {
 		times := counts[word]
