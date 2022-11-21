@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -55,6 +56,26 @@ func randomChoice(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextf(chosen))
 
 	return qq.SendGroupMessage(msg)
+}
+
+func randomMessages(args []string, source *command.MessageSource) error {
+	amount, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	randoms, err := qq.GetRandomGroupMessages(source.Message.GroupCode, amount)
+	if err != nil {
+		return err
+	}
+
+	forwarder := message.NewForwardMessage()
+
+	for _, random := range randoms {
+		forwarder.AddNode(qq.NewForwardNodeByGroup(random))
+	}
+
+	return qq.SendGroupForwardMessageByGroup(source.Message.GroupCode, forwarder)
 }
 
 func randomMessage(args []string, source *command.MessageSource) error {
@@ -388,16 +409,17 @@ func randomSkin(args []string, source *command.MessageSource) error {
 }
 
 var (
-	randomEssenceCommand = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
-	randomMemberCommand  = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
-	randomMessageCommand = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage, "[@群成员]")
-	randomChoiceCommand  = command.NewNode([]string{"choice", "选项"}, "随机选项指令", false, randomChoice)
-	randomAgentCommand   = command.NewNode([]string{"agent", "特务", "角色"}, "随机抽选一个瓦角色", false, randomAgent, "[角色类型]")
-	randomWeaponCommand  = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
-	randomBundleCommand  = command.NewNode([]string{"bundle", "套装"}, "随机抽选一个瓦套装", false, randomBundle)
-	randomSkinCommand    = command.NewNode([]string{"skin", "皮肤"}, "随机抽选一个瓦皮肤", false, randomSkin, "<武器名称>")
-	randomDragonCommand  = command.NewNode([]string{"long", "dragon", "龙图"}, "随机抽选一张龙图", false, randomLong)
-	randomPhotoCommand   = command.NewNode([]string{"photo", "image", "图片"}, "随机抽选一张群图片", false, randomPhoto)
+	randomEssenceCommand  = command.NewNode([]string{"essence", "群精华"}, "获取随机一条群精华消息", false, randomEssence)
+	randomMemberCommand   = command.NewNode([]string{"member", "成员"}, "随机群成员指令", false, randomMember)
+	randomMessageCommand  = command.NewNode([]string{"message", "msg", "群消息"}, "随机群消息指令", false, randomMessage, "[@群成员]")
+	randomMessagesCommand = command.NewNode([]string{"messages", "msgs", "多则群消息"}, "随机一段群消息指令", false, randomMessages, "<数量>")
+	randomChoiceCommand   = command.NewNode([]string{"choice", "选项"}, "随机选项指令", false, randomChoice)
+	randomAgentCommand    = command.NewNode([]string{"agent", "特务", "角色"}, "随机抽选一个瓦角色", false, randomAgent, "[角色类型]")
+	randomWeaponCommand   = command.NewNode([]string{"weapon", "武器"}, "随机抽选一个瓦武器", false, randomWeapon, "[武器类型]")
+	randomBundleCommand   = command.NewNode([]string{"bundle", "套装"}, "随机抽选一个瓦套装", false, randomBundle)
+	randomSkinCommand     = command.NewNode([]string{"skin", "皮肤"}, "随机抽选一个瓦皮肤", false, randomSkin, "<武器名称>")
+	randomDragonCommand   = command.NewNode([]string{"long", "dragon", "龙图"}, "随机抽选一张龙图", false, randomLong)
+	randomPhotoCommand    = command.NewNode([]string{"photo", "image", "图片"}, "随机抽选一张群图片", false, randomPhoto)
 )
 
 var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指令",
@@ -405,6 +427,7 @@ var randomCommand = command.NewParent([]string{"random", "随机"}, "随机指�
 	randomEssenceCommand,
 	randomChoiceCommand,
 	randomMessageCommand,
+	randomMessagesCommand,
 	randomAgentCommand,
 	randomWeaponCommand,
 	randomBundleCommand,

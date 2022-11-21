@@ -56,16 +56,6 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 	}
 
 	forwarder := message.NewForwardMessage()
-	
-	randoms, err := qq.GetRandomGroupMessages(source.Message.GroupCode, 10)
-	if err == nil {
-		for _, random := range randoms {
-			forwarder.AddNode(qq.NewForwardNodeByGroup(random))
-		}
-	}else {
-		logger.Warnf("获取随机群消息出现错误: %v", err)
-	}
-	
 	wg := &sync.WaitGroup{}
 
 	for _, img := range imgs {
