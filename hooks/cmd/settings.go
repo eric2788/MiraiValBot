@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/eric2788/MiraiValBot/internal/file"
@@ -56,11 +57,35 @@ func timesPerNotify(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(reply)
 }
 
+func msgSeqAfter(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		msg.Append(qq.NewTextf("目前信息获取序列是 %d", file.DataStorage.Setting.MsgSeqAfter))
+		return qq.SendGroupMessage(msg)
+	}
+
+	seq, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return err
+	}
+	if seq <= 0 {
+		return fmt.Errorf("序列必须大于0")
+	}
+	file.UpdateStorage(func() {
+		file.DataStorage.Setting.MsgSeqAfter = seq
+	})
+
+	msg.Append(qq.NewTextf("成功设置信息获取序列为 %d", seq))
+	return qq.SendGroupMessage(msg)
+}
+
 var (
 	verboseCommand        = command.NewNode([]string{"verbose", "切换广播"}, "切换是否广播监听状态", true, verbose)
 	verboseDeleteCommand  = command.NewNode([]string{"telldelete"}, "显示撤回的消息", true, verboseDelete)
 	yearlyCheckCommand    = command.NewNode([]string{"yearly"}, "设置群精华消息检查间隔", true, yearlyCheck)
 	timerPerNotifyCommand = command.NewNode([]string{"notifytimes", "提醒间隔"}, "设置字词记录提醒间隔", true, timesPerNotify)
+	msgSeqAfterCommand    = command.NewNode([]string{"msgseq", "信息序列"}, "设置信息获取序列", true, msgSeqAfter, "[序列]")
 )
 
 var settingCommand = command.NewParent([]string{"setting", "设定"}, "设定指令",
@@ -69,6 +94,7 @@ var settingCommand = command.NewParent([]string{"setting", "设定"}, "设定指
 	yearlyCheckCommand,
 	fetchEssenceCommand,
 	timerPerNotifyCommand,
+	msgSeqAfterCommand,
 )
 
 func init() {
