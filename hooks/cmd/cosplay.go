@@ -64,8 +64,6 @@ func cosplayMultiple(args []string, source *command.MessageSource) error {
 	}
 	wg.Wait()
 	return qq.SendGroupForwardMessage(forwarder)
-
-	return nil
 }
 
 var (
@@ -73,7 +71,7 @@ var (
 	cosplayMultipleCommand = command.NewNode([]string{"multiple", "多张"}, "多张随机的 Cosplayer 图片", false, cosplayMultiple)
 )
 
-var cosplayCommand = command.NewParent([]string{"cosplay", "角色扮演"}, "Cosplayer 图片指令",
+var cosplayCommand = command.NewParent([]string{"cosplay", "coser", "cos", "角色扮演"}, "Cosplayer 图片指令",
 	cosplaySingleCommand,
 	cosplayMultipleCommand,
 )

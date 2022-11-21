@@ -201,21 +201,39 @@ func NewVideoByUrlWithGroup(gp int64, url, thumbUrl string) (*message.ShortVideo
 }
 
 func NewForwardNodeByGroup(msg *message.GroupMessage) *message.ForwardNode {
+
+	// not sure why causing nil pointer reference
+	filtered := make([]message.IMessageElement, 0)
+	for _, ele := range msg.Elements {
+		if ele != nil {
+			filtered = append(filtered, ele)
+		}
+	}
+
 	return &message.ForwardNode{
 		GroupId:    msg.GroupCode,
 		SenderId:   msg.Sender.Uin,
 		Time:       msg.Time,
 		SenderName: msg.Sender.DisplayName(),
-		Message:    msg.Elements,
+		Message:    filtered,
 	}
 }
 
 func NewForwardNodeByPrivate(msg *message.PrivateMessage) *message.ForwardNode {
+
+	// not sure why causing nil pointer reference
+	filtered := make([]message.IMessageElement, 0)
+	for _, ele := range msg.Elements {
+		if ele != nil {
+			filtered = append(filtered, ele)
+		}
+	}
+
 	return &message.ForwardNode{
 		SenderId:   msg.Sender.Uin,
 		Time:       msg.Time,
 		SenderName: msg.Sender.DisplayName(),
-		Message:    msg.Elements,
+		Message:    filtered,
 	}
 }
 

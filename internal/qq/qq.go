@@ -208,7 +208,6 @@ func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*mes
 		}
 		return nil, err
 	}
-	msgs = make([]*message.GroupMessage, 0)
 	for _, msg := range list {
 		if msg.Sender.Uin == bot.Instance.Uin {
 			// 不要機器人自己發過的訊息
