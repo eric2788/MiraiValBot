@@ -21,11 +21,13 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "，")
 
 	aichats := []aichat.AIReply{
+		&aichat.XiaoAi{},
 		&aichat.QingYunKe{},
 		&aichat.TianXing{},
+		&aichat.MoliYun{},
 	}
 
-	rand.Seed(time.Now().UnixMicro())
+	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
 
 	reply := qq.CreateAtReply(msg)

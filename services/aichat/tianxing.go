@@ -26,6 +26,9 @@ type (
 
 func (ai *TianXing) Reply(msg string) (string, error) {
 	key := os.Getenv("TIAN_API_KEY")
+	if key == "" {
+		return "", fmt.Errorf("TIAN_API_KEY is not set")
+	}
 	url := fmt.Sprintf(tianApi, key)
 	data, err := getAiReply(url, msg)
 	if err != nil {

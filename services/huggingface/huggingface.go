@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/corpix/uarand"
+	"github.com/eric2788/common-utils/request"
 )
 
 const url = "https://api-inference.huggingface.co/models/%s"
@@ -102,4 +103,20 @@ func GetResultImage(model string, param *FaceParam) ([]byte, error) {
 	}
 	defer res.Body.Close()
 	return io.ReadAll(res.Body)
+}
+
+func GetGeneratedText(model string, parm *FaceParam) (string, error) {
+	res, err := doRequest(model, parm)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	var resp []map[string]string
+	err = request.Read(res, &resp)
+	if err != nil {
+		return "", err
+	}else if len(resp) < 1 {
+		return "", fmt.Errorf("no result: %v", resp)
+	}
+	return resp[0]["generated_text"], nil
 }
