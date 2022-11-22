@@ -19,19 +19,23 @@ func aiWaifu(args []string, source *command.MessageSource) error {
 }
 
 func aiPaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source, 
+	return generateHuggingFaceImage(args, source,
 		"runwayml/stable-diffusion-v1-5",
+		"CompVis/stable-diffusion-v1-4",
 	)
 }
 
 func aiMadoka(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source, 
+	return generateHuggingFaceImage(args, source,
 		"yuk/madoka-waifu-diffusion",
 	)
 }
 
 func aiPrompt(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceText("Gustavosta/MagicPrompt-Stable-Diffusion", args, source)
+	return generateHuggingFaceText(args, source,
+		"Gustavosta/MagicPrompt-Stable-Diffusion",
+		"DrishtiSharma/StableDiffusion-Prompt-Generator-GPT-Neo-125M",
+	)
 }
 
 func aiChinesePaint(args []string, source *command.MessageSource) error {
@@ -63,7 +67,7 @@ func init() {
 
 // hugging face utils
 
-func generateHuggingFaceText(model string, args []string, source *command.MessageSource) error {
+func generateHuggingFaceText(args []string, source *command.MessageSource, models ...string) error {
 	reply := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
@@ -76,11 +80,23 @@ func generateHuggingFaceText(model string, args []string, source *command.Messag
 
 	inputs := strings.Join(args, " ")
 
-	txt, err := huggingface.GetGeneratedText(model,
-		huggingface.NewParam(
+	var txt string
+	var err error
+
+	for _, model := range models {
+
+		api := huggingface.NewInferenceApi(model,
 			huggingface.Input(inputs),
-		),
-	)
+		)
+
+		txt, err = api.GetGeneratedText()
+
+		if err == nil {
+			break
+		} else {
+			logger.Errorf("使用model %s 生成文字时出现错误: %v", err)
+		}
+	}
 
 	if err != nil {
 		return err
@@ -115,11 +131,11 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, mode
 	var b []byte
 	for _, model := range models {
 
-		b, err = huggingface.GetResultImage(model,
-			huggingface.NewParam(
-				huggingface.Input(inputs),
-			),
+		api := huggingface.NewInferenceApi(model,
+			huggingface.Input(inputs),
 		)
+
+		b, err = api.GetResultImage()
 
 		if err == nil {
 			break

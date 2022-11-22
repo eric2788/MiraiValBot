@@ -8,9 +8,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/corpix/uarand"
 	"github.com/eric2788/common-utils/request"
 )
+
+
+var logger = utils.GetModuleLogger("service.huggingface")
 
 const url = "https://api-inference.huggingface.co/models/%s"
 
@@ -26,9 +30,40 @@ type (
 	}
 
 	Option func(*FaceParam)
+
+	InferenceApi struct {
+		model string
+		param *FaceParam
+	}
 )
 
-func doRequest(model string, param *FaceParam) (res *http.Response, err error) {
+func NewInferenceApi(model string, options ...Option) *InferenceApi {
+	
+	opt := &FaceParam{
+		Inputs: "",
+		Options: &FaceOptions{
+			WaitForModel: true,
+			UseCache:     false,
+		},
+	}
+
+	for _, o := range options {
+		o(opt)
+	}
+
+	return &InferenceApi{
+		model: model,
+		param: opt,
+	}
+}
+
+func (in *InferenceApi) ChangeParams(options ...Option) {
+	for _, change := range options {
+		change(in.param)
+	}
+}
+
+func (in *InferenceApi) doRequest() (res *http.Response, err error) {
 
 	token := os.Getenv("HUGGING_FACE_TOKEN")
 
@@ -36,12 +71,12 @@ func doRequest(model string, param *FaceParam) (res *http.Response, err error) {
 		return nil, fmt.Errorf("HUGGING_FACE_TOKEN is not set")
 	}
 
-	body, err := json.Marshal(param)
+	body, err := json.Marshal(in.param)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(url, model), bytes.NewReader(body))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(url, in.model), bytes.NewReader(body))
 	if err != nil {
 		return nil, err
 	}
@@ -61,21 +96,29 @@ func doRequest(model string, param *FaceParam) (res *http.Response, err error) {
 	return
 }
 
-func NewParam(options ...Option) *FaceParam {
-
-	def := &FaceParam{
-		Inputs: "",
-		Options: &FaceOptions{
-			WaitForModel: true,
-			UseCache:     false,
-		},
+func (in *InferenceApi) GetResultImage() ([]byte, error) {
+	res, err := in.doRequest()
+	if err != nil {
+		return nil, err
 	}
+	defer res.Body.Close()
+	return io.ReadAll(res.Body)
+}
 
-	for _, o := range options {
-		o(def)
+func (in *InferenceApi) GetGeneratedText() (string, error) {
+	res, err := in.doRequest()
+	if err != nil {
+		return "", err
 	}
-
-	return def
+	defer res.Body.Close()
+	var resp []map[string]string
+	err = request.Read(res, &resp)
+	if err != nil {
+		return "", err
+	} else if len(resp) < 1 {
+		return "", fmt.Errorf("no result: %v", resp)
+	}
+	return resp[0]["generated_text"], nil
 }
 
 func WaitForModel(wait bool) Option {
@@ -94,29 +137,4 @@ func Input(input interface{}) Option {
 	return func(fp *FaceParam) {
 		fp.Inputs = input
 	}
-}
-
-func GetResultImage(model string, param *FaceParam) ([]byte, error) {
-	res, err := doRequest(model, param)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	return io.ReadAll(res.Body)
-}
-
-func GetGeneratedText(model string, parm *FaceParam) (string, error) {
-	res, err := doRequest(model, parm)
-	if err != nil {
-		return "", err
-	}
-	defer res.Body.Close()
-	var resp []map[string]string
-	err = request.Read(res, &resp)
-	if err != nil {
-		return "", err
-	}else if len(resp) < 1 {
-		return "", fmt.Errorf("no result: %v", resp)
-	}
-	return resp[0]["generated_text"], nil
 }

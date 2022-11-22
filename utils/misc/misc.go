@@ -3,6 +3,7 @@ package misc
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"sync"
 	"time"
 
@@ -113,4 +114,12 @@ func FetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync
 		msg.Append(img)
 	}
 	forwarder.AddNode(qq.NewForwardNode(msg))
+}
+
+
+func TrimPrefixes(s string, prefixes... string) string {
+	for _, prefix := range prefixes {
+		s = strings.TrimPrefix(s, prefix)
+	}
+	return s
 }
