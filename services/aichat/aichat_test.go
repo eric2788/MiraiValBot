@@ -12,6 +12,7 @@ var chats = map[string]AIReply{
 	"xiaoai":    &XiaoAi{},
 	"qingyunke": &QingYunKe{},
 	"tianxing":  &TianXing{},
+	"moliyun": &MoliYun{},
 }
 
 func TestGetXiaoAi(t *testing.T) {
@@ -20,7 +21,16 @@ func TestGetXiaoAi(t *testing.T) {
 
 	msg, err := aichat.Reply("小米是垃圾")
 	if err != nil {
-		// maybe dead
+		t.Skip(err)
+	}
+
+	t.Logf("Reply: %s", msg)
+}
+
+func TestGetMoliyun(t *testing.T){
+	aichat := chats["moliyun"]
+	msg, err := aichat.Reply("你真笨")
+	if err != nil {
 		t.Skip(err)
 	}
 
@@ -32,10 +42,7 @@ func TestQingYunKe(t *testing.T) {
 
 	msg, err := aichat.Reply("你真垃圾")
 	if err != nil {
-		if strings.Contains(err.Error(), "timeout") {
-			t.Skip(err)
-		}
-		t.Fatal(err)
+		t.Skip(err)
 	}
 
 	t.Logf("Reply: %s", msg)
