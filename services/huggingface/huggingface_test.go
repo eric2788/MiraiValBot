@@ -31,3 +31,16 @@ func TestWaifuDiffusier(t *testing.T) {
 	t.Logf("size: %dB", len(b))
 
 }
+
+func TestMagicPrompt(t *testing.T){
+	if os.Getenv("HUGGING_FACE_TOKEN") == "" {
+		t.Skip("no token set")
+	}
+
+	txt, err := GetGeneratedText("Gustavosta/MagicPrompt-Stable-Diffusion", NewParam(Input("landscape of")))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Log(txt)
+}
