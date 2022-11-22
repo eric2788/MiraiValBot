@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
@@ -10,19 +12,22 @@ import (
 )
 
 func aiWaifu(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage("Nilaier/Waifu-Diffusers", args, source)
-}
-
-func aiWaifu2(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage("hakurei/waifu-diffusion", args, source)
+	return generateHuggingFaceImage(args, source,
+		"hakurei/waifu-diffusion",
+		"Nilaier/Waifu-Diffusers",
+	)
 }
 
 func aiPaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage("runwayml/stable-diffusion-v1-5", args, source)
+	return generateHuggingFaceImage(args, source, 
+		"runwayml/stable-diffusion-v1-5",
+	)
 }
 
 func aiMadoka(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage("yuk/madoka-waifu-diffusion", args, source)
+	return generateHuggingFaceImage(args, source, 
+		"yuk/madoka-waifu-diffusion",
+	)
 }
 
 func aiPrompt(args []string, source *command.MessageSource) error {
@@ -30,12 +35,14 @@ func aiPrompt(args []string, source *command.MessageSource) error {
 }
 
 func aiChinesePaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage("IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1", args, source)
+	return generateHuggingFaceImage(args, source,
+		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1",
+		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-EN-v0.1",
+	)
 }
 
 var (
 	aiWaifuCommand   = command.NewNode([]string{"waifu"}, "文字生成图像(waifu)", false, aiWaifu, "<文字>")
-	aiWaifu2Command  = command.NewNode([]string{"waifu2"}, "文字生成图像(waifu2)", false, aiWaifu2, "<文字>")
 	aiPaintCNCommand = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand  = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
 	aiPaintCommand   = command.NewNode([]string{"paint", "画图", "画画"}, "文字生成图像(普通)", false, aiPaint, "<文字>")
@@ -44,7 +51,6 @@ var (
 
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
-	aiWaifu2Command,
 	aiMadokaCommand,
 	aiPaintCommand,
 	aiPromptCommand,
@@ -86,7 +92,7 @@ func generateHuggingFaceText(model string, args []string, source *command.Messag
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
-func generateHuggingFaceImage(model string, args []string, source *command.MessageSource) error {
+func generateHuggingFaceImage(args []string, source *command.MessageSource, models ...string) error {
 	reply := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
@@ -99,11 +105,29 @@ func generateHuggingFaceImage(model string, args []string, source *command.Messa
 
 	inputs := strings.Join(args, " ")
 
-	b, err := huggingface.GetResultImage(model,
-		huggingface.NewParam(
-			huggingface.Input(inputs),
-		),
-	)
+	// 打散随机使用
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(models), func(i, j int) {
+		models[i], models[j] = models[j], models[i]
+	})
+
+	var err error
+	var b []byte
+	for _, model := range models {
+
+		b, err = huggingface.GetResultImage(model,
+			huggingface.NewParam(
+				huggingface.Input(inputs),
+			),
+		)
+
+		if err == nil {
+			break
+		} else {
+			logger.Errorf("使用model %s 生成图像时出现错误: %v", err)
+		}
+
+	}
 
 	if err != nil {
 		return err
