@@ -137,7 +137,7 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 	for _, model := range models {
 
 		api := huggingface.NewInferenceApi(model,
-			huggingface.InputWithoutBracket(inputs),
+			huggingface.Input(inputs),
 		)
 
 		b, err = api.GetResultImage()
