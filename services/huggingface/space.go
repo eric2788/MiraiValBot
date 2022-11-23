@@ -92,7 +92,7 @@ func (s *SpaceApi) GetResultImages() ([][]byte, error) {
 		if err != nil {
 			logger.Errorf("error while parsing base64: %v, source: %s", err, b64)
 		} else if IsImageBlocked(b) {
-			logger.Warnf("image has been blocked by nsfw filter")
+			logger.Warnf("图像被NSFW过滤屏蔽")
 		} else {
 			list = append(list, b)
 		}

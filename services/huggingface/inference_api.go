@@ -104,7 +104,7 @@ func (in *InferenceApi) GetResultImage() (img []byte, err error) {
 	img, err = io.ReadAll(res.Body)
 	// nsfw filtered
 	if err == nil && IsImageBlocked(img) {
-		err = fmt.Errorf("images has been blocked by nsfw filter")
+		err = fmt.Errorf("图像被NSFW过滤屏蔽")
 	}
 	return
 }
