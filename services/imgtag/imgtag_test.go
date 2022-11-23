@@ -5,8 +5,6 @@ import (
 	"testing"
 )
 
-
-
 func TestTagImage(t *testing.T) {
 	tags, nsfw, err := GetTagsFromImage("https://preview.redd.it/9gjq7h4szi0a1.jpg?width=640&crop=smart&auto=webp&s=1dcafa0e449331010764731a4f41f095981dad86")
 	if err != nil {

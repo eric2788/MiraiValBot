@@ -36,12 +36,13 @@ type (
 	}
 
 	setting struct {
-		VerboseDelete  bool  `json:"verboseDelete"`
-		Verbose        bool  `json:"verbose"`
-		YearlyCheck    bool  `json:"yearlyCheck"`
-		LastChecked    int64 `json:"lastChecked"`
-		MsgSeqAfter    int64 `json:"msgSeqAfter"`
-		TimesPerNotify int   `json:"timesPerNotify"`
+		VerboseDelete    bool    `json:"verboseDelete"`
+		Verbose          bool    `json:"verbose"`
+		YearlyCheck      bool    `json:"yearlyCheck"`
+		LastChecked      int64   `json:"lastChecked"`
+		MsgSeqAfter      int64   `json:"msgSeqAfter"`
+		TimesPerNotify   int     `json:"timesPerNotify"`
+		TagClassifyLimit float64 `json:"tagClassifyLimit"`
 	}
 )
 
@@ -80,12 +81,13 @@ type (
 	}
 
 	Setting struct {
-		VerboseDelete  bool
-		Verbose        bool
-		YearlyCheck    bool
-		LastChecked    int64
-		MsgSeqAfter    int64
-		TimesPerNotify int
+		VerboseDelete    bool
+		Verbose          bool
+		YearlyCheck      bool
+		LastChecked      int64
+		MsgSeqAfter      int64
+		TimesPerNotify   int
+		TagClassifyLimit float64
 	}
 )
 
@@ -105,12 +107,13 @@ func (s *StorageData) toRealStorageData() *storageData {
 			ShowReply: s.Twitter.ShowReply,
 		},
 		Setting: &setting{
-			VerboseDelete:  s.Setting.VerboseDelete,
-			Verbose:        s.Setting.Verbose,
-			YearlyCheck:    s.Setting.YearlyCheck,
-			LastChecked:    s.Setting.LastChecked,
-			MsgSeqAfter:    s.Setting.MsgSeqAfter,
-			TimesPerNotify: s.Setting.TimesPerNotify,
+			VerboseDelete:    s.Setting.VerboseDelete,
+			Verbose:          s.Setting.Verbose,
+			YearlyCheck:      s.Setting.YearlyCheck,
+			LastChecked:      s.Setting.LastChecked,
+			MsgSeqAfter:      s.Setting.MsgSeqAfter,
+			TimesPerNotify:   s.Setting.TimesPerNotify,
+			TagClassifyLimit: s.Setting.TagClassifyLimit,
 		},
 		Listening: &listening{
 			Bilibili: s.Listening.Bilibili.ToArr(),
@@ -136,12 +139,13 @@ func (s *StorageData) parse(sd *storageData) {
 		ShowReply: sd.Twitter.ShowReply,
 	}
 	s.Setting = &Setting{
-		VerboseDelete:  sd.Setting.VerboseDelete,
-		Verbose:        sd.Setting.Verbose,
-		YearlyCheck:    sd.Setting.YearlyCheck,
-		LastChecked:    sd.Setting.LastChecked,
-		MsgSeqAfter:    sd.Setting.MsgSeqAfter,
-		TimesPerNotify: sd.Setting.TimesPerNotify,
+		VerboseDelete:    sd.Setting.VerboseDelete,
+		Verbose:          sd.Setting.Verbose,
+		YearlyCheck:      sd.Setting.YearlyCheck,
+		LastChecked:      sd.Setting.LastChecked,
+		MsgSeqAfter:      sd.Setting.MsgSeqAfter,
+		TimesPerNotify:   sd.Setting.TimesPerNotify,
+		TagClassifyLimit: sd.Setting.TagClassifyLimit,
 	}
 	s.Listening = &Listening{
 		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),

@@ -80,12 +80,37 @@ func msgSeqAfter(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(msg)
 }
 
+func tagClassifyLimit(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		msg.Append(qq.NewTextf("目前标签鉴别强度是 %d", file.DataStorage.Setting.TagClassifyLimit))
+		return qq.SendGroupMessage(msg)
+	}
+
+	limit, err := strconv.ParseFloat(args[0], 64)
+	if err != nil {
+		return err
+	}
+	if limit < 0 || limit > 1 {
+		return fmt.Errorf("强度必须在0-1之间")
+	}
+
+	file.UpdateStorage(func() {
+		file.DataStorage.Setting.TagClassifyLimit = limit
+	})
+
+	msg.Append(qq.NewTextf("成功设置标签鉴别强度为 %f", limit))
+	return qq.SendGroupMessage(msg)
+}
+
 var (
-	verboseCommand        = command.NewNode([]string{"verbose", "切换广播"}, "切换是否广播监听状态", true, verbose)
-	verboseDeleteCommand  = command.NewNode([]string{"telldelete"}, "显示撤回的消息", true, verboseDelete)
-	yearlyCheckCommand    = command.NewNode([]string{"yearly"}, "设置群精华消息检查间隔", true, yearlyCheck)
-	timerPerNotifyCommand = command.NewNode([]string{"notifytimes", "提醒间隔"}, "设置字词记录提醒间隔", true, timesPerNotify)
-	msgSeqAfterCommand    = command.NewNode([]string{"msgseq", "信息序列"}, "设置信息获取序列", true, msgSeqAfter, "[序列]")
+	verboseCommand          = command.NewNode([]string{"verbose", "切换广播"}, "切换是否广播监听状态", true, verbose)
+	verboseDeleteCommand    = command.NewNode([]string{"telldelete"}, "显示撤回的消息", true, verboseDelete)
+	yearlyCheckCommand      = command.NewNode([]string{"yearly"}, "设置群精华消息检查间隔", true, yearlyCheck)
+	timerPerNotifyCommand   = command.NewNode([]string{"notifytimes", "提醒间隔"}, "设置字词记录提醒间隔", true, timesPerNotify)
+	msgSeqAfterCommand      = command.NewNode([]string{"msgseq", "信息序列"}, "设置信息获取序列", true, msgSeqAfter, "[序列]")
+	tagClassifyLimitCommand = command.NewNode([]string{"taglimit", "标签强度"}, "设置标签鉴别强度", true, tagClassifyLimit, "[强度]")
 )
 
 var settingCommand = command.NewParent([]string{"setting", "设定"}, "设定指令",
@@ -95,6 +120,7 @@ var settingCommand = command.NewParent([]string{"setting", "设定"}, "设定指
 	fetchEssenceCommand,
 	timerPerNotifyCommand,
 	msgSeqAfterCommand,
+	tagClassifyLimitCommand,
 )
 
 func init() {

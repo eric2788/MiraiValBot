@@ -5,14 +5,15 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/common-utils/request"
 )
 
-const tagURL = "https://nsfwtag.azurewebsites.net/api/tag?limit=0.48&url=%s"
+const tagURL = "https://nsfwtag.azurewebsites.net/api/tag?limit=%f&url=%s"
 
 func GetTagsFromImage(imgUrl string) ([]string, bool, error) {
 	var dict map[string]float64
-	err := request.Get(fmt.Sprintf(tagURL, url.QueryEscape(imgUrl)), &dict)
+	err := request.Get(fmt.Sprintf(tagURL, file.DataStorage.Setting.TagClassifyLimit, url.QueryEscape(imgUrl)), &dict)
 	if err != nil {
 		return nil, false, err
 	}
