@@ -84,7 +84,7 @@ func tagClassifyLimit(args []string, source *command.MessageSource) error {
 	msg := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
-		msg.Append(qq.NewTextf("目前标签鉴别强度是 %d", file.DataStorage.Setting.TagClassifyLimit))
+		msg.Append(qq.NewTextf("目前标签鉴别强度是 %f", file.DataStorage.Setting.TagClassifyLimit))
 		return qq.SendGroupMessage(msg)
 	}
 
