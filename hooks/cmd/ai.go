@@ -97,7 +97,7 @@ func generateHuggingFaceText(args []string, source *command.MessageSource, model
 		if err == nil {
 			break
 		} else {
-			logger.Errorf("使用model %s 生成文字时出现错误: %v", err)
+			logger.Errorf("使用model %s 生成文字时出现错误: %v", model, err)
 		}
 	}
 
@@ -145,7 +145,7 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 		if err == nil {
 			break
 		} else {
-			logger.Errorf("使用model %s 生成图像时出现错误: %v", err)
+			logger.Errorf("使用model %s 生成图像时出现错误: %v", model, err)
 		}
 
 	}
