@@ -21,7 +21,11 @@ func GetTagsFromImage(imgUrl string) ([]string, bool, error) {
 	for key, sample := range dict {
 		if key == "rating:safe" {
 			nsfw = sample <= 0.55
-		} else {
+		} else if key == "rating:questionable" {
+			nsfw = sample >= 0.75
+		} else if key == "rating:explicit" {
+			nsfw = sample >= 0.55
+		} else { //filter rating:xxx
 			tags = append(tags, strings.ReplaceAll(key, "_", " "))
 		}
 	}
