@@ -89,7 +89,7 @@ func generateHuggingFaceText(args []string, source *command.MessageSource, model
 	for _, model := range models {
 
 		api := huggingface.NewInferenceApi(model,
-			huggingface.Input(inputs),
+			huggingface.InputWithoutBracket(inputs),
 		)
 
 		txt, err = api.GetGeneratedText()
@@ -137,7 +137,7 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 	for _, model := range models {
 
 		api := huggingface.NewInferenceApi(model,
-			huggingface.Input(inputs),
+			huggingface.InputWithoutBracket(inputs),
 		)
 
 		b, err = api.GetResultImage()

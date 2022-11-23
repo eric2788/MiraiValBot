@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/corpix/uarand"
@@ -134,6 +135,16 @@ func WaitForModel(wait bool) Option {
 func UseCache(use bool) Option {
 	return func(fp *FaceParam) {
 		fp.Options.UseCache = use
+	}
+}
+
+func InputWithoutBracket(input string) Option {
+	input = strings.ReplaceAll(input, "{", "")
+	input = strings.ReplaceAll(input, "}", "")
+	input = strings.ReplaceAll(input, "[", "")
+	input = strings.ReplaceAll(input, "]", "")
+	return func(fp *FaceParam) {
+		fp.Inputs = input
 	}
 }
 
