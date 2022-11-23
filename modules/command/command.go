@@ -2,10 +2,11 @@ package command
 
 import (
 	"fmt"
-	"github.com/eric2788/MiraiValBot/internal/eventhook"
-	"github.com/eric2788/MiraiValBot/services/waifu"
 	"runtime/debug"
 	"sync"
+
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
+	"github.com/eric2788/MiraiValBot/services/waifu"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -102,7 +103,9 @@ func (c *command) HookEvent(bot *bot.Bot) {
 				// 發送私人或临时会话訊息的指令幫助
 				helpMessage := message.NewSendingMessage().Append(message.NewText(response.Content))
 
-				_ = qq.SendWithRandomRiskyFunc(helpMessage, func() {
+				if err := qq.SendGroupMessageByGroup(msg.GroupCode, helpMessage); err != nil {
+
+					logger.Errorf("無法發送指令幫助: %v", err)
 
 					if msg.Sender.IsFriend {
 						if err = qq.SendPrivateMessage(msg.Sender.Uin, helpMessage); err == nil {
@@ -118,9 +121,9 @@ func (c *command) HookEvent(bot *bot.Bot) {
 						}
 					}
 
-					hintMessage := qq.CreateReply(msg).Append(message.NewText("向群发送指令帮助讯息时由于遭到屡次风控，已改为私聊你指令列表。"))
+					hintMessage := qq.CreateReply(msg).Append(message.NewText("向群发送指令帮助讯息时由于遭到风控，已改为私聊你指令列表。"))
 					_ = qq.SendGroupMessageByGroup(msg.GroupCode, hintMessage)
-				})
+				}
 
 			}
 
