@@ -70,7 +70,8 @@ func aiTags(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	reply.Append(qq.NewTextf("图片识别标签: %s, NSFW: %t", strings.Join(tag, ", "), nsfw))
+	reply.Append(qq.NewTextfLn("图片识别标签: %s", strings.Join(tag, ", ")))
+	reply.Append(qq.NewTextf("NSFW: %t", nsfw))
 	return qq.SendGroupMessage(reply)
 }
 
@@ -216,7 +217,7 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 		return err
 	}
 
-	msg := message.NewSendingMessage()
+	msg := qq.CreateReply(source.Message)
 	msg.Append(img)
 	return qq.SendGroupMessage(msg)
 }
