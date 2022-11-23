@@ -12,21 +12,24 @@ import (
 )
 
 func aiWaifu(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source,
+
+	// model should sort by best quality
+	return generateHuggingFaceImage(args, source, false,
+		"Linaqruf/anything-v3.0",
 		"hakurei/waifu-diffusion",
 		"Nilaier/Waifu-Diffusers",
 	)
 }
 
 func aiPaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source,
+	return generateHuggingFaceImage(args, source, false,
 		"runwayml/stable-diffusion-v1-5",
 		"CompVis/stable-diffusion-v1-4",
 	)
 }
 
 func aiMadoka(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source,
+	return generateHuggingFaceImage(args, source, false,
 		"yuk/madoka-waifu-diffusion",
 	)
 }
@@ -39,9 +42,9 @@ func aiPrompt(args []string, source *command.MessageSource) error {
 }
 
 func aiChinesePaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source,
-		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1",
+	return generateHuggingFaceImage(args, source, true,
 		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-EN-v0.1",
+		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1",
 	)
 }
 
@@ -108,7 +111,7 @@ func generateHuggingFaceText(args []string, source *command.MessageSource, model
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
-func generateHuggingFaceImage(args []string, source *command.MessageSource, models ...string) error {
+func generateHuggingFaceImage(args []string, source *command.MessageSource, random bool, models ...string) error {
 	reply := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
@@ -121,11 +124,13 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, mode
 
 	inputs := strings.Join(args, " ")
 
-	// 打散随机使用
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(models), func(i, j int) {
-		models[i], models[j] = models[j], models[i]
-	})
+	if random {
+		// shuffle
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(models), func(i, j int) {
+			models[i], models[j] = models[j], models[i]
+		})
+	}
 
 	var err error
 	var b []byte
