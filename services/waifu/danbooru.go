@@ -90,10 +90,17 @@ func (d *Danbooru) GetImages(option *SearchOptions) ([]*ImageData, error) {
 		}
 		return nil, err
 	}
-	var images []*ImageData
+	var images map[uint64]*ImageData
 
 	for _, post := range resp {
-		images = append(images, &ImageData{
+
+		r18 := d.isR18(post)
+
+		if r18 && !option.R18 {
+			continue
+		}
+
+		images[post.Id] = &ImageData{
 			Title:  post.TagStringCharacter,
 			Url:    post.LargeFileUrl,
 			Pid:    post.PixivId,
@@ -101,10 +108,28 @@ func (d *Danbooru) GetImages(option *SearchOptions) ([]*ImageData, error) {
 			R18:    d.isR18(post),
 			Author: fmt.Sprint(post.UploaderId),
 			Tags:   strings.Split(post.TagString, " "),
-		})
+		}
 	}
 
-	return images, nil
+	var results []*ImageData
+	for _, image := range images {
+		results = append(results, image)
+	}
+
+	if option.Amount > len(results) {
+		ids, err := d.GetImages(NewOptions(
+			WithTags(tags...),
+			WithAmount(option.Amount-len(results)),
+			WithR18(option.R18),
+		))
+		if err != nil {
+			return nil, err
+		}
+
+		results = append(results, ids...)
+	}
+
+	return results, nil
 }
 
 func (d *Danbooru) isR18(post DanbooruPostResp) bool {
