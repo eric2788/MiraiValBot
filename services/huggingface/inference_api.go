@@ -13,7 +13,6 @@ import (
 	"github.com/eric2788/common-utils/request"
 )
 
-
 var logger = utils.GetModuleLogger("service.huggingface")
 
 const url = "https://api-inference.huggingface.co/models/%s"
@@ -38,7 +37,7 @@ type (
 )
 
 func NewInferenceApi(model string, options ...Option) *InferenceApi {
-	
+
 	opt := &FaceParam{
 		Inputs: "",
 		Options: &FaceOptions{
@@ -96,13 +95,18 @@ func (in *InferenceApi) doRequest() (res *http.Response, err error) {
 	return
 }
 
-func (in *InferenceApi) GetResultImage() ([]byte, error) {
+func (in *InferenceApi) GetResultImage() (img []byte, err error) {
 	res, err := in.doRequest()
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-	return io.ReadAll(res.Body)
+	img, err = io.ReadAll(res.Body)
+	// nsfw filtered
+	if err == nil && IsImageBlocked(img) {
+		err = fmt.Errorf("images has been blocked by nsfw filter")
+	}
+	return
 }
 
 func (in *InferenceApi) GetGeneratedText() (string, error) {

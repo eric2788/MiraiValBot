@@ -2,6 +2,7 @@ package huggingface
 
 import (
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/utils/test"
@@ -41,7 +42,6 @@ func TestWaifuDiffusier(t *testing.T) {
 		t.Skip("no token set")
 	}
 
-
 	api := NewInferenceApi("Nilaier/Waifu-Diffusers",
 		Input("group of girls, golden details, gems, fluffy hair, silver hair straight high ponytail+long hair, curly blonde hair, {ginger hair}, purple hair low ponytail curly, clear details, night time, fireworks, casual clothes, raytracing, foreground focus, blurred background, intricate details, floating lanterns, front facing, blooming light"),
 	)
@@ -57,7 +57,30 @@ func TestWaifuDiffusier(t *testing.T) {
 
 }
 
-func TestMagicPrompt(t *testing.T){
+func TestBlockedImage(t *testing.T) {
+	models := []string{
+		"Linaqruf/anything-v3.0",
+		"hakurei/waifu-diffusion",
+		"Nilaier/Waifu-Diffusers",
+	}
+	for _, model := range models {
+		api := NewInferenceApi(model, Input("1girl, masterpiece, best quality, hyper detailed, Cinematic light, intricate_detail, highres, official art, barefoot, legs, short pants, looking at the viewer"))
+		b, err := api.GetResultImage()
+		if err != nil {
+			t.Log(err)
+			continue
+		}
+		if IsImageBlocked(b) {
+			t.Logf("%v image blocked", model)
+		} else {
+			name := strings.ReplaceAll(model, "/", "-") + "_result.jpeg"
+			_ = os.WriteFile(name, b, os.ModePerm)
+			t.Logf("%s -> size: %dB", name, len(b))
+		}
+	}
+}
+
+func TestMagicPrompt(t *testing.T) {
 	if os.Getenv("HUGGING_FACE_TOKEN") == "" {
 		t.Skip("no token set")
 	}

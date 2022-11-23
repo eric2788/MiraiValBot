@@ -91,6 +91,8 @@ func (s *SpaceApi) GetResultImages() ([][]byte, error) {
 		b, err := base64.RawStdEncoding.DecodeString(b64)
 		if err != nil {
 			logger.Errorf("error while parsing base64: %v, source: %s", err, b64)
+		} else if IsImageBlocked(b) {
+			logger.Warnf("image has been blocked by nsfw filter")
 		} else {
 			list = append(list, b)
 		}
