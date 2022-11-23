@@ -1,6 +1,7 @@
 package file
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"testing"
@@ -37,6 +38,18 @@ func TestLoadYaml(t *testing.T) {
 	assert.Equal(t, "hello world", fakeYaml.A)
 	assert.Equal(t, 1231, fakeYaml.B)
 	assert.Equal(t, []string{"a", "b", "c"}, fakeYaml.C)
+}
+
+type boolJson struct {
+	A bool `json:"a,string"`
+	B bool `json:"b,string"`
+}
+
+func TestJsonParseBool(t *testing.T) {
+	const test = `{"a": 1, "b": 0}`
+	var m boolJson
+	_ = json.Unmarshal([]byte(test), &m)
+	t.Logf("A: %t, B: %t", m.A, m.B)
 }
 
 type FakeYaml struct {

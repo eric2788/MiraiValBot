@@ -21,10 +21,6 @@ type (
 		data []interface{}
 	}
 
-	SpaceParam struct {
-		Data []interface{} `json:"data"`
-	}
-
 	// Common Resp
 	SpaceResp struct {
 		Data []string `json:"data"`
@@ -51,8 +47,8 @@ func NewSpaceApi(subdomain string, inputs ...interface{}) *SpaceApi {
 }
 
 func (s *SpaceApi) doRequest() (res *http.Response, err error) {
-	body, err := json.Marshal(SpaceParam{
-		Data: s.data,
+	body, err := json.Marshal(map[string]interface{}{
+		"data": s.data,
 	})
 	if err != nil {
 		return nil, err
