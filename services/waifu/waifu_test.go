@@ -13,9 +13,12 @@ import (
 	"github.com/eric2788/common-utils/request"
 )
 
+func init() {
+	test.InitTesting()
+}
+
 func TestGetPixivMoe(t *testing.T) {
 
-	test.InitTesting()
 	file.GenerateConfig()
 	file.LoadApplicationYaml()
 	Init()
@@ -67,6 +70,25 @@ func TestGetPixivIcon(t *testing.T) {
 		t.Skip(err)
 	}
 	t.Logf("%d B", len(b))
+}
+
+func TestGetDanbooru(t *testing.T) {
+	dan := &Danbooru{}
+	data, err := dan.GetImages(NewOptions(
+		WithTags("loli", "genshin impact"),
+		WithAmount(3),
+		WithR18(false),
+	))
+
+	if err != nil {
+		t.Skip(err)
+	}
+
+	for _, d := range data {
+		t.Logf("title: %s, Tags: %s, R18: %t\n", d.Title, strings.Join(d.Tags, ","), d.R18)
+	}
+
+	t.Logf("found %d data", len(data))
 }
 
 func TestGetLolicron(t *testing.T) {

@@ -36,6 +36,7 @@ type (
 var providers = map[string]ImageApi{
 	"lolicron": &Lolicron{},
 	"pixivmoe": &PixelMoe{},
+	"danbooru": &Danbooru{},
 }
 
 func NewOptions(searcher ...Searcher) *SearchOptions {
