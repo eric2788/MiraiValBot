@@ -3,6 +3,7 @@ package command
 import (
 	"fmt"
 	"runtime/debug"
+	"strings"
 	"sync"
 
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
@@ -56,7 +57,13 @@ func (c *command) HookEvent(bot *bot.Bot) {
 			return
 		}
 		source := &MessageSource{ct, msg}
-		content := msg.ToString()
+
+		// 回复时无法检测是否指令
+		// content := msg.ToString()
+
+		// 这个可以检测
+		content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, " ")
+
 		member := qq.FindGroupMember(msg.Sender.Uin)
 		if member == nil {
 			logger.Infof("%s (%d) 不是瓦群成員，已略過。", msg.Sender.Nickname, msg.Sender.Uin)

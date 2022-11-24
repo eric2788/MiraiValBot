@@ -238,7 +238,7 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 
 var (
 	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
-	aiImg2ImgCommand    = command.NewNode([]string{"waifu2"}, "以图生图(二次元)", false, aiImg2Img, "<文字>")
+	aiImg2ImgCommand    = command.NewNode([]string{"img2img", "img", "以图生图"}, "以图生图(二次元)", false, aiImg2Img, "[转换强度]", "[文字]")
 	aiPaintCNCommand    = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand     = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
 	aiPaintCommand      = command.NewNode([]string{"paint", "画图", "画画"}, "文字生成图像(普通)", false, aiPaint, "<文字>")
