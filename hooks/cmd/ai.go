@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,6 +14,7 @@ import (
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/huggingface"
 	"github.com/eric2788/MiraiValBot/services/imgtag"
+	"github.com/eric2788/common-utils/request"
 )
 
 func aiWaifu(args []string, source *command.MessageSource) error {
@@ -114,19 +118,68 @@ func aiSearchTags(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(reply)
 }
 
-// aiWaifu2 generate high quality waifu image (but still nsfw filtered)
-func aiWaifu2(args []string, source *command.MessageSource) error {
+// img2img still nsfw filtered
+func aiImg2Img(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 
-	if len(args) == 0 {
-		reply.Append(message.NewText("参数不能为空!"))
-		return qq.SendGroupMessage(reply)
+	var img *string = nil
+	var inputs = ""
+	var tranform = 0.5
+
+	if len(args) > 0 {
+		tranform, err := strconv.ParseFloat(args[0], 64)
+		if err != nil {
+			reply.Append(qq.NewTextfLn("无效的转变强度: %s", args[0]))
+			return qq.SendGroupMessage(reply)
+		} else if tranform > 1 || tranform < 0 {
+			reply.Append(qq.NewTextfLn("转变强度必须在 0-1 之间: %s", args[0]))
+			return qq.SendGroupMessage(reply)
+		}
+	}
+
+	if len(args) > 1 {
+		inputs = strings.Join(args[1:], " ")
+	}
+
+	content := qq.ParseMsgContent(source.Message.Elements)
+	imgs := content.Images
+
+	// 支援 reply 圖片輸入指令
+	if len(imgs) == 0 && len(content.Replies) > 0 {
+		for _, ele := range source.Message.Elements {
+			if reply, ok := ele.(*message.ReplyElement); ok {
+				imgs = qq.ParseMsgContent(reply.Elements).Images
+			}
+		}
+	}
+
+	if len(imgs) == 0 {
+		reply.Append(qq.NewTextfLn("找不到图片, 将自动转为文字转图像。"))
+	} else {
+
+		t := ""
+		if strings.Contains(imgs[0], ".jpg") {
+			t = "image/jpeg"
+		} else if strings.Contains(imgs[0], ".png") {
+			t = "image/png"
+		} else {
+			return fmt.Errorf("不支持的图片格式: %s", imgs[len(imgs)-4:])
+		}
+
+		b, err := request.GetBytesByUrl(imgs[0])
+		if err != nil {
+			return fmt.Errorf("图片下载失败: %v", err)
+		}
+
+		b64 := fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b)
+		img = &b64
 	}
 
 	reply.Append(qq.NewTextf("正在生成图像...."))
+	if img == nil {
+		reply.Append(qq.NewTextf("\n非以图生图，需时可能较长..."))
+	}
 	_ = qq.SendGroupMessage(reply)
-
-	inputs := strings.Join(args, " ")
 
 	var err error
 	var bb [][]byte
@@ -140,8 +193,8 @@ func aiWaifu2(args []string, source *command.MessageSource) error {
 			720,
 			720,
 			0,
-			nil,
-			0.5,
+			img,
+			tranform,
 			huggingface.BadPrompt,
 		),
 		huggingface.NewSpaceApi("fkunn1326-animestyle-diffusionmodels",
@@ -152,8 +205,8 @@ func aiWaifu2(args []string, source *command.MessageSource) error {
 			720,
 			720,
 			0,
-			nil,
-			0.5,
+			img,
+			tranform,
 			huggingface.BadPrompt,
 		),
 	}
@@ -173,19 +226,19 @@ func aiWaifu2(args []string, source *command.MessageSource) error {
 		return errors.New("没有图片被生成")
 	}
 
-	img, err := qq.NewImageByByte(bb[0])
+	imgElement, err := qq.NewImageByByte(bb[0])
 	if err != nil {
 		return err
 	}
 
 	msg := qq.CreateReply(source.Message)
-	msg.Append(img)
+	msg.Append(imgElement)
 	return qq.SendGroupMessage(msg)
 }
 
 var (
 	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
-	aiWaifu2Command     = command.NewNode([]string{"waifu2"}, "文字生成二次元图(高质量,但超慢)", false, aiWaifu2, "<文字>")
+	aiImg2ImgCommand    = command.NewNode([]string{"waifu2"}, "以图生图(二次元)", false, aiImg2Img, "<文字>")
 	aiPaintCNCommand    = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand     = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
 	aiPaintCommand      = command.NewNode([]string{"paint", "画图", "画画"}, "文字生成图像(普通)", false, aiPaint, "<文字>")
@@ -196,7 +249,7 @@ var (
 
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
-	aiWaifu2Command,
+	aiImg2ImgCommand,
 	aiMadokaCommand,
 	aiPaintCommand,
 	aiPromptCommand,

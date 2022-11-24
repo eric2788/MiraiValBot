@@ -1,7 +1,11 @@
 package huggingface
 
 import (
+	"encoding/base64"
+	"fmt"
 	"testing"
+
+	"github.com/eric2788/common-utils/request"
 )
 
 func TestAnythingV3(t *testing.T) {
@@ -14,10 +18,40 @@ func TestAnythingV3(t *testing.T) {
 	t.Log(len(bb))
 }
 
-func TestAnythingV3Wss(t *testing.T) {
-
+func TestAnythingV3Img2Img(t *testing.T) {
 	t.Skip("too long need 5 minutes")
+	img := "https://gchat.qpic.cn/gchatpic_new/0/0-0-42DFE074B3F0C8A416E7D5895AF941D4/0?term=3&is_origin=0&file=42dfe074b3f0c8a416e7d5895af941d4188218-848-1200.jpg"
 
+	b, err := request.GetBytesByUrl(img)
+	if err != nil {
+		t.Skip(err)
+	}
+
+	b64 := fmt.Sprintf("data:%s;base64,", "image/jpeg") + base64.StdEncoding.EncodeToString(b)
+
+	api := NewSpaceApi("akhaliq-anything-v3-0",
+		"anything v3",
+		"1girl, long hair, car ears",
+		7.5,
+		25,
+		512,
+		512,
+		0,
+		b64,
+		0.5,
+		BadPrompt,
+	)
+
+	bb, err := api.UseWebsocketHandler().GetResultImages()
+	if err != nil {
+		t.Skip(err)
+	}
+
+	t.Log(len(bb))
+}
+
+func TestAnythingV3Wss(t *testing.T) {
+	t.Skip("too long need 5 minutes")
 	api := NewSpaceApi("akhaliq-anything-v3-0",
 		"anything v3",
 		"1girl, long hair, car ears",
