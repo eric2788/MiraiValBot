@@ -3,11 +3,12 @@ package waifu
 import (
 	"errors"
 	"fmt"
-	"github.com/eric2788/common-utils/request"
 	"net/url"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/eric2788/common-utils/request"
 )
 
 const danbooruURL = "https://danbooru.donmai.us"
@@ -68,6 +69,7 @@ func (d *Danbooru) GetImages(option *SearchOptions) ([]*ImageData, error) {
 	// convert tags to danbooru format
 	tags := make([]string, len(option.Tags))
 	for i, tag := range option.Tags {
+		tag = strings.TrimSpace(tag)
 		tags[i] = strings.ReplaceAll(tag, " ", "_")
 	}
 
