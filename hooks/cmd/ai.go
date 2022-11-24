@@ -17,13 +17,15 @@ func aiWaifu(args []string, source *command.MessageSource) error {
 	// model should sort by best quality
 	return generateHuggingFaceImage(args, source, false,
 		"Linaqruf/anything-v3.0",
+		"eimiss/EimisAnimeDiffusion_1.0v",
 		"hakurei/waifu-diffusion",
 		"Nilaier/Waifu-Diffusers",
 	)
 }
 
 func aiPaint(args []string, source *command.MessageSource) error {
-	return generateHuggingFaceImage(args, source, false,
+	return generateHuggingFaceImage(args, source, true,
+		"prompthero/openjourney",
 		"runwayml/stable-diffusion-v1-5",
 		"CompVis/stable-diffusion-v1-4",
 	)
