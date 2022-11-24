@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/eric2788/common-utils/request"
 	"math/rand"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -125,19 +126,12 @@ func TrimPrefixes(s string, prefixes ...string) string {
 	return s
 }
 
-func ReadURLToSrcData(url string) (string, error) {
-	t := ""
-	if strings.Contains(url, ".jpg") {
-		t = "image/jpeg"
-	} else if strings.Contains(url, ".png") {
-		t = "image/png"
-	} else {
-		return "", fmt.Errorf("不支持的图片格式: %s", url)
-	}
-
+// ReadURLToSrcData return base64, type, error
+func ReadURLToSrcData(url string) (string, string, error) {
 	b, err := request.GetBytesByUrl(url)
 	if err != nil {
-		return "", fmt.Errorf("图片下载失败: %v", err)
+		return "", "", fmt.Errorf("图片下载失败: %v", err)
 	}
-	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), nil
+	t := http.DetectContentType(b)
+	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), t, nil
 }

@@ -159,9 +159,11 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 	} else {
 
 		if imgs[0].Url != "" {
-			url, err := misc.ReadURLToSrcData(imgs[0].Url)
+			url, t, err := misc.ReadURLToSrcData(imgs[0].Url)
 			if err != nil {
 				return err
+			} else if !strings.HasPrefix(t, "image/") {
+				return fmt.Errorf("不是图片")
 			}
 			img = &url
 		} else if b, _ := qq.GetCacheImage(hex.EncodeToString(imgs[0].Md5)); b != nil {
@@ -173,9 +175,11 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 				return fmt.Errorf("不支持的图片类型: %s", t)
 			}
 		} else if element, qerr := bot.Instance.QueryGroupImage(source.Message.GroupCode, imgs[0].Md5, imgs[0].Size); element != nil && element.Url != "" {
-			url, err := misc.ReadURLToSrcData(element.Url)
+			url, t, err := misc.ReadURLToSrcData(element.Url)
 			if err != nil {
 				return err
+			} else if !strings.HasPrefix(t, "image/") {
+				return fmt.Errorf("不是图片")
 			}
 			img = &url
 		} else {
