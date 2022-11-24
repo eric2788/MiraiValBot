@@ -8,34 +8,12 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/corpix/uarand"
 	"github.com/eric2788/common-utils/request"
 )
 
-var logger = utils.GetModuleLogger("service.huggingface")
-
 const url = "https://api-inference.huggingface.co/models/%s"
 
-type (
-	FaceParam struct {
-		Inputs  interface{}  `json:"inputs"`
-		Options *FaceOptions `json:"options"`
-	}
-
-	FaceOptions struct {
-		WaitForModel bool `json:"wait_for_model"`
-		UseCache     bool `json:"use_cache"`
-	}
-
-	Option func(*FaceParam)
-
-	InferenceApi struct {
-		model string
-		param *FaceParam
-	}
-)
 
 func NewInferenceApi(model string, options ...Option) *InferenceApi {
 

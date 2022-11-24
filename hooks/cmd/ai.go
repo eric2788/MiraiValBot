@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"math/rand"
 	"strings"
 	"time"
@@ -54,7 +55,17 @@ func aiChinesePaint(args []string, source *command.MessageSource) error {
 func aiTags(args []string, source *command.MessageSource) error {
 	reply := qq.CreateReply(source.Message)
 
-	imgs := qq.ParseMsgContent(source.Message.Elements).Images
+	content := qq.ParseMsgContent(source.Message.Elements)
+	imgs := content.Images
+
+	// 支援 reply 圖片輸入指令
+	if len(imgs) == 0 && len(content.Replies) > 0 {
+		for _, ele := range source.Message.Elements {
+			if reply, ok := ele.(*message.ReplyElement); ok {
+				imgs = qq.ParseMsgContent(reply.Elements).Images
+			}
+		}
+	}
 
 	if len(imgs) == 0 {
 		reply.Append(message.NewText("找不到图片, 请附带图片!"))
@@ -103,8 +114,78 @@ func aiSearchTags(args []string, source *command.MessageSource) error {
 	return qq.SendWithRandomRiskyStrategy(reply)
 }
 
+// aiWaifu2 generate high quality waifu image (but still nsfw filtered)
+func aiWaifu2(args []string, source *command.MessageSource) error {
+	reply := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		reply.Append(message.NewText("参数不能为空!"))
+		return qq.SendGroupMessage(reply)
+	}
+
+	reply.Append(qq.NewTextf("正在生成图像...."))
+	_ = qq.SendGroupMessage(reply)
+
+	inputs := strings.Join(args, " ")
+
+	var err error
+	var bb [][]byte
+
+	apis := []*huggingface.SpaceApi{
+		huggingface.NewSpaceApi("akhaliq-anything-v3-0",
+			"anything v3",
+			inputs,
+			7.5,
+			35,
+			720,
+			720,
+			0,
+			nil,
+			0.5,
+			huggingface.BadPrompt,
+		),
+		huggingface.NewSpaceApi("fkunn1326-animestyle-diffusionmodels",
+			"EimisAnimeDiffusion_1.0v",
+			inputs,
+			7.5,
+			35,
+			720,
+			720,
+			0,
+			nil,
+			0.5,
+			huggingface.BadPrompt,
+		),
+	}
+
+	for _, api := range apis {
+		bb, err = api.UseWebsocketHandler().GetResultImages()
+		if err == nil {
+			break
+		} else {
+			logger.Errorf("使用model %s 生成图像时出现错误: %v", api.Id, err)
+		}
+	}
+
+	if err != nil {
+		return err
+	} else if len(bb) == 0 {
+		return errors.New("没有图片被生成")
+	}
+
+	img, err := qq.NewImageByByte(bb[0])
+	if err != nil {
+		return err
+	}
+
+	msg := qq.CreateReply(source.Message)
+	msg.Append(img)
+	return qq.SendGroupMessage(msg)
+}
+
 var (
-	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成图像(waifu)", false, aiWaifu, "<文字>")
+	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
+	aiWaifu2Command     = command.NewNode([]string{"waifu2"}, "文字生成二次元图(高质量,但超慢)", false, aiWaifu2, "<文字>")
 	aiPaintCNCommand    = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand     = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
 	aiPaintCommand      = command.NewNode([]string{"paint", "画图", "画画"}, "文字生成图像(普通)", false, aiPaint, "<文字>")
@@ -115,6 +196,7 @@ var (
 
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
+	aiWaifu2Command,
 	aiMadokaCommand,
 	aiPaintCommand,
 	aiPromptCommand,
@@ -128,6 +210,8 @@ func init() {
 }
 
 // hugging face utils
+
+const badPrompt = `bad feet, bad foot, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry`
 
 func generateHuggingFaceText(args []string, source *command.MessageSource, models ...string) error {
 	reply := qq.CreateReply(source.Message)

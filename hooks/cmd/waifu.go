@@ -20,7 +20,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 	amountStr, tags := args[0], []string{""}
 
 	if len(args) > 1 {
-		tags = strings.Split(strings.Join(args[1:], ","), ",")
+		tags = strings.Split(strings.Join(args[1:], " "), ",")
 	}
 
 	amount, err := strconv.Atoi(amountStr)
