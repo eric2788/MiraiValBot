@@ -20,7 +20,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 	amountStr, tags := args[0], []string{""}
 
 	if len(args) > 1 {
-		tags = strings.Split(args[1], ",")
+		tags = strings.Split(strings.Join(args[1:], ","), ",")
 	}
 
 	amount, err := strconv.Atoi(amountStr)
@@ -39,7 +39,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 	}
 
 	reply := qq.CreateReply(source.Message)
-	_ = qq.SendGroupMessage(reply.Append(qq.NewTextf("正在索取 %s 的相关图片...", strings.Join(tags, ","))))
+	_ = qq.SendGroupMessage(reply.Append(qq.NewTextf("正在索取 %s 的相关图片...", strings.Join(tags, ", "))))
 
 	imgs, err := waifu.GetRandomImages(
 		waifu.NewOptions(
