@@ -172,14 +172,14 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 			} else {
 				return fmt.Errorf("不支持的图片类型: %s", t)
 			}
-		} else if element, _ := bot.Instance.QueryGroupImage(source.Message.GroupCode, imgs[0].Md5, imgs[0].Size); element != nil && element.Url != "" {
+		} else if element, qerr := bot.Instance.QueryGroupImage(source.Message.GroupCode, imgs[0].Md5, imgs[0].Size); element != nil && element.Url != "" {
 			url, err := misc.ReadURLToSrcData(element.Url)
 			if err != nil {
 				return err
 			}
 			img = &url
 		} else {
-			return fmt.Errorf("图片读取失败")
+			return fmt.Errorf("图片读取失败: %v", qerr)
 		}
 	}
 
