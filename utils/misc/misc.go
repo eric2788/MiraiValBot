@@ -1,7 +1,9 @@
 package misc
 
 import (
+	"encoding/base64"
 	"fmt"
+	"github.com/eric2788/common-utils/request"
 	"math/rand"
 	"strings"
 	"sync"
@@ -116,10 +118,26 @@ func FetchImageToForward(forwarder *message.ForwardMessage, url string, wg *sync
 	forwarder.AddNode(qq.NewForwardNode(msg))
 }
 
-
-func TrimPrefixes(s string, prefixes... string) string {
+func TrimPrefixes(s string, prefixes ...string) string {
 	for _, prefix := range prefixes {
 		s = strings.TrimPrefix(s, prefix)
 	}
 	return s
+}
+
+func ReadURLToSrcData(url string) (string, error) {
+	t := ""
+	if strings.Contains(url, ".jpg") {
+		t = "image/jpeg"
+	} else if strings.Contains(url, ".png") {
+		t = "image/png"
+	} else {
+		return "", fmt.Errorf("不支持的图片格式: %s", url)
+	}
+
+	b, err := request.GetBytesByUrl(url)
+	if err != nil {
+		return "", fmt.Errorf("图片下载失败: %v", err)
+	}
+	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), nil
 }

@@ -107,6 +107,16 @@ func GetGroupEssenceMsgIds() ([]int64, error) {
 
 }
 
+func ExtractMessageElement[E message.IMessageElement](elements []message.IMessageElement) []E {
+	var results []E
+	for _, element := range elements {
+		if e, ok := element.(E); ok {
+			results = append(results, e)
+		}
+	}
+	return results
+}
+
 func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 
 	var content = &MsgContent{

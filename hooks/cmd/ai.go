@@ -2,9 +2,13 @@ package cmd
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 	"math/rand"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -14,7 +18,6 @@ import (
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/huggingface"
 	"github.com/eric2788/MiraiValBot/services/imgtag"
-	"github.com/eric2788/common-utils/request"
 )
 
 func aiWaifu(args []string, source *command.MessageSource) error {
@@ -141,15 +144,13 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 		inputs = strings.Join(args[1:], " ")
 	}
 
-	content := qq.ParseMsgContent(source.Message.Elements)
-	imgs := content.Images
+	imgs := qq.ExtractMessageElement[*message.GroupImageElement](source.Message.Elements)
+	replies := qq.ExtractMessageElement[*message.ReplyElement](source.Message.Elements)
 
 	// 支援 reply 圖片輸入指令
-	if len(imgs) == 0 && len(content.Replies) > 0 {
-		for _, ele := range source.Message.Elements {
-			if reply, ok := ele.(*message.ReplyElement); ok {
-				imgs = qq.ParseMsgContent(reply.Elements).Images
-			}
+	if len(imgs) == 0 && len(replies) > 0 {
+		for _, ele := range replies {
+			imgs = qq.ExtractMessageElement[*message.GroupImageElement](ele.Elements)
 		}
 	}
 
@@ -157,22 +158,29 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 		reply.Append(qq.NewTextfLn("找不到图片, 将自动转为文字转图像。"))
 	} else {
 
-		t := ""
-		if strings.Contains(imgs[0], ".jpg") {
-			t = "image/jpeg"
-		} else if strings.Contains(imgs[0], ".png") {
-			t = "image/png"
+		if imgs[0].Url != "" {
+			url, err := misc.ReadURLToSrcData(imgs[0].Url)
+			if err != nil {
+				return err
+			}
+			img = &url
+		} else if b, _ := qq.GetCacheImage(hex.EncodeToString(imgs[0].Md5)); b != nil {
+			t := http.DetectContentType(b)
+			if t == "image/jpeg" || t == "image/png" {
+				b64 := fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b)
+				img = &b64
+			} else {
+				return fmt.Errorf("不支持的图片类型: %s", t)
+			}
+		} else if element, _ := bot.Instance.QueryGroupImage(source.Message.GroupCode, imgs[0].Md5, imgs[0].Size); element != nil && element.Url != "" {
+			url, err := misc.ReadURLToSrcData(element.Url)
+			if err != nil {
+				return err
+			}
+			img = &url
 		} else {
-			return fmt.Errorf("不支持的图片格式: %s", imgs[len(imgs)-4:])
+			return fmt.Errorf("图片读取失败")
 		}
-
-		b, err := request.GetBytesByUrl(imgs[0])
-		if err != nil {
-			return fmt.Errorf("图片下载失败: %v", err)
-		}
-
-		b64 := fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b)
-		img = &b64
 	}
 
 	reply.Append(qq.NewTextf("正在生成图像...."))
