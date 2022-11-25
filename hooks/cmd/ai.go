@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/services/ai"
 	"github.com/eric2788/MiraiValBot/utils/misc"
 	"math/rand"
 	"net/http"
@@ -57,6 +58,40 @@ func aiChinesePaint(args []string, source *command.MessageSource) error {
 		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-EN-v0.1",
 		"IDEA-CCNL/Taiyi-Stable-Diffusion-1B-Chinese-v0.1",
 	)
+}
+
+func aiWaifu2(args []string, source *command.MessageSource) error {
+	reply := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		reply.Append(message.NewText("参数不能为空!"))
+		return qq.SendGroupMessage(reply)
+	}
+
+	reply.Append(qq.NewTextf("正在生成图像...."))
+	_ = qq.SendGroupMessage(reply)
+
+	inputs := strings.Join(args, " ")
+
+	url, err := ai.GetNovelAI8zywImage(
+		ai.New8zywPayload(
+			inputs,
+			false,
+		),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	img, err := qq.NewImageByUrl(url)
+	if err != nil {
+		return err
+	}
+
+	reply = qq.CreateReply(source.Message)
+	reply.Append(img)
+	return qq.SendGroupMessage(reply)
 }
 
 func aiTags(args []string, source *command.MessageSource) error {
@@ -250,6 +285,7 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 
 var (
 	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
+	aiWaifu2Command     = command.NewNode([]string{"waifu2"}, "文字生成二次元图(无和谐)", false, aiWaifu2, "<文字>")
 	aiImg2ImgCommand    = command.NewNode([]string{"img2img", "img", "以图生图"}, "以图生图(二次元)", false, aiImg2Img, "[转换强度]", "[文字]")
 	aiPaintCNCommand    = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand     = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
@@ -261,6 +297,7 @@ var (
 
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
+	aiWaifu2Command,
 	aiImg2ImgCommand,
 	aiMadokaCommand,
 	aiPaintCommand,
@@ -313,7 +350,7 @@ func generateHuggingFaceText(args []string, source *command.MessageSource, model
 		return err
 	}
 
-	msg := message.NewSendingMessage()
+	msg := qq.CreateReply(source.Message)
 	msg.Append(qq.NewTextf("文字生成: %s", txt))
 
 	return qq.SendWithRandomRiskyStrategy(msg)
