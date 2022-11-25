@@ -19,6 +19,8 @@ const (
 
 	WithR18    ExcludeType = `lowanderr`
 	WithoutR18 ExcludeType = `r18`
+
+	BestQualityTags = `best quality,masterpiece,official art,extremely detailed,`
 )
 
 type (
@@ -101,7 +103,7 @@ func New8zywPayload(tags string, r18 bool, badPrompt ...string) *NovelAI8zywPayl
 		uc = huggingface.BadPrompt + NoR18
 	}
 	return &NovelAI8zywPayload{
-		Desc:    tags,
+		Desc:    BestQualityTags + tags,
 		UC:      uc + strings.Join(badPrompt, ", "),
 		Exclude: exclude,
 	}
