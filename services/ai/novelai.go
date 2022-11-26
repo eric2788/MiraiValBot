@@ -20,7 +20,7 @@ const (
 	WithR18    ExcludeType = `lowanderr`
 	WithoutR18 ExcludeType = `r18`
 
-	BestQualityTags = `best quality,masterpiece,extremely detailed,`
+	BestQualityTags = `best quality,masterpiece,`
 )
 
 type (
