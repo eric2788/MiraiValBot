@@ -19,8 +19,8 @@ func (n *novelAI) ApplicationCommand() *discordgo.ApplicationCommand {
 	return &discordgo.ApplicationCommand{
 		Name: "novelai",
 		NameLocalizations: &map[discordgo.Locale]string{
-			discordgo.ChineseTW: "AI畫圖",
-			discordgo.ChineseCN: "AI画图",
+			discordgo.ChineseTW: "畫圖",
+			discordgo.ChineseCN: "画图",
 		},
 		Description: "AI画图",
 		Type:        discordgo.ChatApplicationCommand,
@@ -47,7 +47,7 @@ func (n *novelAI) ApplicationCommand() *discordgo.ApplicationCommand {
 			},
 			{
 				Type: discordgo.ApplicationCommandOptionString,
-				Name: "badPrompt",
+				Name: "badprompt",
 				NameLocalizations: map[discordgo.Locale]string{
 					discordgo.ChineseTW: "不良标签",
 					discordgo.ChineseCN: "不良标签",
@@ -67,7 +67,10 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 
 	description := optionMap["description"].StringValue()
 	nsfw := optionMap["nsfw"].BoolValue()
-	badPrompt := optionMap["badPrompt"].StringValue()
+	badPrompt := ""
+	if bp, ok := optionMap["badprompt"]; ok {
+		badPrompt = bp.StringValue()
+	}
 
 	if interact.ChannelID != fmt.Sprint(config.NsfwChannel) && nsfw {
 		err = session.InteractionRespond(interact.Interaction, &discordgo.InteractionResponse{
