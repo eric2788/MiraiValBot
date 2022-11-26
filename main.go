@@ -26,6 +26,9 @@ import (
 	// 所有指令
 	_ "github.com/eric2788/MiraiValBot/hooks/cmd"
 
+	// 所有 Discord 指令
+	_ "github.com/eric2788/MiraiValBot/hooks/discord_cmd"
+
 	// 所有定時器任務
 	_ "github.com/eric2788/MiraiValBot/hooks/timer_tasks"
 

@@ -27,7 +27,7 @@ func Start() {
 
 	client.AddHandlerOnce(func(s *discordgo.Session, e *discordgo.Ready) {
 		go StartChatListen() // 啟動跨平台聊天
-		go HookCommand()
+		go HookCommands()
 		Log("Discord 機器人已成功啟動。")
 	})
 	err = client.Open()
