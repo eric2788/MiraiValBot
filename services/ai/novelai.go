@@ -96,6 +96,7 @@ func New8zywPayload(tags string, r18 bool, badPrompt ...string) *NovelAI8zywPayl
 	var uc string
 
 	if r18 {
+		tags += ",uncensored," // 必須加這個否則沒有r18
 		exclude = WithR18
 		uc = huggingface.BadPrompt
 	} else {
