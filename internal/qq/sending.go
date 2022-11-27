@@ -52,7 +52,7 @@ func SendGroupMessageAndRecallByGroup(gp int64, msg *message.SendingMessage, dur
 
 	defer recoverGroupMessage(gp, msg, err)
 
-	msg.Append(NewTextf("(本条消息将在 %d 秒后撤回)", duration.Seconds()))
+	msg.Append(NewTextf("(本条消息将在 %.f 秒后撤回)", duration.Seconds()))
 
 	result, err := sendGroupMessage(gp, msg)
 
