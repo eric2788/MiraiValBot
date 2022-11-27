@@ -92,7 +92,8 @@ func (d *Danbooru) GetImages(option *SearchOptions) ([]*ImageData, error) {
 		}
 		return nil, err
 	}
-	var images map[uint64]*ImageData
+
+	var images = make(map[uint64]*ImageData)
 
 	for _, post := range resp {
 
