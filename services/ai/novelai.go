@@ -17,8 +17,9 @@ const (
 		spread pussy, ass_visible_through_thighs, no_bra, naked_ribbon, naked_cape, naked_apron, naked, nude, bottomless, wardrobe_malfunction, nipples, nipple_slip, erect_nipples, areola, breast_grab, breast_hold, paizuri, bukkake, thigh_sex, buttjob, ass_grab, fellatio, bathing, vibrator, tentacles, sex, ass,oshiri,butt, dildo, pubic_hair, pee, pussy_juice, penis, cunnilingus, pussy,vulva, lactation, gangbang, uncensored, cum, fingering, futanari, extreme_content, censored, handjob, bestiality, masturbation, footjob, anal, cameltoe, bondage, enema, guro, nsfw,
 	`
 
-	WithR18    ExcludeType = `lowanderr`
-	WithoutR18 ExcludeType = `r18`
+	WithR18    ExcludeType = `lowanderr` // totally r18
+	WithNSFW   ExcludeType = `nsfw`      // with less r18 but no explict
+	WithoutR18 ExcludeType = `r18`       // nealy no r18
 
 	BestQualityTags = `best quality,masterpiece,`
 )
@@ -41,6 +42,7 @@ type (
 		Probability float64                `json:"probability"`
 		Icon        int                    `json:"icon"`
 		Node        string                 `json:"node"`
+		Data        []string               `json:"data,omitempty"`
 	}
 )
 
@@ -86,21 +88,18 @@ func GetNovelAI8zywImage(payload *NovelAI8zywPayload) (string, error) {
 	if err != nil {
 		return "", err
 	} else if resp.Code != 200 {
-		return "", fmt.Errorf("novelai.8zyw.cn: %s", resp.Msg)
+		return "", fmt.Errorf("%s %s", resp.Msg, strings.Join(resp.Data, ", "))
 	}
 	return fmt.Sprintf("https://novelai.8zyw.cn/%s", resp.Url), nil
 }
 
-func New8zywPayload(tags string, r18 bool, badPrompt ...string) *NovelAI8zywPayload {
-	var exclude ExcludeType
+func New8zywPayload(tags string, exclude ExcludeType, badPrompt ...string) *NovelAI8zywPayload {
 	var uc string
 
-	if r18 {
+	if exclude == WithR18 {
 		tags += ",uncensored," // 必須加這個否則沒有r18
-		exclude = WithR18
 		uc = huggingface.BadPrompt
 	} else {
-		exclude = WithoutR18
 		uc = huggingface.BadPrompt + NoR18
 	}
 	return &NovelAI8zywPayload{

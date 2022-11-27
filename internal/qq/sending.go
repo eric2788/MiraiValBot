@@ -15,6 +15,8 @@ const (
 	Muted Reason = iota
 	Nil
 	Risked
+
+	MaxRecallTime time.Duration = time.Minute*2 - time.Second*5 // 提前五秒撤回
 )
 
 type MessageSendError struct {
@@ -31,6 +33,53 @@ func SendGroupMessage(msg *message.SendingMessage) error {
 		return fmt.Errorf("群资料尚未加载。")
 	}
 	return SendGroupMessageByGroup(ValGroupInfo.Uin, msg)
+}
+
+func SendGroupMessageAndRecall(msg *message.SendingMessage, duration time.Duration) error {
+	if ValGroupInfo == nil {
+		return fmt.Errorf("群资料尚未加载。")
+	}
+	return SendGroupMessageAndRecallByGroup(ValGroupInfo.Uin, msg, duration)
+}
+
+func SendGroupMessageAndRecallByGroup(gp int64, msg *message.SendingMessage, duration time.Duration) (err error) {
+
+	// 超過兩分鐘就無法撤回消息了
+	if duration > MaxRecallTime {
+		logger.Warnf("撤回消息的時間超過兩分鐘，將會無法撤回消息, 已改為兩分鐘。")
+		duration = MaxRecallTime // 提前五秒撤回
+	}
+
+	defer recoverGroupMessage(gp, msg, err)
+
+	msg.Append(NewTextf("(本条消息将在 %d 秒后撤回)", duration.Seconds()))
+
+	result, err := sendGroupMessage(gp, msg)
+
+	if err != nil {
+		return
+	}
+
+	if result == nil || result.Id == -1 {
+		err = &MessageSendError{
+			Msg:    "群消息发送失败，该消息可能被风控",
+			Reason: Risked,
+		}
+		return
+	}
+
+	go func() {
+		time.Sleep(duration)
+		err = bot.Instance.RecallGroupMessage(gp, result.Id, result.InternalId)
+		if err != nil {
+			logger.Errorf("撤回群消息时出现错误: %v", err)
+			reply := CreateReply(result)
+			reply.Append(NewTextf("撤回失败: %v", err))
+			_ = SendGroupMessageByGroup(gp, reply)
+		}
+	}()
+
+	return
 }
 
 func SendGroupForwardMessage(msg *message.ForwardMessage) error {
@@ -130,34 +179,14 @@ func SendPrivateForwardMessage(uid int64, msg *message.ForwardMessage) (err erro
 }
 
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
-	defer func() {
-		if recovered := recover(); recovered != nil {
-			err = fmt.Errorf("致命错误 => %v", recovered)
-			debug.PrintStack()
-		}
-		if err != nil {
-			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
-			logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
-		}
-	}()
 
-	if msg == nil || bot.Instance == nil {
-		err = &MessageSendError{
-			Msg:    "讯息或机器人为 NULL",
-			Reason: Nil,
-		}
+	defer recoverGroupMessage(gp, msg, err)
+
+	result, err := sendGroupMessage(gp, msg)
+
+	if err != nil {
 		return
 	}
-
-	if IsMuted(bot.Instance.Uin) {
-		err = &MessageSendError{
-			Msg:    fmt.Sprintf("机器人在群 %d 被禁言，无法发送消息", gp),
-			Reason: Muted,
-		}
-		return
-	}
-
-	result := bot.Instance.SendGroupMessage(gp, msg)
 
 	if result == nil || result.Id == -1 {
 		err = &MessageSendError{
@@ -165,6 +194,7 @@ func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) 
 			Reason: Risked,
 		}
 	}
+
 	return
 }
 
@@ -370,4 +400,34 @@ func GetRandomMessageByTry(try int) []*message.TextElement {
 	}
 
 	return extras
+}
+
+func sendGroupMessage(gp int64, msg *message.SendingMessage) (result *message.GroupMessage, err error) {
+	if msg == nil || bot.Instance == nil {
+		err = &MessageSendError{
+			Msg:    "讯息或机器人为 NULL",
+			Reason: Nil,
+		}
+		return
+	}
+	if IsMuted(bot.Instance.Uin) {
+		err = &MessageSendError{
+			Msg:    fmt.Sprintf("机器人在群 %d 被禁言，无法发送消息", gp),
+			Reason: Muted,
+		}
+		return
+	}
+	result = bot.Instance.SendGroupMessage(gp, msg)
+	return
+}
+
+func recoverGroupMessage(gp int64, msg *message.SendingMessage, err error) {
+	if recovered := recover(); recovered != nil {
+		err = fmt.Errorf("致命错误 => %v", recovered)
+		debug.PrintStack()
+	}
+	if err != nil {
+		logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
+		logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
+	}
 }

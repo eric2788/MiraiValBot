@@ -61,37 +61,11 @@ func aiChinesePaint(args []string, source *command.MessageSource) error {
 }
 
 func aiWaifu2(args []string, source *command.MessageSource) error {
-	reply := qq.CreateReply(source.Message)
+	return generateNovelAIImage(args, source, ai.WithoutR18)
+}
 
-	if len(args) == 0 {
-		reply.Append(message.NewText("参数不能为空!"))
-		return qq.SendGroupMessage(reply)
-	}
-
-	reply.Append(qq.NewTextf("正在生成图像...."))
-	_ = qq.SendGroupMessage(reply)
-
-	inputs := strings.Join(args, " ")
-
-	url, err := ai.GetNovelAI8zywImage(
-		ai.New8zywPayload(
-			inputs,
-			false,
-		),
-	)
-
-	if err != nil {
-		return err
-	}
-
-	img, err := qq.NewImageByUrl(url)
-	if err != nil {
-		return err
-	}
-
-	reply = qq.CreateReply(source.Message)
-	reply.Append(img)
-	return qq.SendGroupMessage(reply)
+func aiSetu(args []string, source *command.MessageSource) error {
+	return generateNovelAIImage(args, source, ai.WithNSFW)
 }
 
 func aiTags(args []string, source *command.MessageSource) error {
@@ -286,6 +260,7 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 var (
 	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
 	aiWaifu2Command     = command.NewNode([]string{"waifu2"}, "文字生成二次元图(无和谐)", false, aiWaifu2, "<文字>")
+	aiSetuCommand       = command.NewNode([]string{"setu", "sese", "色图", "色色", "涩涩"}, "文字生成二次元图(有色图, 谨慎使用)", false, aiSetu, "<文字>")
 	aiImg2ImgCommand    = command.NewNode([]string{"img2img", "img", "以图生图"}, "以图生图(二次元)", false, aiImg2Img, "[转换强度]", "[文字]")
 	aiPaintCNCommand    = command.NewNode([]string{"paintcn", "中文画图", "中文"}, "中文文字生成图像", false, aiChinesePaint, "<文字>")
 	aiMadokaCommand     = command.NewNode([]string{"madoka", "円香", "画円香"}, "文字生成图像(円香)", false, aiMadoka, "<文字>")
@@ -298,6 +273,7 @@ var (
 var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
 	aiWaifu2Command,
+	aiSetuCommand,
 	aiImg2ImgCommand,
 	aiMadokaCommand,
 	aiPaintCommand,
@@ -310,10 +286,6 @@ var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指�
 func init() {
 	command.AddCommand(aiCommand)
 }
-
-// hugging face utils
-
-const badPrompt = `bad feet, bad foot, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, normal quality, jpeg artifacts, signature, watermark, username, blurry`
 
 func generateHuggingFaceText(args []string, source *command.MessageSource, models ...string) error {
 	reply := qq.CreateReply(source.Message)
@@ -408,4 +380,42 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 	msg := qq.CreateReply(source.Message)
 	msg.Append(img)
 	return qq.SendGroupMessage(msg)
+}
+
+func generateNovelAIImage(args []string, source *command.MessageSource, exclude ai.ExcludeType) error {
+	reply := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		reply.Append(message.NewText("参数不能为空!"))
+		return qq.SendGroupMessage(reply)
+	}
+
+	reply.Append(qq.NewTextf("正在生成图像...."))
+	_ = qq.SendGroupMessage(reply)
+
+	inputs := strings.Join(args, " ")
+
+	url, err := ai.GetNovelAI8zywImage(
+		ai.New8zywPayload(
+			inputs,
+			exclude,
+		),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	img, err := qq.NewImageByUrl(url)
+	if err != nil {
+		return err
+	}
+
+	reply = qq.CreateReply(source.Message)
+	reply.Append(img)
+	if exclude == ai.WithoutR18 {
+		return qq.SendGroupMessage(reply)
+	} else {
+		return qq.SendGroupMessageAndRecall(reply, 30*time.Second)
+	}
 }
