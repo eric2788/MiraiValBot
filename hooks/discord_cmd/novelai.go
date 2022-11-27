@@ -89,6 +89,11 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 		},
 	})
 
+	t := ai.WithNSFW
+	if nsfw {
+		t = ai.WithR18
+	}
+
 	if err != nil {
 		return
 	}
@@ -96,7 +101,7 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 	img, err := ai.GetNovelAI8zywImage(
 		ai.New8zywPayload(
 			description,
-			nsfw,
+			t,
 			strings.Split(badPrompt, ",")...,
 		),
 	)
