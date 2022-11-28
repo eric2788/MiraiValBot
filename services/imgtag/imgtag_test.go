@@ -3,14 +3,18 @@ package imgtag
 import (
 	"strings"
 	"testing"
+
+	"github.com/eric2788/MiraiValBot/internal/file"
 )
 
 func TestTagImage(t *testing.T) {
-	tags, nsfw, err := GetTagsFromImage("https://preview.redd.it/9gjq7h4szi0a1.jpg?width=640&crop=smart&auto=webp&s=1dcafa0e449331010764731a4f41f095981dad86")
+	file.DataStorage.Setting.TagClassifyLimit = 0.5
+	tags, err := GetTagsFromImage("https://cdn.discordapp.com/attachments/898123452089778236/1046596783041691700/1280px-.jpg")
 	if err != nil {
 		t.Skip(err)
 	}
-	t.Logf("tags: %s, nsfw: %t", strings.Join(tags, ", "), nsfw)
+	t.Logf("tags: %s", strings.Join(tags, ", "))
+	t.Logf("size: %d", len(tags))
 }
 
 func TestSearchTags(t *testing.T) {

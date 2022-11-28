@@ -49,9 +49,14 @@ func (w *websocketHandler) Handle(s *SpaceApi) (*SpaceResp, error) {
 		case <-ticker.C:
 			return nil, fmt.Errorf("timeout")
 		default:
-			_, message, err := conn.ReadMessage()
+			t, message, err := conn.ReadMessage()
 			if err != nil {
 				return nil, err
+			}
+			if t == websocket.CloseMessage {
+				return nil, fmt.Errorf("websocket closed.")
+			} else if t > 2 {
+				continue
 			}
 			var resp SpaceWssResp
 			err = json.Unmarshal(message, &resp)
@@ -62,7 +67,7 @@ func (w *websocketHandler) Handle(s *SpaceApi) (*SpaceResp, error) {
 			case ProcessCompleted:
 				logger.Debugf("Process Completed: %v", resp.Output)
 				return &SpaceResp{
-					Data:            resp.GetStringData(),
+					Data:            resp.Output["data"].([]interface{}),
 					Duration:        resp.AvgEventProcessTime,
 					AverageDuration: resp.AvgEventConcurrentProcessTime,
 				}, nil

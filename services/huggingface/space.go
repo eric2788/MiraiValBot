@@ -34,7 +34,14 @@ func (s *SpaceApi) GetResultImages() ([][]byte, error) {
 		return nil, err
 	}
 	var list [][]byte
-	for _, d := range resp.Data {
+	for _, line := range resp.Data {
+
+		d, ok := line.(string)
+
+		if !ok {
+			logger.Warnf("%v is not string type, skipped.", line)
+			continue
+		}
 
 		// should be error message
 		if strings.HasPrefix(d, "<h4>Error</h4>") {
@@ -63,9 +70,42 @@ func (s *SpaceApi) GetGeneratedTexts() ([]string, error) {
 		return nil, err
 	}
 	var list []string
-	for _, d := range resp.Data {
+	for _, line := range resp.Data {
+
+		d, ok := line.(string)
+
+		if !ok {
+			logger.Warnf("%v is not string type, skipped.", line)
+			continue
+		}
+
 		txts := strings.Split(d, "\n\n")
 		list = append(list, txts...)
 	}
 	return list, nil
+}
+
+func (s *SpaceApi) GetClassifiedLabels() (map[string]float64, error) {
+	resp, err := s.handler.Handle(s)
+	if err != nil {
+		return nil, err
+	}
+
+	results := make(map[string]float64)
+
+	for i := range resp.Data {
+		var tagger SpaceLabelTag
+		err = resp.ParseData(i, &tagger)
+		if err != nil {
+			logger.Errorf("error parsing Data[%d]: %v", i, err)
+		} else {
+
+			for _, tag := range tagger.Confidences {
+				results[tag.Label] = tag.Confidence
+			}
+
+		}
+	}
+
+	return results, nil
 }
