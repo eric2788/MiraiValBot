@@ -133,6 +133,10 @@ func ParseMsgContent(elements []message.IMessageElement) *MsgContent {
 
 		switch e := element.(type) {
 		case *message.TextElement:
+			// have @element and no space in text
+			if strings.HasPrefix(e.Content, "@") && !strings.Contains(e.Content, " ") {
+				continue
+			}
 			content.Texts = append(content.Texts, e.Content)
 		case *message.AtElement:
 			content.At = append(content.At, e.Target)
