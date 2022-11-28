@@ -1,6 +1,9 @@
 package huggingface
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type (
 
@@ -62,13 +65,21 @@ type (
 
 	// Common Resp
 	SpaceResp struct {
-		Data            []string `json:"data"`
-		Duration        float64  `json:"duration"`
-		AverageDuration float64  `json:"average_duration"`
-		IsGenerating    bool     `json:"is_generating"`
+		Data            []interface{} `json:"data"`
+		Duration        float64       `json:"duration"`
+		AverageDuration float64       `json:"average_duration"`
+		IsGenerating    bool          `json:"is_generating"`
 
 		Durations        []float64 `json:"durations"`
 		AverageDurations []float64 `json:"average_durations"`
+	}
+
+	SpaceLabelTag struct {
+		Label       string `json:"label"`
+		Confidences []struct {
+			Label      string  `json:"label"`
+			Confidence float64 `json:"confidence"`
+		} `json:"confidences"`
 	}
 )
 
@@ -92,11 +103,17 @@ func (sp *SpaceResp) GetAverageDuration() float64 {
 	return 0
 }
 
-func (sp *SpaceWssResp) GetStringData() []string {
-	outputs := sp.Output["data"].([]interface{})
-	results := make([]string, len(outputs))
-	for i, output := range outputs {
-		results[i] = fmt.Sprint(output)
+func (sp *SpaceResp) ParseData(index int, arg interface{}) error {
+	if index >= len(sp.Data) {
+		return fmt.Errorf("index out of range: %d", index)
 	}
-	return results
+	m, ok := sp.Data[index].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("cannot parse data: Data[%d] is not map type", index)
+	}
+	b, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(b, arg)
 }

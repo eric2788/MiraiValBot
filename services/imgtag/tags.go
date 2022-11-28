@@ -5,30 +5,73 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/services/huggingface"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 	"github.com/eric2788/common-utils/request"
 )
 
 const tagURL = "https://nsfwtag.azurewebsites.net/api/tag?limit=%f&url=%s"
 
-func GetTagsFromImage(imgUrl string) ([]string, bool, error) {
+var logger = utils.GetModuleLogger("service.imgtag")
+
+type ImageTagger func(imgUrl string, confidence float64) (map[string]float64, error)
+
+var taggerProviders = map[string]ImageTagger{
+	"hfspace": getTagFromHFSpace,
+	"azure":   getTagFromAzure,
+}
+
+func GetTagsFromImage(imgUrl string) ([]string, error) {
 	var dict map[string]float64
-	err := request.Get(fmt.Sprintf(tagURL, file.DataStorage.Setting.TagClassifyLimit, url.QueryEscape(imgUrl)), &dict)
-	if err != nil {
-		return nil, false, err
+	var err error
+
+	for name, provider := range taggerProviders {
+
+		dict, err = provider(imgUrl, file.DataStorage.Setting.TagClassifyLimit)
+		if err != nil {
+			logger.Errorf("从 %s 获取图片鉴别标签错误: %v, 将使用下一个API", name, err)
+		} else {
+			break
+		}
 	}
+
+	if err != nil {
+		return nil, err
+	}
+
 	var tags []string
-	nsfw := false
-	for key, sample := range dict {
-		if key == "rating:safe" {
-			nsfw = sample <= 0.55
-		} else if key == "rating:questionable" {
-			nsfw = sample >= 0.75
-		} else if key == "rating:explicit" {
-			nsfw = sample >= 0.55
+	for key := range dict {
+		if strings.HasPrefix(key, "rating:") {
+			continue
 		} else { //filter rating:xxx
 			tags = append(tags, strings.ReplaceAll(key, "_", " "))
 		}
 	}
-	return tags, nsfw, nil
+	return tags, nil
+}
+
+func getTagFromAzure(imgUrl string, confidence float64) (map[string]float64, error) {
+	var dict map[string]float64
+	err := request.Get(fmt.Sprintf(tagURL, confidence, url.QueryEscape(imgUrl)), &dict)
+	return dict, err
+}
+
+func getTagFromHFSpace(imgUrl string, confidence float64) (map[string]float64, error) {
+
+	b64, t, err := misc.ReadURLToSrcData(imgUrl)
+
+	if err != nil {
+		return nil, err
+	} else if !strings.HasPrefix(t, "image/") {
+		return nil, fmt.Errorf("url is not image type")
+	}
+
+	api := huggingface.NewSpaceApi("mayhug-rainchan-anime-image-label",
+		b64,
+		confidence,
+		"ResNet50",
+	)
+	return api.EndPoint("api/predict/").GetClassifiedLabels()
 }

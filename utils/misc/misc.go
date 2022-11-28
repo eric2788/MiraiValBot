@@ -3,12 +3,13 @@ package misc
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/eric2788/common-utils/request"
 	"math/rand"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/eric2788/common-utils/request"
 
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -127,11 +128,16 @@ func TrimPrefixes(s string, prefixes ...string) string {
 }
 
 // ReadURLToSrcData return base64, type, error
-func ReadURLToSrcData(url string) (string, string, error) {
+func ReadURLToSrcData(url string) (s string, t string, err error) {
 	b, err := request.GetBytesByUrl(url)
 	if err != nil {
 		return "", "", fmt.Errorf("图片下载失败: %v", err)
 	}
+	s, t = ReadBytesToSrcData(b)
+	return
+}
+
+func ReadBytesToSrcData(b []byte) (string, string) {
 	t := http.DetectContentType(b)
-	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), t, nil
+	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), t
 }

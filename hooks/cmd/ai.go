@@ -1,18 +1,17 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/services/ai"
-	"github.com/eric2788/MiraiValBot/utils/misc"
 	"math/rand"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/services/ai"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
@@ -94,13 +93,12 @@ func aiTags(args []string, source *command.MessageSource) error {
 	reply = qq.CreateReply(source.Message)
 
 	img := imgs[0]
-	tag, nsfw, err := imgtag.GetTagsFromImage(img)
+	tag, err := imgtag.GetTagsFromImage(img)
 	if err != nil {
 		return err
 	}
 
 	reply.Append(qq.NewTextfLn("图片识别标签: %s", strings.Join(tag, ", ")))
-	reply.Append(qq.NewTextf("NSFW: %t", nsfw))
 	return qq.SendGroupMessage(reply)
 }
 
@@ -176,9 +174,8 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 			}
 			img = &url
 		} else if b, _ := qq.GetCacheImage(hex.EncodeToString(imgs[0].Md5)); b != nil {
-			t := http.DetectContentType(b)
+			t, b64 := misc.ReadBytesToSrcData(b)
 			if t == "image/jpeg" || t == "image/png" {
-				b64 := fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b)
 				img = &b64
 			} else {
 				return fmt.Errorf("不支持的图片类型: %s", t)
