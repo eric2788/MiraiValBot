@@ -30,7 +30,7 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
 
-	reply := qq.CreateAtReply(msg)
+	reply := qq.CreateReply(msg)
 
 	for _, ai := range aichats {
 
