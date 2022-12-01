@@ -24,7 +24,10 @@ var (
 	stopGameCommand  = command.NewNode([]string{"stop", "中止", "关闭"}, "中止目前游戏", false, stopGame)
 )
 
-var gameCommand = command.NewParent([]string{"parent", "游戏"}, "文字游戏指令")
+var gameCommand = command.NewParent([]string{"game", "游戏"}, "文字游戏指令",
+	startGameCommand,
+	stopGameCommand,
+)
 
 func init() {
 	command.AddCommand(gameCommand)
