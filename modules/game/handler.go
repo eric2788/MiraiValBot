@@ -12,7 +12,7 @@ import (
 type (
 	Handler interface {
 		Start()
-		Handle(msg *message.GroupMessage) Result
+		Handle(msg *message.GroupMessage) *Result
 		Stop()
 	}
 
@@ -27,8 +27,8 @@ var (
 	games               = make(map[string]Handler)
 	currentGame Handler = nil
 
-	ContinueResult = Result{EndGame: false}
-	TerminateResult = Result{EndGame: true}
+	ContinueResult  = &Result{EndGame: false}
+	TerminateResult = &Result{EndGame: true}
 )
 
 func StartGame(name string) string {

@@ -28,7 +28,7 @@ func (g *guessWhoSaid) Start() {
 	g.sendNextQuestion()
 }
 
-func (g *guessWhoSaid) Handle(msg *message.GroupMessage) game.Result {
+func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 
 	reply := qq.CreateAtReply(msg)
 
@@ -79,18 +79,17 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) game.Result {
 }
 
 func (g *guessWhoSaid) sendNextQuestion() {
-	_ = qq.SendGroupMessage(message.NewSendingMessage().Append(qq.NewTextf("猜猜下面的信息是谁发的:")))
 	_ = qq.SendGroupMessage(g.nextQuestion())
 }
 
-func (g *guessWhoSaid) calculateFinalResult() game.Result {
+func (g *guessWhoSaid) calculateFinalResult() *game.Result {
 	winner, s := int64(0), 0
 	for uid, score := range g.scores {
 		if score > s {
 			winner = uid
 		}
 	}
-	result := game.TerminateResult
+	result := &game.Result{EndGame: true}
 	if winner == 0 {
 		if member := qq.FindGroupMember(winner); member != nil {
 			result.Winner = member
@@ -109,6 +108,8 @@ func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
 		return g.nextQuestion()
 	}
 	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("猜猜下面的信息是谁发的 👇\n"))
+
 	for _, ele := range random.Elements {
 		if _, ok := ele.(*message.ReplyElement); ok {
 			continue
@@ -131,7 +132,6 @@ func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
 }
 
 func (g *guessWhoSaid) Stop() {
-
 }
 
 func init() {
