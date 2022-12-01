@@ -45,7 +45,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 			case "photo":
 				img, err := qq.NewImageByUrl(m.MediaUrlHttps)
 				if err != nil {
-					logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
+					logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
+					msg.Append(qq.NewTextf("\n图片\n%s", m.MediaUrlHttps))
 				} else {
 					msg.Append(img)
 				}
@@ -73,7 +74,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 					logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
 					img, err := qq.NewImageByUrl(m.MediaUrlHttps)
 					if err != nil {
-						logger.Warnf("加载推特图片 %s 时出现错误: %v", m.MediaUrlHttps, err)
+						logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
+						msg.Append(qq.NewTextf("\n视频封面\n%s", m.MediaUrlHttps))
 					} else {
 						msg.Append(img)
 					}

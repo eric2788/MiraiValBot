@@ -7,6 +7,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/modules/game"
 	"github.com/eric2788/common-utils/array"
 )
 
@@ -34,6 +35,11 @@ type (
 
 func (a *atResponse) HookEvent(bot *bot.Bot) {
 	bot.GroupMessageEvent.Subscribe(func(cl *client.QQClient, msg *message.GroupMessage) {
+
+		if game.IsInGame() {
+			return
+		}
+
 		content := qq.ParseMsgContent(msg.Elements)
 
 		if array.IndexOfInt64(content.At, cl.Uin) != -1 && len(content.Texts) > 0 {
