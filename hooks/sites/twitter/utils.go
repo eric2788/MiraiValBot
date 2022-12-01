@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	noTweetLinkPattern = regexp.MustCompile("https:\\/\\/t\\.co\\/\\w+")
+	noTweetLinkPattern = regexp.MustCompile(`https:\/\/t\.co\/\w+`)
 )
 
 func TextWithoutTCLink(txt string) string {

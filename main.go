@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"syscall"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/config"
@@ -32,11 +33,15 @@ import (
 	// 所有定時器任務
 	_ "github.com/eric2788/MiraiValBot/hooks/timer_tasks"
 
+	// 所有游戏
+	_ "github.com/eric2788/MiraiValBot/hooks/games"
+
 	// 註冊模組
 	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
 	_ "github.com/eric2788/MiraiValBot/modules/chat_reply"
 	_ "github.com/eric2788/MiraiValBot/modules/command"
 	_ "github.com/eric2788/MiraiValBot/modules/counting"
+	_ "github.com/eric2788/MiraiValBot/modules/game"
 	_ "github.com/eric2788/MiraiValBot/modules/privatechat"
 	_ "github.com/eric2788/MiraiValBot/modules/repeatchat"
 	_ "github.com/eric2788/MiraiValBot/modules/response"
@@ -91,7 +96,7 @@ func main() {
 	eventhook.HookBotEvents()
 
 	ch := make(chan os.Signal, 1)
-	signal.Notify(ch, os.Interrupt, os.Kill)
+	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	<-ch
 	bot.Stop()
 	file.SaveStorage()
