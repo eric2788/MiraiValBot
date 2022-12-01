@@ -2,9 +2,11 @@ package game
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
+	"golang.org/x/exp/maps"
 )
 
 type (
@@ -38,7 +40,7 @@ func StartGame(name string) string {
 		currentGame.Start()
 		return fmt.Sprintf("成功启动游戏: %s", name)
 	} else {
-		return fmt.Sprintf("找不到游戏: %s", name)
+		return fmt.Sprintf("找不到游戏: %s, 可用游戏: %v", name, strings.Join(maps.Keys(games), ", "))
 	}
 }
 
