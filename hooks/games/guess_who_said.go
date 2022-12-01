@@ -33,8 +33,8 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) game.Result {
 	reply := qq.CreateAtReply(msg)
 
 	if g.currentSender == nil {
-		reply.Append(qq.NewTextf("错误: 找不到目前的进度，请重新启动游戏"))
-		return game.TerminateResult
+		reply.Append(qq.NewTextf("题目尚未出现!"))
+		return game.ContinueResult
 	}
 
 	at := qq.ParseMsgContent(msg.Elements).At
@@ -55,12 +55,12 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) game.Result {
 
 	if ans == g.currentSender.Uin {
 		reply.Append(qq.NewTextf("恭喜答对! 请听下一题"))
+		_ = qq.SendGroupMessage(reply)
 		if score, ok := g.scores[msg.Sender.Uin]; ok {
 			g.scores[msg.Sender.Uin] = score + 1
 		} else {
 			g.scores[msg.Sender.Uin] = 1
 		}
-		_ = qq.SendGroupMessage(reply)
 		g.sendNextQuestion()
 		return game.ContinueResult
 	} else {
@@ -126,6 +126,7 @@ func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
 		return g.nextQuestion()
 	}
 
+	g.currentSender = random.Sender
 	return msg
 }
 
