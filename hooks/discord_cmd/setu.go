@@ -2,11 +2,12 @@ package discord_cmd
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/services/discord"
 	"github.com/eric2788/MiraiValBot/services/waifu"
-	"strings"
 )
 
 type setu struct {
@@ -111,7 +112,7 @@ func (s *setu) Handler(session *discordgo.Session, interact *discordgo.Interacti
 	}
 
 	content := fmt.Sprintf("正在发送色图到频道 <#%d> ....", config.NsfwChannel)
-	_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
+	_, _ = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
 		Content: &content,
 	})
 	for _, img := range imgs {

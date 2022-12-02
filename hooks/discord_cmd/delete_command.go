@@ -2,6 +2,7 @@ package discord_cmd
 
 import (
 	"fmt"
+
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/services/discord"
 )
@@ -42,19 +43,15 @@ func (d *deleteCommand) Handler(session *discordgo.Session, interact *discordgo.
 	err = session.ApplicationCommandDelete(interact.AppID, interact.GuildID, optMap["id"].StringValue())
 
 	if err != nil {
-		err = session.InteractionRespond(interact.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: fmt.Sprintf("刪除指令失敗: %v", err),
-			},
+		content := fmt.Sprintf("刪除指令失敗: %v", err)
+		_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
+			Content: &content,
 		})
 		return
 	} else {
-		err = session.InteractionRespond(interact.Interaction, &discordgo.InteractionResponse{
-			Type: discordgo.InteractionResponseChannelMessageWithSource,
-			Data: &discordgo.InteractionResponseData{
-				Content: "刪除指令成功",
-			},
+		content := "刪除指令成功"
+		_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
+			Content: &content,
 		})
 		return
 	}
