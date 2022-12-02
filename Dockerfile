@@ -28,6 +28,6 @@ ENV CACHE_STRATEGY=local
 
 WORKDIR /app
 
-VOLUME [ "/app/data", "/app/cache", "/app/logs" ]
+VOLUME [ "/app/data", "/app/cache" ]
 
 ENTRYPOINT [ "/valbot" ]
