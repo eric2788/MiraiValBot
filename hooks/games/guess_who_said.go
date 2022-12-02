@@ -86,7 +86,7 @@ func (g *guessWhoSaid) calculateFinalResult() *game.Result {
 	winner, s := int64(0), 0
 	for uid, score := range g.scores {
 		if score > s {
-			winner = uid
+			winner, s = uid, score
 		}
 	}
 	result := &game.Result{EndGame: true}
