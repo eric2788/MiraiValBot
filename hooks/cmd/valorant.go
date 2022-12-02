@@ -298,11 +298,7 @@ func leaderboard(args []string, source *command.MessageSource) error {
 				msg.Append(qq.NewTextfLn("段位: %s", player.CurrentTierPatched))
 			}
 
-			// 如果不是死鬥模式，則顯示所屬隊伍
-			if strings.ToLower(match.MetaData.Mode) != "deathmatch" {
-				msg.Append(qq.NewTextfLn("队伍: %s", player.Team))
-			}
-
+			msg.Append(qq.NewTextfLn("队伍: %s", player.Team))
 			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
 			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
 			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
