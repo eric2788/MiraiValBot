@@ -19,8 +19,9 @@ var logger = utils.GetModuleLogger("service.imgtag")
 type ImageTagger func(imgUrl string, confidence float64) (map[string]float64, error)
 
 var taggerProviders = map[string]ImageTagger{
-	"hfspace": getTagFromHFSpace,
-	"azure":   getTagFromAzure,
+	"hfspace2": getTagFromHFSpace2,
+	"hfspace":  getTagFromHFSpace,
+	"azure":    getTagFromAzure,
 }
 
 func GetTagsFromImage(imgUrl string) ([]string, error) {
@@ -58,6 +59,7 @@ func getTagFromAzure(imgUrl string, confidence float64) (map[string]float64, err
 	return dict, err
 }
 
+// getTagFromHFSpace using model: mayhug-rainchan-anime-image-label
 func getTagFromHFSpace(imgUrl string, confidence float64) (map[string]float64, error) {
 
 	b64, t, err := misc.ReadURLToSrcData(imgUrl)
@@ -74,4 +76,26 @@ func getTagFromHFSpace(imgUrl string, confidence float64) (map[string]float64, e
 		"ResNet50",
 	)
 	return api.EndPoint("api/predict/").GetClassifiedLabels()
+}
+
+// getTagFromHFSpace2 using model:
+func getTagFromHFSpace2(imgUrl string, confidence float64) (tags map[string]float64, err error) {
+	b64, t, err := misc.ReadURLToSrcData(imgUrl)
+	if err != nil {
+		return nil, err
+	} else if !strings.HasPrefix(t, "image/") {
+		return nil, fmt.Errorf("url is not image type")
+	}
+
+	api := huggingface.NewSpaceApi("hysts-deepdanbooru", b64, confidence)
+	tags, err = api.EndPoint("api/predict/").GetClassifiedLabels()
+	if err != nil {
+		return
+	}
+	for tag := range tags {
+		if strings.HasPrefix(tag, "rating:") {
+			delete(tags, tag)
+		}
+	}
+	return
 }
