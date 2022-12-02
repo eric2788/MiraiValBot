@@ -23,11 +23,11 @@ func RegisterCommand(c Command) {
 func HookCommands() {
 	// delete all commands before hook
 	// UnRegisterCommands()
+	logger.Infof("正在注册 %d 个 Discord 指令...", len(commandHandler))
 	for name, cmd := range commandHandler {
 		_, err := client.ApplicationCommandCreate(client.State.User.ID, fmt.Sprint(config.Guild), cmd.ApplicationCommand())
 		if err != nil {
 			logger.Errorf("注册指令 %s 失败: %v", name, err)
-			continue
 		} else {
 			logger.Infof("注册 Discord 指令 %s 成功", name)
 		}
