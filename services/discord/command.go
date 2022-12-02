@@ -2,9 +2,9 @@ package discord
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
-	"github.com/eric2788/common-utils/set"
 	"runtime/debug"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 type Command interface {
@@ -13,8 +13,7 @@ type Command interface {
 }
 
 var (
-	commandHandler     = make(map[string]Command)
-	registeredCommands = set.NewString()
+	commandHandler = make(map[string]Command)
 )
 
 func RegisterCommand(c Command) {
@@ -23,15 +22,14 @@ func RegisterCommand(c Command) {
 
 func HookCommands() {
 	// delete all commands before hook
-	UnRegisterCommands()
+	// UnRegisterCommands()
 	for name, cmd := range commandHandler {
-		data, err := client.ApplicationCommandCreate(client.State.User.ID, fmt.Sprint(config.Guild), cmd.ApplicationCommand())
+		_, err := client.ApplicationCommandCreate(client.State.User.ID, fmt.Sprint(config.Guild), cmd.ApplicationCommand())
 		if err != nil {
 			logger.Errorf("注册指令 %s 失败: %v", name, err)
 			continue
 		} else {
 			logger.Infof("注册 Discord 指令 %s 成功", name)
-			registeredCommands.Add(data.ID)
 		}
 	}
 	client.AddHandler(handleCommands)
