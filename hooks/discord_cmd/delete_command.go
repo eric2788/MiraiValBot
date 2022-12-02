@@ -42,20 +42,19 @@ func (d *deleteCommand) Handler(session *discordgo.Session, interact *discordgo.
 
 	err = session.ApplicationCommandDelete(interact.AppID, interact.GuildID, optMap["id"].StringValue())
 
+	var content string
 	if err != nil {
-		content := fmt.Sprintf("刪除指令失敗: %v", err)
-		_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		return
+		content = fmt.Sprintf("刪除指令失敗: %v", err)
 	} else {
-		content := "刪除指令成功"
-		_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
-			Content: &content,
-		})
-		return
+		content = "刪除指令成功"
 	}
+
+	_, err = session.InteractionResponseEdit(interact.Interaction, &discordgo.WebhookEdit{
+		Content: &content,
+	})
+	return
 }
+
 
 func init() {
 	discord.RegisterCommand(&deleteCommand{})
