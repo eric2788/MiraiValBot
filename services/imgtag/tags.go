@@ -78,7 +78,7 @@ func getTagFromHFSpace(imgUrl string, confidence float64) (map[string]float64, e
 	return api.EndPoint("api/predict/").GetClassifiedLabels()
 }
 
-// getTagFromHFSpace2 using model:
+// getTagFromHFSpace2 using model: hysts-deepdanbooru
 func getTagFromHFSpace2(imgUrl string, confidence float64) (tags map[string]float64, err error) {
 	b64, t, err := misc.ReadURLToSrcData(imgUrl)
 	if err != nil {
