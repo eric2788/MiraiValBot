@@ -31,6 +31,8 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
 		if !file.DataStorage.Setting.VerboseDelete {
 			return
+		} else if event.AuthorUin == c.Uin {
+			return
 		}
 
 		var who string
@@ -58,6 +60,8 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 
 		if !file.DataStorage.Setting.VerboseDelete {
 			return
+		} else if gm.Sender.Uin == c.Uin {
+			return
 		}
 
 		key := qq.GroupKey(gm.GroupCode, fmt.Sprintf("msg:%d", gm.Id))
@@ -79,5 +83,5 @@ func (v *verbose) HookEvent(qqBot *bot.Bot) {
 }
 
 func init() {
-	eventhook.RegisterAsModule(instance, "Verbose", Tag, logger)
+	eventhook.RegisterAsModule(instance, "显示撤回消息", Tag, logger)
 }
