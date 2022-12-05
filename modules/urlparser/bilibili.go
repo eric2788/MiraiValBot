@@ -44,8 +44,36 @@ type (
 					Face string `json:"face"`
 				} `json:"owner"`
 				Stats struct {
-				}
+					View      int64 `json:"view"`
+					Danmaku   int64 `json:"danmaku"`
+					Reply     int64 `json:"reply"`
+					Favourite int64 `json:"favourite"`
+					Coin      int64 `json:"coin"`
+					Share     int64 `json:"share"`
+					Like      int64 `json:"like"`
+					DisLike   int64 `json:"dislike"`
+				} `json:"stats"`
+				Cid   int64 `json:"cid"`
+				Pages []struct {
+					Part       string `json:"part"`
+					FirstFrame string `json:"first_frame"`
+					Cid        int64  `json:"cid"`
+					Page       int    `json:"page"`
+					Vid        string `json:"vid"`
+					Weblink    string `json:"weblink"`
+				} `json:"pages"`
 			} `json:"View"`
+
+			Tags []struct {
+				TagId        int    `json:"tag_id"`
+				TagName      string `json:"tag_name"`
+				Cover        string `json:"cover"`
+				HeadCover    string `json:"head_cover"`
+				Content      string `json:"content"`
+				ShortContent string `json:"short_content"`
+				Type         int    `json:"type"`
+				Color        string `json:"color"`
+			} `json:"tags"`
 		} `json:"data"`
 	}
 )
