@@ -15,8 +15,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 
 	videos := make([]*message.ShortVideoElement, 0)
 
-	// 内文
-	msg.Append(qq.NewTextLn(data.Text))
+	// 内文 (need to change html &gt back to >)
+	msg.Append(qq.NewTextLn(data.UnEsacapedText()))
 
 	if len(alt) > 0 {
 		msg.Append(qq.NextLn())

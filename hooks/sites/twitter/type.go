@@ -1,5 +1,7 @@
 package twitter
 
+import "html"
+
 const (
 	Tweet           = "TWEET"
 	ReTweet         = "RETWEET"
@@ -152,4 +154,9 @@ func (t TweetStreamData) GetCommand() string {
 	default:
 		return Tweet
 	}
+}
+
+// with html unescaped string
+func (t TweetStreamData) UnEsacapedText() string {
+	return html.UnescapeString(t.Text)
 }

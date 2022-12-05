@@ -46,13 +46,13 @@ func handleRetweetDiscord(data *twitter.TweetStreamData, withText bool) {
 	if withText {
 		first.Fields = append(first.Fields, &discordgo.MessageEmbedField{
 			Name:  "附文",
-			Value: data.Text,
+			Value: data.UnEsacapedText(),
 		})
 	}
 
 	if data.RetweetedStatus != nil {
 		retweetedDiscordMessage := &discordgo.MessageEmbed{
-			Description: data.Text,
+			Description: data.UnEsacapedText(),
 		}
 		twitter.AddEntitiesByDiscord(retweetedDiscordMessage, data.RetweetedStatus)
 		discord.SendNewsEmbedDouble(first, retweetedDiscordMessage)
@@ -68,7 +68,7 @@ func HandleReTweetWithText(_ *bot.Bot, data *twitter.TweetStreamData) error {
 	msg.Append(qq.NewTextfLn("%s 转发了一则推文", data.User.Name))
 	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextLn("附文"))
-	msg.Append(qq.NewTextLn(twitter.TextWithoutTCLink(data.Text)))
+	msg.Append(qq.NewTextLn(twitter.TextWithoutTCLink(data.UnEsacapedText())))
 	msg.Append(qq.NextLn())
 	if data.QuotedStatus != nil {
 		msg.Append(qq.NewTextLn("================="))

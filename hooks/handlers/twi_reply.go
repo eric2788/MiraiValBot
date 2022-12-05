@@ -28,7 +28,7 @@ func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
 			},
 			{
 				Name:  "回复内容",
-				Value: twitter.TextWithoutTCLink(data.Text),
+				Value: twitter.TextWithoutTCLink(data.UnEsacapedText()),
 			},
 		},
 	}

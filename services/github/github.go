@@ -13,7 +13,6 @@ import (
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	gh "github.com/google/go-github/v48/github"
-	"github.com/subosito/gotenv"
 	"golang.org/x/oauth2"
 )
 
@@ -204,11 +203,5 @@ func generateAuthor() *gh.CommitAuthor {
 		Name:  &name,
 		Email: &email,
 		Date:  &now,
-	}
-}
-
-func init() {
-	if err := gotenv.Load(".env.local"); err == nil {
-		logger.Debugf("successfully loaded local environment variables.")
 	}
 }
