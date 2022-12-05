@@ -64,7 +64,7 @@ func (r *response) HookEvent(bot *bot.Bot) {
 					send, err := misc.NewRandomDragon()
 
 					if err != nil {
-						logger.Errorf("获取龙图失败: %v, 改为发送随机群消息", err)
+						logger.Errorf("获取龙图失败: %v, 改为发送随机群图片", err)
 						send, err = misc.NewRandomImage()
 					}
 
