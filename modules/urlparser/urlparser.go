@@ -9,24 +9,27 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/corpix/uarand"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
 )
 
 const Tag = "valbot.urlparser"
 
 var (
-	logger    = utils.GetModuleLogger(Tag)
-	instance  = &urlParser{}
-	providers = []InfoProvider{
+	linkPattern = regexp.MustCompile(`https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`)
+	logger      = utils.GetModuleLogger(Tag)
+	instance    = &urlParser{}
+	providers   = []InfoProvider{
 		&bilibili{},
+		&common{}, // 最底部
 	}
 )
 
 type (
 	InfoProvider interface {
-		ParseURL(content string) Broadcaster
+		ParseURL(url string) Broadcaster
 	}
 
-	Broadcaster func(bot *client.QQClient, event *message.GroupMessage)
+	Broadcaster func(bot *client.QQClient, event *message.GroupMessage) error
 
 	urlParser struct {
 	}
@@ -34,34 +37,45 @@ type (
 
 func (u *urlParser) HookEvent(bot *bot.Bot) {
 	bot.GroupMessageEvent.Subscribe(func(client *client.QQClient, event *message.GroupMessage) {
+
+		if event.Sender.Uin == client.Uin {
+			return
+		}
+
 		msg := event.ToString()
-		for _, provider := range providers {
-			if do := provider.ParseURL(msg); do != nil {
-				do(client, event)
+		if !linkPattern.MatchString(msg) {
+			return
+		}
+
+		links := linkPattern.FindAllString(msg, -1)
+
+		for _, link := range links {
+			for _, provider := range providers {
+				if do := provider.ParseURL(link); do == nil {
+					continue
+				} else if err := do(client, event); err != nil {
+					logger.Error(err)
+				} else {
+					break
+				}
 			}
 		}
 	})
 }
 
-func parsePattern(text string, pattern *regexp.Regexp) [][]string {
+func parsePattern(url string, pattern *regexp.Regexp) []string {
 
-	if !pattern.MatchString(text) {
+	if !pattern.MatchString(url) {
 		return nil
 	}
 
-	results := make([][]string, 0)
+	match := pattern.FindStringSubmatch(url)
 
-	matches := pattern.FindAllStringSubmatch(text, -1)
-
-	for _, match := range matches {
-		if len(match) < 2 {
-			continue
-		}
-
-		results = append(results, match[1:])
+	if len(match) < 2 {
+		return nil
 	}
 
-	return results
+	return match[1:]
 }
 
 func getRedirectLink(shortURL string) (string, error) {
@@ -76,4 +90,8 @@ func getRedirectLink(shortURL string) (string, error) {
 	}
 	defer res.Body.Close()
 	return res.Request.URL.String(), nil
+}
+
+func init() {
+	eventhook.RegisterAsModule(instance, "URL解析", Tag, logger)
 }

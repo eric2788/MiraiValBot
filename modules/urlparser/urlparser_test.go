@@ -3,6 +3,10 @@ package urlparser
 import (
 	"strings"
 	"testing"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/eric2788/common-utils/request"
+	"github.com/stretchr/testify/assert"
 )
 
 const (
@@ -11,9 +15,8 @@ const (
 )
 
 func TestParseBV(t *testing.T) {
-	matches := biliLinks[0].FindStringSubmatch(bvlink)
-
-	t.Log(strings.Join(matches, ", "))
+	matches := parsePattern(bvlink, biliLinks[0])
+	assert.Equal(t, "BV1LR4y1y76t", matches[0])
 }
 
 func TestParseShortLink(t *testing.T) {
@@ -22,4 +25,25 @@ func TestParseShortLink(t *testing.T) {
 		t.Skip(err)
 	}
 	t.Logf("%s => %s", shortLink, s)
+}
+
+func TestGoQuery(t *testing.T) {
+	url := "https://b23.tv/qGyBSoE"
+	content, err := request.GetHtml(url)
+	if err != nil {
+		t.Skipf("解析URL %s 出现错误: %v", url, err)
+	}
+	docs, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	if err != nil {
+		t.Skipf("解析URL %s 为 html 时出现错误: %v", url, err)
+	}
+	title := docs.Find("meta[property='og:title']").Text()
+	if title == "" {
+		title = docs.Find("title").Text()
+	}
+	thumbnail := docs.Find("meta[property='og:Image']").AttrOr("content", "")
+	if thumbnail == "" {
+		thumbnail = docs.Find("img").AttrOr("src", "")
+	}
+	t.Logf("title: %q, thumbnail: %q", title, thumbnail)
 }

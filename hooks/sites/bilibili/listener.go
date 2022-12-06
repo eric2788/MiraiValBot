@@ -3,6 +3,7 @@ package bilibili
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/internal/file"
@@ -24,6 +25,14 @@ type RoomInfoData struct {
 	ShortId   int32  `json:"short_id"`
 	Title     string `json:"title"`
 	UserCover string `json:"user_cover"`
+
+	// for external use
+
+	LiveStatus int       `json:"live_status"`
+	AreaName   string    `json:"area_name"`
+	LiveTime   time.Time `json:"live_time"`
+	Online     int64     `json:"online"`
+	KeyFrame   string    `json:"keyframe"`
 }
 
 func (d *RoomInfoData) Parse(data map[string]interface{}) error {
