@@ -37,7 +37,7 @@ func StartGame(name string) string {
 	}
 	if game, ok := games[name]; ok {
 		currentGame = game
-		currentGame.Start()
+		defer currentGame.Start()
 		return fmt.Sprintf("成功启动游戏: %s", name)
 	} else {
 		return fmt.Sprintf("找不到游戏: %s, 可用游戏: %v", name, strings.Join(maps.Keys(games), ", "))

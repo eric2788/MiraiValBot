@@ -90,7 +90,7 @@ func (g *guessWhoSaid) calculateFinalResult() *game.Result {
 		}
 	}
 	result := &game.Result{EndGame: true}
-	if winner == 0 {
+	if winner > 0 {
 		if member := qq.FindGroupMember(winner); member != nil {
 			result.Winner = member
 			result.Score = s

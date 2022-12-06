@@ -114,9 +114,9 @@ func compareMonthly(ts int64) bool {
 
 func tellTime() string {
 	if (*setting).YearlyCheck {
-		return "上年度"
+		return "某年度"
 	} else {
-		return "上个月"
+		return "某个月"
 	}
 }
 

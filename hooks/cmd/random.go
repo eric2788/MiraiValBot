@@ -106,13 +106,7 @@ func randomMessage(args []string, source *command.MessageSource) error {
 	}
 
 	reply := message.NewSendingMessage()
-	var nick string
-	if msg.Sender.CardName == "" {
-		nick = msg.Sender.Nickname
-	} else {
-		nick = msg.Sender.CardName
-	}
-	reply.Append(qq.NewTextfLn("%s 在 %s 说过: ", nick, datetime.FormatSeconds(int64(msg.Time))))
+	reply.Append(qq.NewTextfLn("%s 在 %s 说过: ", msg.Sender.DisplayName(), datetime.FormatSeconds(int64(msg.Time))))
 	for _, element := range msg.Elements {
 		switch element.(type) {
 		case *message.ReplyElement:
@@ -157,7 +151,7 @@ func randomEssence(args []string, source *command.MessageSource) error {
 
 	msgids, err := qq.GetGroupEssenceMsgIds()
 	if err != nil {
-		logger.Warnf("获取群精华消息列表失败: %v, 將使用純緩存列表", source.Message.GroupCode)
+		logger.Warnf("获取群精华消息列表失败: %v, 將使用純緩存列表", err)
 
 		// 快取是 0
 		if len(msgids) == 0 {
@@ -222,7 +216,7 @@ func randomAgent(args []string, source *command.MessageSource) error {
 		return errors.New("角色列表为空")
 	}
 
-	rand.Seed(time.Now().UnixMilli())
+	rand.Seed(time.Now().UnixNano())
 
 	random := agents[rand.Intn(len(agents))]
 
@@ -285,7 +279,7 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 		return errors.New("武器列表为空")
 	}
 
-	rand.Seed(time.Now().UnixMilli())
+	rand.Seed(time.Now().UnixNano())
 
 	random := weapons[rand.Intn(len(weapons))]
 
@@ -306,7 +300,7 @@ func randomWeapon(args []string, source *command.MessageSource) error {
 
 func randomBundle(args []string, source *command.MessageSource) error {
 
-	rand.Seed(time.Now().UnixMicro())
+	rand.Seed(time.Now().UnixNano())
 
 	bundles, err := valorant.GetBundles(valorant.SC)
 	if err != nil {
@@ -357,7 +351,7 @@ func randomSkin(args []string, source *command.MessageSource) error {
 		return qq.SendGroupMessage(msg)
 	}
 
-	rand.Seed(time.Now().UnixMicro())
+	rand.Seed(time.Now().UnixNano())
 
 	skin := weapon.Skins[rand.Intn(len(weapon.Skins))]
 
@@ -372,7 +366,7 @@ func randomSkin(args []string, source *command.MessageSource) error {
 		}
 	} else {
 
-		rand.Seed(time.Now().UnixMicro())
+		rand.Seed(time.Now().UnixNano())
 
 		chroma := skin.Chromas[rand.Intn(len(skin.Chromas))]
 
