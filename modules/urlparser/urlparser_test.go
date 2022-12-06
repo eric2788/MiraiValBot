@@ -37,7 +37,7 @@ func TestGoQuery(t *testing.T) {
 	if err != nil {
 		t.Skipf("解析URL %s 为 html 时出现错误: %v", url, err)
 	}
-	title := docs.Find("meta[property='og:title']").Text()
+	title := docs.Find("meta[property='og:title']").AttrOr("content", "")
 	if title == "" {
 		title = docs.Find("title").Text()
 	}
