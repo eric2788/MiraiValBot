@@ -25,7 +25,7 @@ func (c *common) ParseURL(url string) Broadcaster {
 		if err != nil {
 			return fmt.Errorf("解析URL %s 为 html 时出现错误: %v", url, err)
 		}
-		title := docs.Find("meta[property='og:title']").Text()
+		title := docs.Find("meta[property='og:title']").AttrOr("content", "")
 		if title == "" {
 			title = docs.Find("title").Text()
 		}
