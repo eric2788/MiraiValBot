@@ -53,7 +53,7 @@ type (
 					View      int64 `json:"view"`
 					Danmaku   int64 `json:"danmaku"`
 					Reply     int64 `json:"reply"`
-					Favourite int64 `json:"favourite"`
+					Favourite int64 `json:"favorite"`
 					Coin      int64 `json:"coin"`
 					Share     int64 `json:"share"`
 					Like      int64 `json:"like"`
