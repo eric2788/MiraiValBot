@@ -253,6 +253,7 @@ func SendGroupTempMessage(gp int64, uid int64, msg *message.SendingMessage) (err
 			Reason: Risked,
 		}
 	}
+	result.ToString()
 	return
 }
 

@@ -54,8 +54,12 @@ func (c *common) ParseURL(url string) Broadcaster {
 			}
 		} else if thumbnail != "" {
 
-			if !strings.HasPrefix(thumbnail, "http") {
-				thumbnail = "https:" + thumbnail
+			if strings.HasPrefix(thumbnail, "//") {
+				// //host.com/static/img/qq.png
+				thumbnail = "http:" + thumbnail
+			} else if strings.HasPrefix(thumbnail, "/") {
+				// /static/img/qq.png
+				thumbnail = fmt.Sprintf("http://%s%s", docs.Url.Host, thumbnail)
 			}
 
 			img, err = qq.NewImageByUrl(thumbnail)

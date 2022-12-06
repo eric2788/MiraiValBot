@@ -18,7 +18,7 @@ const biliVideoInfoURL = "http://api.bilibili.com/x/web-interface/view/detail?bv
 
 var (
 	biliLinks = []*regexp.Regexp{
-		regexp.MustCompile(`https?:\/\/(?:www\.)?bilibili\.com\/video\/(BV\w+)\/?`),
+		regexp.MustCompile(`https?:\/\/(?:\w+\.)?bilibili\.com\/video\/(BV\w+)\/?`),
 		regexp.MustCompile(`https?:\/\/b23\.tv\/(BV\w+)\/?`),
 	}
 	liveLink     = regexp.MustCompile(`https?:\/\/live\.bilibili\.com\/(\d+)\/?`)
@@ -58,7 +58,7 @@ type (
 					Share     int64 `json:"share"`
 					Like      int64 `json:"like"`
 					DisLike   int64 `json:"dislike"`
-				} `json:"stats"`
+				} `json:"stat"`
 				Cid   int64 `json:"cid"`
 				Pages []struct {
 					Part       string `json:"part"`
@@ -126,13 +126,14 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 	match := parsePattern(url, liveLink)
 	if match != nil {
 		if id, err := strconv.ParseInt(match[0], 10, 64); err != nil {
-			logger.Errorf("解析bilibili room_id %s 时出现错误: %v", err)
+			logger.Errorf("解析bilibili room_id %s 时出现错误: %v", match[0], err)
 		} else {
 			roomId = id
 		}
 	}
 
 	if bvid == "" && roomId == 0 {
+		logger.Debugf("bilibili 方式无法解析链接: %s, 将使用下一个方式", url)
 		return nil
 	}
 
