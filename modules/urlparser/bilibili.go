@@ -152,13 +152,24 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 				msg := qq.CreateReply(event)
 				msg.Append(qq.NewTextfLn("标题: %s", resp.Data.View.Title))
 				msg.Append(qq.NewTextfLn("创作者: %s", resp.Data.View.Owner.Name))
+
+				if len(resp.Data.View.Desc) > 30 {
+					resp.Data.View.Desc = resp.Data.View.Desc[:30] + "..."
+				}
 				msg.Append(qq.NewTextfLn("简介: %s", resp.Data.View.Desc))
+				
 				msg.Append(qq.NewTextfLn("发布时间: %s", datetime.FormatSeconds(resp.Data.View.PublishDate)))
 				msg.Append(qq.NewTextfLn("观看次数: %d | 弹幕数: %d",
 					resp.Data.View.Stats.View, resp.Data.View.Stats.Danmaku))
 				msg.Append(qq.NewTextfLn("💬: %d | 🔗: %d | 🪙: %d | ⭐: %d",
 					resp.Data.View.Stats.Reply, resp.Data.View.Stats.Share,
 					resp.Data.View.Stats.Coin, resp.Data.View.Stats.Favourite))
+
+				var tags []string
+				for _, tag := range resp.Data.Tags {
+					tags = append(tags, tag.TagName)
+				}
+				msg.Append(qq.NewTextfLn("标签: %s", strings.Join(tags, ", ")))
 
 				img, err := qq.NewImageByUrl(resp.Data.View.Pic)
 				if err != nil {
