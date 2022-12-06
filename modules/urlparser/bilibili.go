@@ -151,6 +151,7 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 			} else {
 				msg := qq.CreateReply(event)
 				msg.Append(qq.NewTextfLn("标题: %s", resp.Data.View.Title))
+				msg.Append(qq.NewTextfLn("创作者: %s", resp.Data.View.Owner.Name))
 				msg.Append(qq.NewTextfLn("简介: %s", resp.Data.View.Desc))
 				msg.Append(qq.NewTextfLn("发布时间: %s", datetime.FormatSeconds(resp.Data.View.PublishDate)))
 				msg.Append(qq.NewTextfLn("观看次数: %d | 弹幕数: %d",
