@@ -46,6 +46,7 @@ import (
 	_ "github.com/eric2788/MiraiValBot/modules/repeatchat"
 	_ "github.com/eric2788/MiraiValBot/modules/response"
 	_ "github.com/eric2788/MiraiValBot/modules/timer"
+	_ "github.com/eric2788/MiraiValBot/modules/urlparser"
 	_ "github.com/eric2788/MiraiValBot/modules/verbose"
 )
 

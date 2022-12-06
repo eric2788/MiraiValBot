@@ -18,7 +18,7 @@ func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "内容",
-				Value: twitter.TextWithoutTCLink(data.Text),
+				Value: twitter.TextWithoutTCLink(data.UnEsacapedText()),
 			},
 		},
 	}

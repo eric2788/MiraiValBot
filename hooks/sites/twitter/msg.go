@@ -15,8 +15,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 
 	videos := make([]*message.ShortVideoElement, 0)
 
-	// 内文
-	msg.Append(qq.NewTextLn(data.Text))
+	// 内文 (need to change html &gt back to >)
+	msg.Append(qq.NewTextLn(data.UnEsacapedText()))
 
 	if len(alt) > 0 {
 		msg.Append(qq.NextLn())
@@ -39,14 +39,14 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 	// 媒體
 	if data.ExtendedEntities != nil && data.ExtendedEntities.Media != nil {
 		media := *data.ExtendedEntities.Media
-		for _, m := range media {
+		for i, m := range media {
 			switch m.Type {
 			// 圖片
 			case "photo":
 				img, err := qq.NewImageByUrl(m.MediaUrlHttps)
 				if err != nil {
 					logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
-					msg.Append(qq.NewTextf("\n图片\n%s", m.MediaUrlHttps))
+					msg.Append(qq.NewTextfLn("\n图片%d: %s", i+1, m.MediaUrlHttps))
 				} else {
 					msg.Append(img)
 				}
