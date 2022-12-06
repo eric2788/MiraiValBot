@@ -3,6 +3,7 @@ package urlparser
 import (
 	"encoding/base64"
 	"fmt"
+	uurl "net/url"
 	"strings"
 
 	"github.com/Mrs4s/MiraiGo/client"
@@ -59,7 +60,12 @@ func (c *common) ParseURL(url string) Broadcaster {
 				thumbnail = "http:" + thumbnail
 			} else if strings.HasPrefix(thumbnail, "/") {
 				// /static/img/qq.png
-				thumbnail = fmt.Sprintf("http://%s%s", docs.Url.Host, thumbnail)
+				u, err := uurl.Parse(url)
+				if err != nil {
+					logger.Errorf("URL %s 解析失败: %v", url, err)
+				} else {
+					thumbnail = fmt.Sprintf("http://%s%s", u.Host, thumbnail)
+				}
 			}
 
 			img, err = qq.NewImageByUrl(thumbnail)
