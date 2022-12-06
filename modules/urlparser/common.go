@@ -9,55 +9,30 @@ import (
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/PuerkitoBio/goquery"
-	"github.com/corpix/uarand"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 )
 
-type common struct {
-}
+type (
+	common struct {
+	}
+
+	embedData struct {
+		Host  string
+		Title string
+		Desc  string
+		Thumb string
+		Tags  []string
+	}
+)
 
 func (c *common) ParseURL(url string) Broadcaster {
 	return func(bot *client.QQClient, event *message.GroupMessage) error {
-		req, err := http.NewRequest(http.MethodGet, url, nil)
+		data, err := c.getEmbedData(url)
 		if err != nil {
-			return fmt.Errorf("创建请求 %s 出现错误: %v", url, err)
-		}
-		req.Header.Set("User-Agent", uarand.GetRandom())
-		res, err := http.DefaultClient.Do(req)
-		if err != nil {
-			return fmt.Errorf("请求 %s 出现错误: %v", url, err)
-		}
-		defer res.Body.Close()
-		docs, err := goquery.NewDocumentFromReader(res.Body)
-		if err != nil {
-			return fmt.Errorf("解析URL %s 为 html 时出现错误: %v", url, err)
-		}
-		title := docs.Find("meta[property='og:title']").AttrOr("content", "")
-		if title == "" {
-			title = docs.Find("title").Text()
+			return err
 		}
 
-		desc := docs.Find("meta[property='og:description']").AttrOr("content", "")
-		if desc == "" {
-			desc = docs.Find("meta[name='description']").AttrOr("content", "")
-		}
-
-		thumbnail := docs.Find("meta[property='og:image']").AttrOr("content", "")
-		if thumbnail == "" {
-			thumbnail = docs.Find("img").AttrOr("src", "")
-		}
-
-		tags := docs.Find("meta[property='og:video:tag']").
-			FilterFunction(func(i int, s *goquery.Selection) bool {
-				return s.AttrOr("content", "") != ""
-			}).
-			Map(func(i int, s *goquery.Selection) string {
-				return s.AttrOr("content", "")
-			})
-
-		if title == "" {
-			return fmt.Errorf("无法解析网站 %s 的标题，已略过", url)
-		}
+		title, desc, thumbnail, tags, host := data.Title, data.Desc, data.Thumb, data.Tags, data.Host
 
 		msg := qq.CreateReply(event)
 		msg.Append(qq.NewTextfLn("标题: %s", title))
@@ -94,7 +69,7 @@ func (c *common) ParseURL(url string) Broadcaster {
 					thumbnail = "http:" + thumbnail
 				} else if strings.HasPrefix(thumbnail, "/") {
 					// /static/img/qq.png
-					thumbnail = fmt.Sprintf("http://%s%s", res.Request.URL.Host, thumbnail)
+					thumbnail = fmt.Sprintf("http://%s%s", host, thumbnail)
 				}
 
 				logger.Debugf("即将上传封面: %s", thumbnail)
@@ -112,4 +87,55 @@ func (c *common) ParseURL(url string) Broadcaster {
 
 		return qq.SendGroupMessage(msg)
 	}
+}
+
+func (c *common) getEmbedData(url string) (*embedData, error) {
+	// same as ParseURL
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("创建请求 %s 出现错误: %v", url, err)
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.114 Safari/537.36")
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("请求 %s 出现错误: %v", url, err)
+	}
+	defer res.Body.Close()
+	docs, err := goquery.NewDocumentFromReader(res.Body)
+	if err != nil {
+		return nil, fmt.Errorf("解析URL %s 为 html 时出现错误: %v", url, err)
+	}
+	title := docs.Find("meta[property='og:title']").AttrOr("content", "")
+	if title == "" {
+		title = docs.Find("title").Text()
+	}
+	desc := docs.Find("meta[property='og:description']").AttrOr("content", "")
+	if desc == "" {
+		desc = docs.Find("meta[name='description']").AttrOr("content", "")
+	}
+
+	thumbnail := docs.Find("meta[property='og:image']").AttrOr("content", "")
+	if thumbnail == "" {
+		thumbnail = docs.Find("img").AttrOr("src", "")
+	}
+
+	tags := docs.Find("meta[property='og:video:tag']").
+		FilterFunction(func(i int, s *goquery.Selection) bool {
+			return s.AttrOr("content", "") != ""
+		}).
+		Map(func(i int, s *goquery.Selection) string {
+			return s.AttrOr("content", "")
+		})
+
+	if title == "" {
+		return nil, fmt.Errorf("无法解析网站 %s 的标题，已略过", url)
+	}
+
+	return &embedData{
+		Host:  res.Request.Host,
+		Title: title,
+		Desc:  desc,
+		Tags:  tags,
+		Thumb: thumbnail,
+	}, nil
 }

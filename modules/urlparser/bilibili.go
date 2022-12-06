@@ -153,11 +153,11 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 				msg.Append(qq.NewTextfLn("标题: %s", resp.Data.View.Title))
 				msg.Append(qq.NewTextfLn("创作者: %s", resp.Data.View.Owner.Name))
 
-				if len(resp.Data.View.Desc) > 30 {
-					resp.Data.View.Desc = resp.Data.View.Desc[:30] + "..."
+				if len(resp.Data.View.Desc) > 100 {
+					resp.Data.View.Desc = resp.Data.View.Desc[:100] + "..."
 				}
 				msg.Append(qq.NewTextfLn("简介: %s", resp.Data.View.Desc))
-				
+
 				msg.Append(qq.NewTextfLn("发布时间: %s", datetime.FormatSeconds(resp.Data.View.PublishDate)))
 				msg.Append(qq.NewTextfLn("观看次数: %d | 弹幕数: %d",
 					resp.Data.View.Stats.View, resp.Data.View.Stats.Danmaku))

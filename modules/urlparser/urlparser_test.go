@@ -3,11 +3,9 @@ package urlparser
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/PuerkitoBio/goquery"
 	bili "github.com/eric2788/MiraiValBot/hooks/sites/bilibili"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/utils/test"
@@ -20,6 +18,12 @@ const (
 	bvlink    = `https://www.bilibili.com/video/BV1LR4y1y76t/?spm_id_from=333.851.b_7265636f6d6d656e64.5&vd_source=0677b2cd9313952cc0e25879826b251c`
 	shortLink = `https://b23.tv/qGyBSoE`
 )
+
+var parser = &common{}
+
+func init() {
+	test.InitTesting()
+}
 
 func TestParseBV(t *testing.T) {
 	matches := parsePattern(bvlink, biliLinks[0])
@@ -34,25 +38,22 @@ func TestParseShortLink(t *testing.T) {
 	t.Logf("%s => %s", shortLink, s)
 }
 
-func TestGoQuery(t *testing.T) {
+func TestBiliParseURL(t *testing.T) {
 	url := "https://b23.tv/qGyBSoE"
-	content, err := request.GetHtml(url)
+	data, err := parser.getEmbedData(url)
 	if err != nil {
-		t.Skipf("解析URL %s 出现错误: %v", url, err)
+		t.Skip(err)
 	}
-	docs, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	t.Logf("%+v", data)
+}
+
+func TestYoutubeParseURL(t *testing.T) {
+	url := "https://www.youtube.com/watch?v=1G4isv_Fylg"
+	data, err := parser.getEmbedData(url)
 	if err != nil {
-		t.Skipf("解析URL %s 为 html 时出现错误: %v", url, err)
+		t.Skip(err)
 	}
-	title := docs.Find("meta[property='og:title']").AttrOr("content", "")
-	if title == "" {
-		title = docs.Find("title").Text()
-	}
-	thumbnail := docs.Find("meta[property='og:Image']").AttrOr("content", "")
-	if thumbnail == "" {
-		thumbnail = docs.Find("img").AttrOr("src", "")
-	}
-	t.Logf("title: %q, thumbnail: %q", title, thumbnail)
+	t.Logf("%+v", data)
 }
 
 func TestBiliParse(t *testing.T) {
