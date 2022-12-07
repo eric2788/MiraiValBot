@@ -3,12 +3,11 @@ package bilibili
 import (
 	"encoding/json"
 	"fmt"
-	"time"
-
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	bc "github.com/eric2788/MiraiValBot/modules/broadcaster"
 	"github.com/eric2788/common-utils/request"
+	"time"
 )
 
 type RoomInfo struct {
@@ -28,11 +27,11 @@ type RoomInfoData struct {
 
 	// for external use
 
-	LiveStatus int       `json:"live_status"`
-	AreaName   string    `json:"area_name"`
-	LiveTime   time.Time `json:"live_time"`
-	Online     int64     `json:"online"`
-	KeyFrame   string    `json:"keyframe"`
+	LiveStatus  int    `json:"live_status"`
+	AreaName    string `json:"area_name"`
+	LiveTimeStr string `json:"live_time"`
+	Online      int64  `json:"online"`
+	KeyFrame    string `json:"keyframe"`
 }
 
 func (d *RoomInfoData) Parse(data map[string]interface{}) error {
@@ -41,6 +40,14 @@ func (d *RoomInfoData) Parse(data map[string]interface{}) error {
 		return err
 	}
 	return json.Unmarshal(b, d)
+}
+
+func (d *RoomInfoData) IsLive() bool {
+	return d.LiveStatus == 1
+}
+
+func (d *RoomInfoData) LiveTime() (time.Time, error) {
+	return time.ParseInLocation("2006-01-02 15:04:05", d.LiveTimeStr, time.Local)
 }
 
 const Host = "https://api.live.bilibili.com/room/v1/Room/get_info"
