@@ -38,6 +38,10 @@ func getJsonList(url, key string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	list := resp[key].([]string)
-	return list, nil
+	list := resp[key].([]interface{})
+	results := make([]string, len(list))
+	for i, v := range list {
+		results[i] = v.(string)
+	}
+	return results, nil
 }
