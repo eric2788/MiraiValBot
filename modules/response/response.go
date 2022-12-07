@@ -16,6 +16,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/chat_reply"
+	"github.com/eric2788/MiraiValBot/services/copywriting"
 	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
@@ -28,6 +29,14 @@ var (
 	}
 	YesNoPattern         = regexp.MustCompile(`^.+是.+吗[\?？]*$`)
 	questionMarkReplacer = strings.NewReplacer("?", "", "？", "")
+
+	longWongTalks = []string{
+		"恭迎龙王 %s (跪拜)",
+		"恭喜话痨 %s 成龙王咯",
+		"口水多还得是你, %s",
+		"%s, YOU 👆 ARE 👆 KING 👑",
+		"你就是龙王 %s 吗, 不错",
+	}
 )
 
 type response struct {
@@ -105,6 +114,107 @@ func (r *response) HookEvent(bot *bot.Bot) {
 
 		}
 	})
+
+	bot.GroupNotifyEvent.Subscribe(func(c *client.QQClient, event client.INotifyEvent) {
+
+		// 非瓦群无视
+		if event.From() != qq.ValGroupInfo.Uin {
+			return
+		}
+
+		rand.Seed(time.Now().UnixNano())
+
+		switch notify := event.(type) {
+		case *client.GroupPokeNotifyEvent:
+
+			msg := message.NewSendingMessage()
+			sender := qq.FindGroupMember(notify.Sender)
+
+			// 非机器人
+			if notify.Receiver != c.Uin {
+
+				receivier := qq.FindGroupMember(notify.Receiver)
+
+				// 5% 触发CP
+				if rand.Intn(100)+1 > 95 {
+
+					list, atk, def, err := copywriting.GetCPList()
+					if err != nil {
+						logger.Errorf("获取CP列表失败: %v", err)
+					} else {
+						random := list[rand.Intn(len(list))]
+						replacer := strings.NewReplacer(atk, sender.DisplayName(), def, receivier.DisplayName())
+						msg.Append(message.NewText(replacer.Replace(random)))
+						_ = qq.SendGroupMessage(msg)
+					}
+
+				}
+
+				return
+			}
+
+			if rand.Intn(100)+1 > 10 {
+				msg.Append(qq.NewTextfLn("戳你妹戳戳戳, %s!", sender.DisplayName()))
+				// 戳回去咯
+				c.SendGroupPoke(qq.ValGroupInfo.Code, notify.Sender)
+			} else { // 10% 机率触发发病
+
+				if success := sendFabing(msg, sender); !success {
+					return
+				}
+
+			}
+
+			_ = qq.SendGroupMessage(msg)
+
+		case *client.MemberHonorChangedNotifyEvent:
+
+			msg := message.NewSendingMessage()
+
+			if notify.Uin == c.Uin {
+
+				msg.Append(qq.NewTextf("机器人也能成 %s, 你群是不是该好好反思一下", qq.GetHonorString(notify.Honor)))
+				msg.Append(message.NewFace(15))
+
+			} else {
+
+				user := qq.FindGroupMember(notify.Uin)
+
+				// 80% 随机祝贺, 20% 发病
+				if rand.Intn(100)+1 > 20 {
+					if notify.Honor == client.Talkative {
+						random := longWongTalks[rand.Intn(len(longWongTalks))]
+						msg.Append(qq.NewTextf(random, user.DisplayName()))
+					}
+				} else {
+					if success := sendFabing(msg, user); !success {
+						return
+					}
+				}
+			}
+
+			_ = qq.SendGroupMessage(msg)
+
+		}
+
+	})
+}
+
+func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+	var getter func() ([]string, string, error)
+	if rand.Intn(2) == 1 {
+		getter = copywriting.GetFabingList
+	} else {
+		getter = copywriting.GetFadianList
+	}
+	if list, replace, err := getter(); err != nil {
+		logger.Errorf("获取发病模板失败: %v", err)
+		return false
+	} else {
+		random := list[rand.Intn(len(list))]
+		msg.Append(message.NewText(strings.ReplaceAll(random, replace, sender.DisplayName())))
+		return true
+	}
 }
 
 func getQuestionAns(content string) bool {

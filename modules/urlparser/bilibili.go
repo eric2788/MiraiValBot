@@ -10,6 +10,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	bili "github.com/eric2788/MiraiValBot/hooks/sites/bilibili"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 	"github.com/eric2788/common-utils/datetime"
 	"github.com/eric2788/common-utils/request"
 )
@@ -153,17 +154,20 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 				msg.Append(qq.NewTextfLn("标题: %s", resp.Data.View.Title))
 				msg.Append(qq.NewTextfLn("创作者: %s", resp.Data.View.Owner.Name))
 
-				if len(resp.Data.View.Desc) > 100 {
-					resp.Data.View.Desc = resp.Data.View.Desc[:100] + "..."
+				if misc.GetChineseWordsCount(resp.Data.View.Desc) > 50 {
+					resp.Data.View.Desc = misc.CutChineseWords(resp.Data.View.Desc, 50) + "..."
 				}
+
 				msg.Append(qq.NewTextfLn("简介: %s", resp.Data.View.Desc))
 
 				msg.Append(qq.NewTextfLn("发布时间: %s", datetime.FormatSeconds(resp.Data.View.PublishDate)))
 				msg.Append(qq.NewTextfLn("观看次数: %d | 弹幕数: %d",
 					resp.Data.View.Stats.View, resp.Data.View.Stats.Danmaku))
-				msg.Append(qq.NewTextfLn("💬: %d | 🔗: %d | 🪙: %d | ⭐: %d",
-					resp.Data.View.Stats.Reply, resp.Data.View.Stats.Share,
-					resp.Data.View.Stats.Coin, resp.Data.View.Stats.Favourite))
+
+				// 感觉这些资讯没啥用
+				// msg.Append(qq.NewTextfLn("💬: %d | 🔗: %d | 🪙: %d | ⭐: %d",
+				//	resp.Data.View.Stats.Reply, resp.Data.View.Stats.Share,
+				//	resp.Data.View.Stats.Coin, resp.Data.View.Stats.Favourite))
 
 				var tags []string
 				for _, tag := range resp.Data.Tags {
