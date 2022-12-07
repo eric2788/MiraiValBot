@@ -149,7 +149,7 @@ func TestBiliParse(t *testing.T) {
 				}
 				msg.Append(qq.NewTextfLn("状态: %s", status))
 				if data.LiveStatus == 1 {
-					msg.Append(qq.NewTextfLn("直播时间: %s", data.LiveTime.Format(datetime.TimeFormat)))
+					msg.Append(qq.NewTextfLn("直播时间: %s", data.LiveTimeStr))
 					msg.Append(qq.NewTextfLn("观看人数: %d", data.Online))
 				}
 				msg.Append(qq.NewTextfLn("分区: %s", data.AreaName))
