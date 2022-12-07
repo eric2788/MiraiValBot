@@ -34,3 +34,12 @@ func TestGetTiangouList(t *testing.T) {
 	}
 	t.Logf("%s", strings.Join(list, "\n"))
 }
+
+
+func TestGetCPList(t *testing.T) {
+	list, _, _, err := GetCPList()
+	if err!= nil {
+        t.Skip(err)
+    }
+	t.Logf("%s", strings.Join(list, "\n"))
+}
