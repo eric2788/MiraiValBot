@@ -56,6 +56,13 @@ func TestYoutubeParseURL(t *testing.T) {
 	t.Logf("%+v", data)
 }
 
+func TestChineseText(t *testing.T) {
+	txt := "你好世界"
+	t.Log(len(txt))
+	// one chinese character = 3 bytes
+	assert.Equal(t, 4*3, len([]byte(txt)))
+}
+
 func TestBiliParse(t *testing.T) {
 	b := &bilibili{}
 	url := "https://b23.tv/BV1LR4y1y76t"

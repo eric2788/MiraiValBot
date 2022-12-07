@@ -153,8 +153,8 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 				msg.Append(qq.NewTextfLn("标题: %s", resp.Data.View.Title))
 				msg.Append(qq.NewTextfLn("创作者: %s", resp.Data.View.Owner.Name))
 
-				if len(resp.Data.View.Desc) > 100 {
-					resp.Data.View.Desc = resp.Data.View.Desc[:100] + "..."
+				if len(resp.Data.View.Desc) > 150 { // 150 / 3 = 50 chinese words
+					resp.Data.View.Desc = resp.Data.View.Desc[:150] + "..."
 				}
 				msg.Append(qq.NewTextfLn("简介: %s", resp.Data.View.Desc))
 

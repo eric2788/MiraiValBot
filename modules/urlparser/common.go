@@ -38,8 +38,8 @@ func (c *common) ParseURL(url string) Broadcaster {
 		msg.Append(qq.NewTextfLn("标题: %s", title))
 
 		if desc != "" {
-			if len(desc) > 50 && !strings.HasSuffix(desc, "...") {
-				desc = desc[:50] + "..."
+			if len(desc) > 100 && !strings.HasSuffix(desc, "...") {
+				desc = desc[:100] + "..."
 			}
 			msg.Append(qq.NewTextfLn("简介: %s", desc))
 		}
