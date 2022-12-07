@@ -425,6 +425,23 @@ func GetGroupMessage(groupCode int64, seq int64) (*message.GroupMessage, error) 
 	}
 }
 
+func GetHonorString(t client.HonorType) string {
+	switch t {
+	case client.Legend:
+		return "群聊炙焰"
+	case client.Talkative:
+		return "龙王"
+	case client.Performer:
+		return "群聊之火"
+	case client.Emotion:
+		return "快乐源泉"
+	case client.StrongNewbie:
+		return "冒尖小春笋"
+	default:
+		return "未知"
+	}
+}
+
 func IsMuted(uid int64) bool {
 	member := FindGroupMember(uid)
 	if member == nil {

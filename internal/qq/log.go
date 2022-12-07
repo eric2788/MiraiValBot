@@ -115,6 +115,33 @@ func (l *log) HookEvent(qBot *bot.Bot) {
 		}
 
 	})
+
+	qBot.GroupNotifyEvent.Subscribe(func(c *client.QQClient, event client.INotifyEvent) {
+		var info *client.GroupInfo
+		if event.From() == ValGroupInfo.Uin {
+			info = ValGroupInfo
+		} else {
+			var err error
+			info, err = c.GetGroupInfo(event.From())
+			if err != nil {
+				logger.Errorf("获取群 %d 的资讯时出现错误: %v", event.From(), err)
+				return
+			}
+		}
+		switch notify := event.(type) {
+		case *client.GroupPokeNotifyEvent:
+			sender := FindOtherGroupMember(info.Members, notify.Sender)
+			receiver := FindOtherGroupMember(info.Members, notify.Receiver)
+			logger.Infof("群 %s (%d) 内 %v 戳了戳 %v", info.Name, event.From(), sender.DisplayName(), receiver.DisplayName())
+
+		case *client.GroupRedBagLuckyKingNotifyEvent:
+			sender := FindOtherGroupMember(info.Members, notify.Sender)
+			luckyKing := FindOtherGroupMember(info.Members, notify.LuckyKing)
+			logger.Infof("群 %s (%d) 内 %v 的红包被抢完, %v 是运气王", info.Name, event.From(), sender.DisplayName(), luckyKing.DisplayName())
+		case *client.MemberHonorChangedNotifyEvent:
+			logger.Info(notify.Content())
+		}
+	})
 }
 
 func init() {
