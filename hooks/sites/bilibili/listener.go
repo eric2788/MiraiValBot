@@ -47,7 +47,7 @@ func (d *RoomInfoData) IsLive() bool {
 }
 
 func (d *RoomInfoData) LiveTime() (time.Time, error) {
-	return time.ParseInLocation("2006-01-02 15:04:05", d.LiveTimeStr, time.Local)
+	return time.Parse("2006-01-02 15:04:05", d.LiveTimeStr)
 }
 
 const Host = "https://api.live.bilibili.com/room/v1/Room/get_info"
