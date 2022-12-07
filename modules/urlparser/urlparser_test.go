@@ -57,10 +57,11 @@ func TestYoutubeParseURL(t *testing.T) {
 }
 
 func TestChineseText(t *testing.T) {
-	txt := "你好世界"
-	t.Log(len(txt))
-	// one chinese character = 3 bytes
-	assert.Equal(t, 4*3, len([]byte(txt)))
+	txt := "你好世界海外好低啊哇大文件欧服骄傲我就欧服骄傲你发哦我们佛牌我奥法哦呜"
+	b := "abcdefg"
+	t.Log(len([]rune(txt)), len([]rune(b)))
+	assert.Equal(t, 35, len([]rune(txt)))
+	assert.Equal(t, 7, len([]rune(b)))
 }
 
 func TestBiliParse(t *testing.T) {

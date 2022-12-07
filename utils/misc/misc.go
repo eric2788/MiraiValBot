@@ -141,3 +141,15 @@ func ReadBytesToSrcData(b []byte) (string, string) {
 	t := http.DetectContentType(b)
 	return fmt.Sprintf("data:%s;base64,", t) + base64.StdEncoding.EncodeToString(b), t
 }
+
+func GetChineseWordsCount(cn string) int {
+	return len([]rune(cn))
+}
+
+func SubStringChineseWords(cn string, from, to int) string {
+	return string([]rune(cn)[from:to])
+}
+
+func CutChineseWords(cn string, to int) string {
+	return SubStringChineseWords(cn, 0, to)
+}
