@@ -43,3 +43,11 @@ func TestGetCPList(t *testing.T) {
     }
 	t.Logf("%s", strings.Join(list, "\n"))
 }
+
+func TestGetCrazyThursdayList(t *testing.T) {
+	list, err := GetCrazyThursdayList()
+	if err != nil {
+		t.Skip(err)
+	}
+	t.Logf("%s", strings.Join(list, "\n"))
+}

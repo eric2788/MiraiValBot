@@ -11,7 +11,7 @@ import (
 	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
-func RandomChat(bot *bot.Bot) error {
+func randomChat(bot *bot.Bot) error {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -41,5 +41,5 @@ func RandomChat(bot *bot.Bot) error {
 }
 
 func init() {
-	timer.RegisterTimer("random.chat", time.Minute*20, RandomChat)
+	timer.RegisterTimer("random.chat", time.Minute*20, randomChat)
 }

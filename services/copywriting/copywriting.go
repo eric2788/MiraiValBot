@@ -9,6 +9,7 @@ const (
 	fadianURL  = "https://raw.githubusercontent.com/FloatTech/zbpdata/e8d06b150b2cf84d9c7dc2f8a9f573da2b2290fd/Fadian/post.json"
 	cpDataURL  = "https://raw.githubusercontent.com/SAGIRI-kawaii/sagiri-bot/Ariadne-v3/statics/cp_data.json"
 	tiangouURL = "https://raw.githubusercontent.com/SAGIRI-kawaii/sagiri-bot/Ariadne-v4/modules/self_contained/pero_dog/pero_content.json"
+	crazyThursdayURL = "https://raw.githubusercontent.com/MinatoAquaCrews/nonebot_plugin_crazy_thursday/beta/nonebot_plugin_crazy_thursday/post.json"
 )
 
 //var logger = utils.GetModuleLogger("services.copywriting")
@@ -30,6 +31,10 @@ func GetCPList() ([]string, string, string, error) {
 
 func GetTianGouList() ([]string, error) {
 	return getJsonList(tiangouURL, "data")
+}
+
+func GetCrazyThursdayList() ([]string, error) {
+	return getJsonList(crazyThursdayURL, "post")
 }
 
 func getJsonList(url, key string) ([]string, error) {

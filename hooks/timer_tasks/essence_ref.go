@@ -16,7 +16,7 @@ var (
 	setting = &file.DataStorage.Setting
 )
 
-func EssenceTask(bot *bot.Bot) (err error) {
+func essenceTask(bot *bot.Bot) (err error) {
 
 	if (*setting).LastChecked == 0 {
 
@@ -121,5 +121,5 @@ func tellTime() string {
 }
 
 func init() {
-	timer.RegisterTimer("essence.ref", time.Hour, EssenceTask)
+	timer.RegisterTimer("essence.ref", time.Hour, essenceTask)
 }
