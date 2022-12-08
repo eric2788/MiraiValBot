@@ -3,12 +3,13 @@ package response
 import (
 	"crypto/md5"
 	"encoding/binary"
-	"github.com/eric2788/MiraiValBot/internal/file"
-	"github.com/eric2788/MiraiValBot/utils/misc"
 	"math/rand"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/eric2788/MiraiValBot/internal/file"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
@@ -46,6 +47,16 @@ var (
 		"滚滚滚, %s!",
 		"戳锤子戳, %s!",
 		"泻药，刚醒, %s 找我何事",
+	}
+
+	tiangouKeywords = []string{
+		"田狗",
+		"天狗",
+		"舔狗",
+		"要舔",
+		"开舔",
+		"开天",
+		"好舔",
 	}
 )
 
@@ -124,6 +135,18 @@ func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMess
 
 				_ = qq.SendGroupMessageByGroup(msg.GroupCode, send)
 			}
+
+			// 35% 机率回复
+		} else if rand.Intn(100)+1 > 65 && misc.ContainsAnyWords(content, tiangouKeywords...) {
+
+			list, err := copywriting.GetTianGouList()
+			if err != nil {
+				logger.Errorf("获取天狗列表失败: %v", err)
+				return
+			}
+			random := list[rand.Intn(len(list))]
+			_ = qq.SendGroupMessageByGroup(msg.GroupCode, message.NewSendingMessage().Append(message.NewText(random)))
+
 		}
 
 	}

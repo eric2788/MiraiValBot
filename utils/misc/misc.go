@@ -153,3 +153,21 @@ func SubStringChineseWords(cn string, from, to int) string {
 func CutChineseWords(cn string, to int) string {
 	return SubStringChineseWords(cn, 0, to)
 }
+
+func ContainsAnyWords(txt string, words ...string) bool {
+	for _, word := range words {
+		if strings.Contains(txt, word) {
+			return true
+		}
+	}
+	return false
+}
+
+func ContainsAllWords(txt string, words ...string) bool {
+	for _, word := range words {
+		if !strings.Contains(txt, word) {
+			return false
+		}
+	}
+	return true
+}
