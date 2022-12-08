@@ -134,7 +134,7 @@ func getWaifuMultiple(args []string, source *command.MessageSource) error {
 
 var (
 	waifuMultipleCommand = command.NewNode([]string{"multi", "multiple", "多张"}, "索取多张色图(没有r18)", false, getWaifuMultiple, "<数量>", "[标签]")
-	waifuR18Command      = command.NewNode([]string{"r18", "瑟瑟"}, "索取一张可以时r18的色图", false, getWaifuR18, "[标签]")
+	waifuR18Command      = command.NewNode([]string{"r18", "瑟瑟"}, "索取一张可以是r18的色图", false, getWaifuR18, "[标签]")
 )
 
 var waifuCommand = command.NewParent([]string{"waifu", "setu", "色图"}, "色图指令",
