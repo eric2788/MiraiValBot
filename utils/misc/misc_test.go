@@ -10,3 +10,9 @@ func TestReadURLToSrcData(t *testing.T) {
 	}
 	t.Log(data, ty)
 }
+
+
+func TestXMLEscape(t *testing.T) {
+	a := "<hello world&>"
+	t.Log(XmlEscape(a))
+}

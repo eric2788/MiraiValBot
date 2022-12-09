@@ -22,6 +22,7 @@ type (
 		Desc  string
 		Thumb string
 		Tags  []string
+		Url   string
 	}
 )
 
@@ -31,62 +32,78 @@ func (c *common) ParseURL(url string) Broadcaster {
 		if err != nil {
 			return err
 		}
-
-		title, desc, thumbnail, tags, host := data.Title, data.Desc, data.Thumb, data.Tags, data.Host
-
-		msg := qq.CreateReply(event)
-		msg.Append(qq.NewTextfLn("标题: %s", title))
-
-		if desc != "" {
-			if len(desc) > 150 && !strings.HasSuffix(desc, "...") {
-				desc = desc[:150] + "..."
-			}
-			msg.Append(qq.NewTextfLn("简介: %s", desc))
-		}
-
-		if len(tags) > 0 {
-			msg.Append(qq.NewTextfLn("标签: %s", strings.Join(tags, ", ")))
-		}
-
-		if thumbnail != "" {
-
-			var img *message.GroupImageElement
-
-			if strings.HasPrefix(thumbnail, "data:image") {
-				b64 := strings.Split(thumbnail, "base64,")[1]
-				b, err := base64.StdEncoding.DecodeString(b64)
-				if err != nil {
-					logger.Errorf("URL %s 的封面base64 解析失败: %v, source: %s", url, err, thumbnail)
-				}
-				img, err = qq.NewImageByByte(b)
-				if err != nil {
-					logger.Errorf("URL %s 上传封面失败: %v", url, err)
-				}
-			} else {
-
-				if strings.HasPrefix(thumbnail, "//") {
-					// //host.com/static/img/qq.png
-					thumbnail = "http:" + thumbnail
-				} else if strings.HasPrefix(thumbnail, "/") {
-					// /static/img/qq.png
-					thumbnail = fmt.Sprintf("http://%s%s", host, thumbnail)
-				}
-
-				logger.Debugf("即将上传封面: %s", thumbnail)
-
-				img, err = qq.NewImageByUrl(thumbnail)
-				if err != nil {
-					logger.Errorf("上传封面 %s 失败: %v", thumbnail, err)
-				}
-			}
-
-			if img != nil {
-				msg.Append(img)
-			}
-		}
-
-		return qq.SendGroupMessage(msg)
+		return c.sendAsServiceElement(data, event)
 	}
+}
+
+// sendAsServiceElement send as url sharing in qq
+func (c *common) sendAsServiceElement(data *embedData, event *message.GroupMessage) error {
+	msg := message.NewSendingMessage()
+	ele := c.asServiceElement(data)
+	msg.Append(ele)
+	return qq.SendGroupMessage(msg)
+}
+
+// sendAsGroupMessage send as plain text and image in qq
+func (c *common) sendAsGroupMessage(data *embedData, event *message.GroupMessage) (err error) {
+	title, desc, thumbnail, tags, host := data.Title, data.Desc, data.Thumb, data.Tags, data.Host
+
+	msg := qq.CreateReply(event)
+	msg.Append(qq.NewTextfLn("标题: %s", title))
+
+	if desc != "" {
+		if len(desc) > 150 && !strings.HasSuffix(desc, "...") {
+			desc = desc[:150] + "..."
+		}
+		msg.Append(qq.NewTextfLn("简介: %s", desc))
+	}
+
+	if len(tags) > 0 {
+		msg.Append(qq.NewTextfLn("标签: %s", strings.Join(tags, ", ")))
+	}
+
+	if thumbnail != "" {
+
+		var img *message.GroupImageElement
+
+		if strings.HasPrefix(thumbnail, "data:image") {
+			b64 := strings.Split(thumbnail, "base64,")[1]
+			b, err := base64.StdEncoding.DecodeString(b64)
+			if err != nil {
+				logger.Errorf("URL %s 的封面base64 解析失败: %v, source: %s", data.Url, err, thumbnail)
+			}
+			img, err = qq.NewImageByByte(b)
+			if err != nil {
+				logger.Errorf("URL %s 上传封面失败: %v", data.Url, err)
+			}
+		} else {
+
+			if strings.HasPrefix(thumbnail, "//") {
+				// //host.com/static/img/qq.png
+				thumbnail = "http:" + thumbnail
+			} else if strings.HasPrefix(thumbnail, "/") {
+				// /static/img/qq.png
+				thumbnail = fmt.Sprintf("http://%s%s", host, thumbnail)
+			}
+
+			logger.Debugf("即将上传封面: %s", thumbnail)
+
+			img, err = qq.NewImageByUrl(thumbnail)
+			if err != nil {
+				logger.Errorf("上传封面 %s 失败: %v", thumbnail, err)
+			}
+		}
+
+		if img != nil {
+			msg.Append(img)
+		}
+	}
+
+	return qq.SendGroupMessage(msg)
+}
+
+func (c *common) asServiceElement(data *embedData) *message.ServiceElement {
+	return message.NewUrlShare(data.Url, data.Title, data.Desc, data.Thumb)
 }
 
 func (c *common) getEmbedData(url string) (*embedData, error) {
@@ -114,6 +131,11 @@ func (c *common) getEmbedData(url string) (*embedData, error) {
 		desc = docs.Find("meta[name='description']").AttrOr("content", "")
 	}
 
+	dataURL := docs.Find("meta[property='og:url']").AttrOr("content", "")
+	if dataURL == "" {
+		dataURL = url
+	}
+
 	thumbnail := docs.Find("meta[property='og:image']").AttrOr("content", "")
 	if thumbnail == "" {
 		thumbnail = docs.Find("img").AttrOr("src", "")
@@ -137,5 +159,6 @@ func (c *common) getEmbedData(url string) (*embedData, error) {
 		Desc:  desc,
 		Tags:  tags,
 		Thumb: thumbnail,
+		Url:   dataURL,
 	}, nil
 }
