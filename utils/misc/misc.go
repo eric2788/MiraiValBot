@@ -1,7 +1,9 @@
 package misc
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/xml"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -161,6 +163,12 @@ func ContainsAnyWords(txt string, words ...string) bool {
 		}
 	}
 	return false
+}
+
+func XmlEscape(txt string) string {
+	buff := bytes.NewBuffer([]byte{})
+	_ = xml.EscapeText(buff, []byte(txt))
+	return buff.String()
 }
 
 func ContainsAllWords(txt string, words ...string) bool {

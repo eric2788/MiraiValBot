@@ -8,6 +8,7 @@ import (
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/Mrs4s/MiraiGo/utils"
 	"github.com/eric2788/MiraiValBot/internal/redis"
 	"github.com/eric2788/common-utils/request"
 )
@@ -245,6 +246,17 @@ func NewForwardNode(msg *message.SendingMessage) *message.ForwardNode {
 		Time:       int32(time.Now().Unix()),
 		SenderName: bot.Instance.Nickname,
 		Message:    msg.Elements,
+	}
+}
+
+// NewMusicShare image and content can be empty string
+func NewMusicShare(title, url, audio, image, content string) *message.ServiceElement {
+	xml := fmt.Sprintf(`<?xml version='1.0' encoding='UTF-8' standalone='yes' ?><msg serviceID="2" templateID="1" action="web" brief="[分享] %s" sourceMsgId="0" url="%s" flag="0" adverSign="0" multiMsgFlag="0"><item layout="2"><audio cover="%s" src="%s"/><title>%s</title><summary>%s</summary></item><source name="音乐" icon="https://i.gtimg.cn/open/app_icon/01/07/98/56/1101079856_100_m.png" url="http://web.p.qq.com/qqmpmobile/aio/app.html?id=1101079856" action="app" a_actionData="com.tencent.qqmusic" i_actionData="tencent1101079856://" appid="1101079856" /></msg>`,
+		utils.XmlEscape(title), url, image, audio, utils.XmlEscape(title), utils.XmlEscape(content))
+	return &message.ServiceElement{
+		Id:      60,
+		Content: xml,
+		SubType: "music",
 	}
 }
 
