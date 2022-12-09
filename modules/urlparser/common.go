@@ -27,21 +27,26 @@ type (
 )
 
 func (c *common) ParseURL(url string) Broadcaster {
-	return func(bot *client.QQClient, event *message.GroupMessage) error {
-		data, err := c.getEmbedData(url)
+	return func(bot *client.QQClient, event *message.GroupMessage) (err error) {
+		var data *embedData
+		data, err = c.getEmbedData(url)
 		if err != nil {
-			return err
+			return
 		}
-		return c.sendAsServiceElement(data, event)
+		err = c.sendAsServiceElement(data, event)
+		if err != nil {
+			logger.Errorf("发送URL分享元素失败: %v, 将改为发送普通群消息", err)
+			err = c.sendAsGroupMessage(data, event)
+		}
+		return
 	}
 }
 
 // sendAsServiceElement send as url sharing in qq
+// not sure why but seems not working ? (Get risked)
 func (c *common) sendAsServiceElement(data *embedData, event *message.GroupMessage) error {
-	msg := message.NewSendingMessage()
 	ele := c.asServiceElement(data)
-	msg.Append(ele)
-	return qq.SendGroupMessage(msg)
+	return qq.SendGroupMessage(&message.SendingMessage{Elements: []message.IMessageElement{ele}})
 }
 
 // sendAsGroupMessage send as plain text and image in qq
