@@ -50,7 +50,16 @@ func SendGroupMessageAndRecallByGroup(gp int64, msg *message.SendingMessage, dur
 		duration = MaxRecallTime // 提前五秒撤回
 	}
 
-	defer recoverGroupMessage(gp, msg, err)
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("致命错误 => %v", recovered)
+			debug.PrintStack()
+		}
+		if err != nil {
+			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
+			logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
+		}
+	}()
 
 	msg.Append(NewTextf("(本条消息将在 %.f 秒后撤回)", duration.Seconds()))
 
@@ -180,7 +189,16 @@ func SendPrivateForwardMessage(uid int64, msg *message.ForwardMessage) (err erro
 
 func SendGroupMessageByGroup(gp int64, msg *message.SendingMessage) (err error) {
 
-	defer recoverGroupMessage(gp, msg, err)
+	defer func() {
+		if recovered := recover(); recovered != nil {
+			err = fmt.Errorf("致命错误 => %v", recovered)
+			debug.PrintStack()
+		}
+		if err != nil {
+			logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
+			logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
+		}
+	}()
 
 	result, err := sendGroupMessage(gp, msg)
 
@@ -420,15 +438,4 @@ func sendGroupMessage(gp int64, msg *message.SendingMessage) (result *message.Gr
 	}
 	result = bot.Instance.SendGroupMessage(gp, msg)
 	return
-}
-
-func recoverGroupMessage(gp int64, msg *message.SendingMessage, err error) {
-	if recovered := recover(); recovered != nil {
-		err = fmt.Errorf("致命错误 => %v", recovered)
-		debug.PrintStack()
-	}
-	if err != nil {
-		logger.Errorf("向群 %d 發送訊息時出現錯誤: %v", gp, err)
-		logger.Errorf("厡訊息: %s", ParseMsgContent(msg.Elements))
-	}
 }
