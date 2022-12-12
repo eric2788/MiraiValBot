@@ -48,20 +48,26 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 	}
 
 	at := qq.ParseMsgContent(msg.Elements).At
-	ans := int64(0)
+	answers := make([]int64, 0)
 	for _, a := range at {
 		if a == bot.Instance.Uin {
 			continue
 		}
-		ans = a
+		answers = append(answers, a)
 		break
 	}
 
-	if ans == 0 {
+	if len(answers) == 0 {
 		reply.Append(qq.NewTextf("你没有@任何人"))
 		_ = qq.SendGroupMessage(reply)
 		return game.ContinueResult
+	} else if len(answers) > 1 {
+		reply.Append(qq.NewTextf("你@太多人啦，只能@一个"))
+		_ = qq.SendGroupMessage(reply)
+		return game.ContinueResult
 	}
+
+	ans := answers[0]
 
 	if ans == g.currentSender.Uin {
 		reply.Append(qq.NewTextf("恭喜答对! 请听下一题"))

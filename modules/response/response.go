@@ -13,6 +13,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/chat_reply"
+	"github.com/eric2788/MiraiValBot/modules/game"
 	"github.com/eric2788/MiraiValBot/services/copywriting"
 )
 
@@ -62,6 +63,11 @@ func (r *response) HookEvent(bot *bot.Bot) {
 }
 
 func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMessage) {
+
+	if game.IsInGame() {
+		return
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	rand.Shuffle(len(responses), func(i, j int) {
 		responses[i], responses[j] = responses[j], responses[i]
