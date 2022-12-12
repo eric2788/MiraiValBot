@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Mrs4s/MiraiGo/message"
@@ -29,7 +30,7 @@ func (g *guessNumber) Start(args []string) error {
 
 	g.min = 1
 	g.max = 100
-	g.maxFailed = 0
+	g.maxFailed = 5
 
 	if len(args) > 0 {
 		min, err := strconv.Atoi(args[0])
@@ -65,11 +66,11 @@ func (g *guessNumber) Start(args []string) error {
 
 func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {
 	reply := qq.CreateAtReply(msg)
-	txt := qq.ParseMsgContent(msg.Elements).Texts[0]
+	txt := strings.TrimSpace(qq.ParseMsgContent(msg.Elements).Texts[0])
 
 	guess, err := strconv.Atoi(txt)
 	if err != nil {
-		reply.Append(qq.NewTextf("%s 不是有效的数字", txt))
+		reply.Append(qq.NewTextf("%q 不是有效的数字", txt))
 		_ = qq.SendGroupMessage(reply)
 		return game.ContinueResult
 	}
