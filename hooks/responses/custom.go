@@ -15,10 +15,10 @@ func (s *custom) ShouldHandle(msg *message.GroupMessage) bool {
 	return ok
 }
 
-func (s *custom) Handle(c *client.QQClient, msg *message.GroupMessage) {
+func (s *custom) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 	res := file.DataStorage.Responses[msg.ToString()]
 	m := message.NewSendingMessage().Append(message.NewText(res))
-	_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
+	return qq.SendGroupMessageByGroup(msg.GroupCode, m)
 }
 
 func init() {

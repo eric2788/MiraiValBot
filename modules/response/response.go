@@ -2,6 +2,7 @@ package response
 
 import (
 	"math/rand"
+	"reflect"
 	"strings"
 	"time"
 
@@ -51,7 +52,7 @@ type (
 
 	Handle interface {
 		ShouldHandle(msg *message.GroupMessage) bool
-		Handle(c *client.QQClient, msg *message.GroupMessage)
+		Handle(c *client.QQClient, msg *message.GroupMessage) error
 	}
 )
 
@@ -67,9 +68,12 @@ func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMess
 	})
 	for _, response := range responses {
 		if response.ShouldHandle(msg) {
-            response.Handle(c, msg)
-            break
-        }
+			if err := response.Handle(c, msg); err == nil {
+				break
+			} else {
+				logger.Errorf("处理回应时出现错误: %v", err)
+			}
+		}
 	}
 }
 
@@ -179,6 +183,7 @@ func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) boo
 
 func AddHandle(handle Handle) {
 	responses = append(responses, handle)
+	logger.Infof("新增 %s 回应成功", reflect.TypeOf(handle).Name())
 }
 
 func init() {

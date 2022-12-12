@@ -1,6 +1,7 @@
 package responses
 
 import (
+	"fmt"
 	"math/rand"
 
 	"github.com/Mrs4s/MiraiGo/client"
@@ -29,14 +30,13 @@ func (t *tiangou) ShouldHandle(msg *message.GroupMessage) bool {
 	return rand.Intn(100)+1 > 65 && misc.ContainsAnyWords(content, tiangouKeywords...)
 }
 
-func (t *tiangou) Handle(c *client.QQClient, msg *message.GroupMessage) {
+func (t *tiangou) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 	list, err := copywriting.GetTianGouList()
 	if err != nil {
-		logger.Errorf("获取天狗列表失败: %v", err)
-		return
+		return fmt.Errorf("获取天狗列表失败: %v", err)
 	}
 	random := list[rand.Intn(len(list))]
-	_ = qq.SendGroupMessageByGroup(msg.GroupCode, message.NewSendingMessage().Append(message.NewText(random)))
+	return qq.SendGroupMessageByGroup(msg.GroupCode, message.NewSendingMessage().Append(message.NewText(random)))
 }
 
 func init() {

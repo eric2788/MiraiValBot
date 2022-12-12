@@ -24,7 +24,7 @@ func (y *yesno) ShouldHandle(msg *message.GroupMessage) bool {
 	return misc.YesNoPattern.MatchString(msg.ToString())
 }
 
-func (y *yesno) Handle(c *client.QQClient, msg *message.GroupMessage) {
+func (y *yesno) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 	content := msg.ToString()
 	m := message.NewSendingMessage()
 	if ans, ok := file.DataStorage.Answers[content]; ok {
@@ -35,7 +35,7 @@ func (y *yesno) Handle(c *client.QQClient, msg *message.GroupMessage) {
 		logger.Infof("自动回答问题 %s 为 %t", content, ans)
 		m.Append(message.NewText(y.getResponse(ans)))
 	}
-	_ = qq.SendGroupMessageByGroup(msg.GroupCode, m)
+	return qq.SendGroupMessageByGroup(msg.GroupCode, m)
 }
 
 func (y *yesno) getQuestionAns(content string) bool {
