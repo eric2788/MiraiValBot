@@ -36,6 +36,9 @@ import (
 	// 所有游戏
 	_ "github.com/eric2788/MiraiValBot/hooks/games"
 
+	// 所有回应
+	_ "github.com/eric2788/MiraiValBot/hooks/responses"
+
 	// 註冊模組
 	_ "github.com/eric2788/MiraiValBot/modules/broadcaster"
 	_ "github.com/eric2788/MiraiValBot/modules/chat_reply"
