@@ -60,8 +60,7 @@ func (g *guessNumber) Start(args []string) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextf("猜 %d ~ %d 内的一个数字，最多可以猜 %d 次，@我回答!", g.min, g.max, g.maxFailed))
-
-	return nil
+	return qq.SendGroupMessage(msg)
 }
 
 func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {

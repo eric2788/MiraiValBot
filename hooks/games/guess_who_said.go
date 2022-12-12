@@ -34,10 +34,8 @@ func (g *guessWhoSaid) Start(args []string) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextLn("我将说一句话，你们猜猜是谁发的，直接回复我 @ta 就行"))
-	_ = qq.SendGroupMessage(msg)
-
-	g.sendNextQuestion()
-	return nil
+	defer g.sendNextQuestion()
+	return qq.SendGroupMessage(msg)
 }
 
 func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
