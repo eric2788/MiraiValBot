@@ -5,7 +5,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/file"
 	qq "github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/modules/response"
+	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
 func setYesNo(args []string, source *command.MessageSource) error {
@@ -13,7 +13,7 @@ func setYesNo(args []string, source *command.MessageSource) error {
 
 	reply := qq.CreateReply(source.Message)
 
-	if !response.YesNoPattern.MatchString(question) {
+	if !misc.YesNoPattern.MatchString(question) {
 		reply.Append(message.NewText("不是一个有效的问题"))
 	} else {
 		file.UpdateStorage(func() {

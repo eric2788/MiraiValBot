@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/Mrs4s/MiraiGo/message"
@@ -15,13 +16,23 @@ import (
 func startGame(args []string, source *command.MessageSource) error {
 	name := args[0]
 	msg := qq.CreateReply(source.Message)
-	msg.Append(qq.NewTextf(game.StartGame(name)))
+	res := game.StartGame(name, args[1:]...)
+	if res == "" {
+		return nil
+	}
+	msg.Append(qq.NewTextf(res))
 	return qq.SendGroupMessage(msg)
 }
 
 func stopGame(args []string, source *command.MessageSource) error {
 	msg := qq.CreateReply(source.Message)
 	msg.Append(qq.NewTextf(game.StopGame()))
+	return qq.SendGroupMessage(msg)
+}
+
+func listGames(args []string, source *command.MessageSource) error {
+	msg := qq.CreateReply(source.Message)
+	msg.Append(qq.NewTextf("可用游戏 + 参数: \n%s", strings.Join(game.ListGames(), "\n")))
 	return qq.SendGroupMessage(msg)
 }
 
@@ -79,7 +90,6 @@ func guessFinger(args []string, source *command.MessageSource) (err error) {
 
 	actual := int32(rand.Intn(3))
 
-	
 	msg := message.NewSendingMessage()
 	msg.Append(message.NewFingerGuessing(actual))
 
@@ -118,10 +128,11 @@ func guessFinger(args []string, source *command.MessageSource) (err error) {
 }
 
 var (
-	startGameCommand   = command.NewNode([]string{"start", "开始", "启动"}, "开始一个游戏", false, startGame, "<游戏名称>")
+	startGameCommand   = command.NewNode([]string{"start", "开始", "启动"}, "开始一个游戏", false, startGame, "<游戏名称>", "[参数]")
 	stopGameCommand    = command.NewNode([]string{"stop", "中止", "关闭"}, "中止目前游戏", false, stopGame)
 	diceCommand        = command.NewNode([]string{"dice", "骰子", "掷骰子"}, "掷骰子", false, dice, "[数字]")
 	guessFingerCommand = command.NewNode([]string{"finger", "剪刀石头布", "出拳"}, "剪刀石头布", false, guessFinger, "[剪刀/石头/布]")
+	listGameCommand    = command.NewNode([]string{"list", "游戏列表"}, "可用游戏列表+参数", false, listGames)
 )
 
 var gameCommand = command.NewParent([]string{"game", "游戏"}, "文字游戏指令",
@@ -129,6 +140,7 @@ var gameCommand = command.NewParent([]string{"game", "游戏"}, "文字游戏指
 	stopGameCommand,
 	diceCommand,
 	guessFingerCommand,
+	listGameCommand,
 )
 
 func init() {

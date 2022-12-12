@@ -35,8 +35,8 @@ func (g *game) HookEvent(bot *bot.Bot) {
 			if result.EndGame {
 				msg := message.NewSendingMessage()
 				msg.Append(qq.NewTextfLn("游戏已结束。"))
-				if result.Winner != nil {
-					msg.Append(qq.NewTextfLn("胜者: %s", result.Winner.DisplayName()))
+				if result.Winner != "" {
+					msg.Append(qq.NewTextfLn("胜者: %s", result.Winner))
 				}
 				if result.Score > 0 {
 					msg.Append(qq.NewTextfLn("分数: %d", result.Score))

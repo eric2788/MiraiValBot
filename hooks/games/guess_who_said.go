@@ -1,6 +1,9 @@
 package games
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
@@ -14,18 +17,27 @@ type guessWhoSaid struct {
 	currentSender *message.Sender
 }
 
-func (g *guessWhoSaid) Start() {
+func (g *guessWhoSaid) Start(args []string) error {
 
 	g.scores = make(map[int64]int)
 	g.failed = 0
 	g.maxFailed = 7
 	g.currentSender = nil
 
+	if len(args) > 0 {
+		max, err := strconv.Atoi(args[0])
+		if err != nil {
+			return fmt.Errorf("%s 不是有效的数字", args[0])
+		}
+		g.maxFailed = max
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextLn("我将说一句话，你们猜猜是谁发的，直接回复我 @ta 就行"))
 	_ = qq.SendGroupMessage(msg)
 
 	g.sendNextQuestion()
+	return nil
 }
 
 func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
@@ -92,7 +104,7 @@ func (g *guessWhoSaid) calculateFinalResult() *game.Result {
 	result := &game.Result{EndGame: true}
 	if winner > 0 {
 		if member := qq.FindGroupMember(winner); member != nil {
-			result.Winner = member
+			result.Winner = member.DisplayName()
 			result.Score = s
 		} else {
 			logger.Warnf("找不到群成员: %d", winner)
@@ -132,6 +144,10 @@ func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
 }
 
 func (g *guessWhoSaid) Stop() {
+}
+
+func (g *guessWhoSaid) ArgHints() []string {
+	return []string{"失败次数限制"}
 }
 
 func init() {

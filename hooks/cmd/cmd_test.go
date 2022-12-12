@@ -18,3 +18,8 @@ func TestLongTu(t *testing.T) {
 	imgLink := fmt.Sprintf("%slong%%20(%d)%s", backup, random, ext)
 	t.Log(imgLink)
 }
+
+func TestPanic(t *testing.T){
+	a := []string{"a"}
+	t.Log(a[1:]) // no panic!
+}

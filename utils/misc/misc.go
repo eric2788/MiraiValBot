@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -18,7 +19,10 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/qq"
 )
 
-var logger = utils.GetModuleLogger("valbot.misc")
+var (
+	logger       = utils.GetModuleLogger("valbot.misc")
+	YesNoPattern = regexp.MustCompile(`^.+是.+吗[\?？]*$`)
+)
 
 func NewRandomMessage() (*message.SendingMessage, error) {
 	random, err := qq.GetRandomGroupMessage(qq.ValGroupInfo.Code)
