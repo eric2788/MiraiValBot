@@ -22,8 +22,6 @@ func randomChat(bot *bot.Bot) error {
 		return nil
 	}
 
-	rand.Seed(time.Now().UnixNano())
-
 	var getMsg func() (*message.SendingMessage, error)
 
 	// 70% 发送群图片, 30% 发送群消息

@@ -132,7 +132,7 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 			// 戳回去咯
 			c.SendGroupPoke(qq.ValGroupInfo.Code, notify.Sender)
 		} else { // 10% 机率触发发病
-			if success := sendFabing(msg, sender); !success {
+			if success := sendWriting(msg, sender); !success {
 				return
 			}
 		}
@@ -159,7 +159,7 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 					msg.Append(qq.NewTextf(random, user.DisplayName()))
 				}
 			} else {
-				if success := sendFabing(msg, user); !success {
+				if success := sendWriting(msg, user); !success {
 					return
 				}
 			}
@@ -168,6 +168,25 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 		_ = qq.SendGroupMessage(msg)
 
 	}
+}
+
+func sendWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+	if rand.Intn(100) > 49 {
+		return sendAsWriting(msg, sender)
+	} else {
+		return sendFabing(msg, sender)
+	}
+}
+
+func sendAsWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+	list, err := copywriting.GetRanranList()
+	if err != nil {
+		logger.Errorf("获取小作文模板失败: %v", err)
+		return false
+	}
+	random := list[rand.Intn(len(list))]
+	msg.Append(message.NewText(strings.ReplaceAll(random.Text, random.Person, sender.DisplayName())))
+	return true
 }
 
 func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
