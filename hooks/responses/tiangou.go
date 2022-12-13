@@ -3,6 +3,7 @@ package responses
 import (
 	"fmt"
 	"math/rand"
+	"time"
 
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
@@ -31,7 +32,17 @@ func (t *tiangou) ShouldHandle(msg *message.GroupMessage) bool {
 }
 
 func (t *tiangou) Handle(c *client.QQClient, msg *message.GroupMessage) error {
-	list, err := copywriting.GetTianGouList()
+	rand.Seed(time.Now().UnixNano())
+	
+	var getter func() ([]string, error)
+
+	if rand.Intn(100)+1 > 50 {
+		getter = copywriting.GetTianGouList
+	} else {
+		getter = copywriting.GetTiangou2List
+	}
+	
+	list, err := getter()
 	if err != nil {
 		return fmt.Errorf("获取天狗列表失败: %v", err)
 	}

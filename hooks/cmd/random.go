@@ -366,8 +366,6 @@ func randomSkin(args []string, source *command.MessageSource) error {
 		}
 	} else {
 
-		rand.Seed(time.Now().UnixNano())
-
 		chroma := skin.Chromas[rand.Intn(len(skin.Chromas))]
 
 		msg.Append(qq.NewTextfLn("选中皮肤: %s", chroma.DisplayName))
