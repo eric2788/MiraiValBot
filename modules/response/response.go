@@ -12,7 +12,6 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
-	"github.com/eric2788/MiraiValBot/modules/chat_reply"
 	"github.com/eric2788/MiraiValBot/modules/game"
 	"github.com/eric2788/MiraiValBot/services/copywriting"
 )
@@ -21,9 +20,7 @@ const Tag = "valbot.response"
 
 var (
 	logger   = utils.GetModuleLogger(Tag)
-	instance = &response{
-		res: new(chat_reply.AIChatResponse),
-	}
+	instance = &response{}
 
 	longWongTalks = []string{
 		"恭迎龙王 %s (跪拜)",
@@ -48,7 +45,7 @@ var (
 
 type (
 	response struct {
-		res *chat_reply.AIChatResponse
+		lastInGame bool
 	}
 
 	Handle interface {
@@ -65,6 +62,10 @@ func (r *response) HookEvent(bot *bot.Bot) {
 func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMessage) {
 
 	if game.IsInGame() {
+		r.lastInGame = true
+		return
+	} else if r.lastInGame { // to make sure it wont reply immediately after game stopped
+		r.lastInGame = false
 		return
 	}
 

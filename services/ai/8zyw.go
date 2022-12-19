@@ -2,12 +2,13 @@ package ai
 
 import (
 	"fmt"
-	"github.com/corpix/uarand"
-	"github.com/eric2788/MiraiValBot/services/huggingface"
-	"github.com/eric2788/common-utils/request"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/corpix/uarand"
+	"github.com/eric2788/MiraiValBot/services/huggingface"
+	"github.com/eric2788/common-utils/request"
 )
 
 const (
@@ -67,6 +68,8 @@ func (p *NovelAI8zywPayload) ToURLEncode() string {
 	return form.Encode()
 }
 
+// GetNovelAI8zywImage get image from 8zyw
+// Deprecated: 免费生成已经转移到他的群内而非网站
 func GetNovelAI8zywImage(payload *NovelAI8zywPayload) (string, error) {
 
 	body := strings.ReplaceAll(payload.ToURLEncode(), "%20", "+")

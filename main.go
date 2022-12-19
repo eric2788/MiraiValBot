@@ -67,6 +67,8 @@ func main() {
 		simulate.EnableDebug()
 	}
 
+	go debugServe()
+
 	file.GenerateConfig()
 	file.GenerateDevice()
 

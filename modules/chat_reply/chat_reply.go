@@ -17,7 +17,7 @@ var (
 	logger   = utils.GetModuleLogger(Tag)
 	instance = &atResponse{
 		strategies: []ResponseStrategy{
-			&AIChatResponse{},
+			AIChat,
 			&RandomResponse{},
 		},
 	}

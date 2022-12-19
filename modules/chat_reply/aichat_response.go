@@ -1,12 +1,9 @@
 package chat_reply
 
 import (
-	"errors"
-	"math/rand"
 	"regexp"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
@@ -14,14 +11,8 @@ import (
 )
 
 var (
-	aichats = []aichat.AIReply{
-		&aichat.XiaoAi{},
-		&aichat.QingYunKe{},
-		&aichat.TianXing{},
-		&aichat.MoliYun{},
-	}
-
-	face = regexp.MustCompile(`\{face:(\d+)}`)
+	face   = regexp.MustCompile(`\{face:(\d+)}`)
+	AIChat = &AIChatResponse{}
 )
 
 type AIChatResponse struct {
@@ -31,27 +22,15 @@ func (a *AIChatResponse) Response(msg *message.GroupMessage) (*message.SendingMe
 
 	content := strings.Join(qq.ParseMsgContent(msg.Elements).Texts, "，")
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
-
-	reply := qq.CreateReply(msg)
-
-	for _, ai := range aichats {
-
-		msg, err := ai.Reply(content)
-
-		if err != nil {
-			logger.Errorf("AI %s 回復訊息時出現錯誤: %v, 將使用其他AI", ai.Name(), err)
-			continue
-		} else {
-			a.buildMessage(reply, msg)
-			logger.Infof("AI %s 回复信息成功。", ai.Name())
-			return reply, nil
-		}
+	res, err := aichat.GetRandomResponse(content)
+	if err != nil {
+		return nil, err
 	}
 
-	logger.Errorf("所有 AI 均無法回復訊息, 已略過發送。")
-	return nil, errors.New("所有 AI 均無法回復訊息。")
+	reply := qq.CreateReply(msg)
+	a.buildMessage(reply, res)
+
+	return reply, nil
 }
 
 func (a *AIChatResponse) buildMessage(reply *message.SendingMessage, content string) {

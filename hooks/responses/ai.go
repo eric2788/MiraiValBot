@@ -65,6 +65,6 @@ func (a *ai) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 
 func init() {
 	response.AddHandle(&ai{
-		res: &chat_reply.AIChatResponse{},
+		res: chat_reply.AIChat,
 	})
 }

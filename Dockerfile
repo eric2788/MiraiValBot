@@ -21,6 +21,7 @@ COPY --from=builder /go/bin/valbot /valbot
 RUN chmod +x /valbot
 
 EXPOSE 8080
+EXPOSE 45678
 
 ENV TZ=Asia/Hong_Kong
 ENV COMPRESS_TYPE=zlib

@@ -49,9 +49,7 @@ func (b *Broadcaster) Subscribe(topic string, handler MessageHandler) (bool, err
 	// pubsub 關閉的 context
 	pubsubCtx, pubsubClose := context.WithCancel(ctx)
 
-	go handleMessage(topic, pubsub, handleCtx, pubsubClose, ifError, func(msg *redis.Message) {
-		handler.HandleMessage(bot.Instance, msg)
-	})
+	go handleMessage(topic, pubsub, handleCtx, pubsubClose, ifError, handler)
 
 	go handleError(topic, handleCtx, ifError, func(err error) {
 		handler.HandleError(bot.Instance, err)
@@ -100,7 +98,7 @@ func handleError(topic string, ctx context.Context, ifError <-chan error, errorH
 	}
 }
 
-func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close context.CancelFunc, ifError chan<- error, handle func(*redis.Message)) {
+func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close context.CancelFunc, ifError chan<- error, handle MessageHandler) {
 	defer func() {
 		if err := ps.Close(); err != nil {
 			logger.Warnf("停止訂閱 %s 時出現錯誤: %v", topic, err)
@@ -129,7 +127,7 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close co
 				logger.Debugf("訂閱接收閘口關閉，正在停止訂閱 %s", topic)
 				return
 			}
-			handle(msg)
+			go handle.HandleMessage(bot.Instance, msg)
 		}
 	}
 }
