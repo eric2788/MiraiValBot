@@ -100,7 +100,7 @@ func TestCompressUnCompressMessage(t *testing.T) {
 	for name, compresser := range map[string]compress.Compression{
 		"zlib": &compress.ZLibCompression{},
 		"gzip": &compress.GZipCompression{},
-		"none": compress.None,
+		"none": &compress.NoCompression{},
 	} {
 
 		t.Logf("using compresser: %s", name)

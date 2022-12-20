@@ -2,8 +2,10 @@ package cache
 
 import (
 	"fmt"
-	"github.com/Logiase/MiraiGo-Template/utils"
 	"os"
+	"strings"
+
+	"github.com/Logiase/MiraiGo-Template/utils"
 )
 
 const StrategyEnvVar = "CACHE_STRATEGY"
@@ -35,11 +37,6 @@ type (
 	}
 )
 
-var cacheDbMap = map[string]Database{
-	"local":  &LocalCache{},
-	"github": &GitCache{},
-}
-
 func (s *Service) Set(name string, data []byte) error {
 	return s.db.Save(s.path, name, data)
 }
@@ -64,7 +61,7 @@ func New(options ...func(*Options)) (*Service, error) {
 	for _, setting := range options {
 		setting(opt)
 	}
-	if db, ok := cacheDbMap[opt.Type]; ok {
+	if db := getCacheDatabase(opt.Type); db != nil {
 		if err := db.Init(opt.Path); err != nil {
 			return nil, err
 		}
@@ -98,6 +95,19 @@ func WithPath(path string) func(*Options) {
 func WithType(t string) func(*Options) {
 	return func(opt *Options) {
 		opt.Type = t
+	}
+}
+
+func getCacheDatabase(t string) Database {
+	switch strings.ToLower(t) {
+	case "local":
+		return &LocalCache{}
+	case "github":
+		return &GitCache{}
+	case "redis":
+		return &RedisCache{}
+	default:
+		return nil
 	}
 }
 

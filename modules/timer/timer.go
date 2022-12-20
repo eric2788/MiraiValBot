@@ -20,7 +20,6 @@ type handler struct {
 	duration  time.Duration
 	ctx       context.Context
 	canceller context.CancelFunc
-	ticker    *time.Ticker
 	Started   bool
 }
 
@@ -93,7 +92,6 @@ func (t *Timer) StopTimer(name string) (bool, error) {
 			return false, nil
 		}
 
-		timer.ticker.Stop()
 		timer.canceller()
 		return true, nil
 	}
@@ -112,10 +110,9 @@ func (t *Timer) StartTimer(name string, bot *bot.Bot) (bool, error) {
 		ctx, cancel := context.WithCancel(bgCtx)
 		timer.ctx = ctx
 		timer.canceller = cancel
-		timer.ticker = time.NewTicker(timer.duration)
 		t.wg.Add(1)
 		logger.Debugf("wg added 1")
-		go startTimer(name, ctx, timer.ticker, bot, timer.job, func() {
+		go startTimer(name, ctx, time.NewTicker(timer.duration), bot, timer.job, func() {
 			t.wg.Done()
 			logger.Debugf("wg removed 1")
 			timer.Started = false

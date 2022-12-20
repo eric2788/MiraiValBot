@@ -1,8 +1,10 @@
 package compress
 
 import (
-	"github.com/Logiase/MiraiGo-Template/utils"
 	"os"
+	"strings"
+
+	"github.com/Logiase/MiraiGo-Template/utils"
 )
 
 var logger = utils.GetModuleLogger("valbot.compress")
@@ -11,14 +13,6 @@ var compresser Compression
 type Compression interface {
 	Compress(src []byte) []byte
 	UnCompress(src []byte) []byte
-}
-
-var None = &NoCompression{}
-
-var compressMap = map[string]Compression{
-	"none": None,
-	"zlib": &ZLibCompression{},
-	"gzip": &GZipCompression{},
 }
 
 func DoCompress(src []byte) []byte {
@@ -30,12 +24,16 @@ func DoUnCompress(compressSrc []byte) []byte {
 }
 
 func SwitchType(t string) {
-	if com, ok := compressMap[t]; ok {
-		compresser = com
-		logger.Infof("成功切換到 %s 壓縮模式。", t)
-	} else {
-		compresser = compressMap["none"]
-		logger.Warnf("未知的壓縮類型: %s, 將使用無壓縮模式", t)
+	switch strings.ToLower(t) {
+	case "gzip":
+		compresser = &GZipCompression{}
+		logger.Infof("已切換為 Gzip 壓縮")
+	case "zlib":
+		compresser = &ZLibCompression{}
+		logger.Infof("已切換為 Zlib 壓縮")
+	default:
+		compresser = &NoCompression{}
+		logger.Infof("未知的压缩类型 %v, 已切換為無壓縮", t)
 	}
 }
 

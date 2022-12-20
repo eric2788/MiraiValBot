@@ -47,6 +47,14 @@ func Subscribe(ctx context.Context, topic string) *rgo.PubSub {
 	return rdb.Subscribe(ctx, topic)
 }
 
+func ListKeys(prefix string) (keys []string, err error) {
+	keys, cursor, err := rdb.Scan(ctx, 0, prefix+":*", 0).Result()
+	if cursor == 0 {
+		return nil, nil
+	}
+	return
+}
+
 func HasKey(key string) (bool, error) {
 	re, err := rdb.Exists(ctx, key).Result()
 	return re == 1, err
