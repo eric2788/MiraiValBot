@@ -44,7 +44,7 @@ func (b *Broadcaster) Subscribe(topic string, handler MessageHandler) (bool, err
 	handleCtx, handleCancel := context.WithCancel(ctx)
 
 	pubsub := rdb.Subscribe(handleCtx, topic)
-	ifError := make(chan error)
+	ifError := make(chan error, 1)
 
 	// pubsub 關閉的 context
 	pubsubCtx, pubsubClose := context.WithCancel(ctx)
@@ -98,21 +98,20 @@ func handleError(topic string, ctx context.Context, ifError <-chan error, errorH
 	}
 }
 
-func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, close context.CancelFunc, ifError chan<- error, handle MessageHandler) {
+func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, cancel context.CancelFunc, ifError chan<- error, handle MessageHandler) {
 	defer func() {
 		if err := ps.Close(); err != nil {
 			logger.Warnf("停止訂閱 %s 時出現錯誤: %v", topic, err)
 		}
 		logger.Infof("%s 的訂閱已停止。", topic)
-		close()
+		cancel()
 	}()
+	defer close(ifError)
 	defer func() {
 		if err := recover(); err != nil {
-			go func() {
-				logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v", topic, err)
-				debug.PrintStack()
-				ifError <- fmt.Errorf("%v", err)
-			}()
+			logger.Errorf("處理 %s 訂閱訊息時出現致命錯誤: %v", topic, err)
+			debug.PrintStack()
+			ifError <- fmt.Errorf("%v", err)
 		}
 	}()
 	size := file.ApplicationYaml.Redis.Buffer // 每次最大接收数量 (buffer)
