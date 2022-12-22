@@ -18,11 +18,16 @@ func (c *Chatgpt3) Reply(msg string) (string, error) {
 		return "", err
 	}
 
+	logger.Debugf("chatgpt3 接收信息: %s", msg)
+
 	resp, err := c.cli.ChatWithContext(msg)
 
 	if err != nil {
+		logger.Debugf("chatgpt3 返回錯誤: %v", err)
 		return "", err
 	}
+
+	logger.Debugf("chatgpt3 輸出信息: %s", resp)
 
 	return replaces(resp, map[string]string{
 		"答：": "",

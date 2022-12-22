@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/eric2788/MiraiValBot/utils/test"
 )
@@ -76,8 +77,7 @@ func TestChatgpt3_Reply(t *testing.T) {
 
 	conversations := []string{
 		"你好，我叫老陈，你叫什么？",
-		"你知道我是谁吗？",
-		"写一首诗来表达你现在的心情",
+		"你知道我叫什麼嗎",
 	}
 
 	for i, conversation := range conversations {
@@ -85,6 +85,7 @@ func TestChatgpt3_Reply(t *testing.T) {
 		if err != nil {
 			t.Skip(err)
 		}
+		<-time.After(time.Second * 5)
 		t.Logf("Reply %d: %s", i+1, msg)
 	}
 }
