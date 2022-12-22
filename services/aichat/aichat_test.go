@@ -69,7 +69,6 @@ func TestTianXing_Reply(t *testing.T) {
 }
 
 func TestChatgpt3_Reply(t *testing.T) {
-	aichat := chats["chatgpt3"]
 
 	if os.Getenv("CHATGPT_API_KEY") == "" {
 		t.Skip("CHATGPT_API_KEY is empty")
@@ -81,7 +80,9 @@ func TestChatgpt3_Reply(t *testing.T) {
 	}
 
 	for i, conversation := range conversations {
-		msg, err := aichat.Reply(conversation)
+
+		ai := &Chatgpt3{}
+		msg, err := ai.Reply(conversation)
 		if err != nil {
 			t.Skip(err)
 		}
