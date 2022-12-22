@@ -18,9 +18,6 @@ func GetRandomResponse(content string) (string, error) {
 
 	aichats := GetAIChats(os.Getenv("AI_CHAT_MODE"))
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
-
 	for _, ai := range aichats {
 
 		msg, err := ai.Reply(content)
@@ -38,25 +35,42 @@ func GetRandomResponse(content string) (string, error) {
 }
 
 func GetAIChats(mode string) []AIReply {
+
+	rand.Seed(time.Now().UnixNano())
+
 	switch strings.ToLower(mode) {
-	case "cn":
-		return []AIReply{
+
+	case "random":
+
+		aichats := []AIReply{
 			&XiaoAi{},
 			&QingYunKe{},
 			&TianXing{},
 			&MoliYun{},
+			&Chatgpt3{},
 		}
+
+		rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
+
+		return aichats
+
 	case "chatgpt3":
-		return []AIReply{
-			&Chatgpt3{},
-		}
-	default:
-		return []AIReply{
+		chats := make([]AIReply, 0)
+
+		aichats := []AIReply{
 			&XiaoAi{},
 			&QingYunKe{},
 			&TianXing{},
 			&MoliYun{},
-			&Chatgpt3{},
 		}
+
+		rand.Shuffle(len(aichats), func(i, j int) { aichats[i], aichats[j] = aichats[j], aichats[i] })
+
+		chats = append(chats, &Chatgpt3{})
+		chats = append(chats, aichats...)
+		return chats
+
+	default:
+		return GetAIChats("random")
 	}
 }
