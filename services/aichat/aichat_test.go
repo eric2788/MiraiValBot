@@ -12,7 +12,8 @@ var chats = map[string]AIReply{
 	"xiaoai":    &XiaoAi{},
 	"qingyunke": &QingYunKe{},
 	"tianxing":  &TianXing{},
-	"moliyun": &MoliYun{},
+	"moliyun":   &MoliYun{},
+	"chatgpt3":  &Chatgpt3{},
 }
 
 func TestGetXiaoAi(t *testing.T) {
@@ -27,7 +28,7 @@ func TestGetXiaoAi(t *testing.T) {
 	t.Logf("Reply: %s", msg)
 }
 
-func TestGetMoliyun(t *testing.T){
+func TestGetMoliyun(t *testing.T) {
 	aichat := chats["moliyun"]
 	msg, err := aichat.Reply("你真笨")
 	if err != nil {
@@ -56,6 +57,24 @@ func TestTianXing_Reply(t *testing.T) {
 	}
 
 	msg, err := aichat.Reply("你好，你叫什么？")
+	if err != nil {
+		if strings.Contains(err.Error(), "timeout") {
+			t.Skip(err)
+		}
+		t.Fatal(err)
+	}
+
+	t.Logf("Reply: %s", msg)
+}
+
+func TestChatgpt3_Reply(t *testing.T) {
+	aichat := chats["chatgpt3"]
+
+	if os.Getenv("CHATGPT_API_KEY") == "" {
+		t.Skip("CHATGPT_API_KEY is empty")
+	}
+
+	msg, err := aichat.Reply("编写一个 hello world 的 javascript 代码")
 	if err != nil {
 		if strings.Contains(err.Error(), "timeout") {
 			t.Skip(err)

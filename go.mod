@@ -6,6 +6,7 @@ require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5
 	github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/PullRequestInc/go-gpt3 v1.1.10
 	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/corpix/uarand v0.2.0
@@ -23,7 +24,6 @@ require (
 )
 
 require (
-	github.com/PullRequestInc/go-gpt3 v1.1.10 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/dghubble/sling v1.4.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
