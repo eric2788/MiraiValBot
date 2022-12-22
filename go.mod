@@ -6,7 +6,6 @@ require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5
 	github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/PullRequestInc/go-gpt3 v1.1.10
 	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/corpix/uarand v0.2.0
@@ -18,6 +17,7 @@ require (
 	github.com/hqbobo/text2pic v0.0.0-20180823042751-2479e146d720
 	github.com/lucas-clemente/quic-go v0.31.0
 	github.com/sirupsen/logrus v1.9.0
+	github.com/solywsh/chatgpt v0.0.12
 	github.com/stretchr/testify v1.8.1
 	github.com/wdvxdr1123/go-silk v0.0.0-20220304095002-f67345df09ea
 	gopkg.in/yaml.v3 v3.0.1
@@ -35,6 +35,7 @@ require (
 	github.com/marten-seemann/qtls-go1-18 v0.1.3 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.5.0 // indirect
+	github.com/sashabaranov/go-gpt3 v0.0.0-20221216095610-1c20931ead68 // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/tools v0.3.0 // indirect

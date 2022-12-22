@@ -1,41 +1,46 @@
 package aichat
 
 import (
-	"context"
 	"fmt"
-	"github.com/PullRequestInc/go-gpt3"
+	"github.com/solywsh/chatgpt"
 	"os"
+	"time"
 )
 
 // openAI
 type Chatgpt3 struct {
+	cli *chatgpt.ChatGPT
 }
 
 func (c *Chatgpt3) Reply(msg string) (string, error) {
-	apiKey := os.Getenv("CHATGPT_API_KEY")
-	if apiKey == "" {
-		return "", fmt.Errorf("chatgpt api key not set")
-	}
-	cli := gpt3.NewClient(apiKey,
-		gpt3.WithDefaultEngine(gpt3.TextDavinci003Engine),
-	)
 
-	resp, err := cli.Completion(context.Background(), gpt3.CompletionRequest{
-		Prompt:      []string{msg},
-		MaxTokens:   gpt3.IntPtr(1000),
-		Temperature: gpt3.Float32Ptr(0),
-		N:           gpt3.IntPtr(1),
-	})
+	if err := c.ensureInit(); err != nil {
+		return "", err
+	}
+
+	resp, err := c.cli.ChatWithContext(msg)
 
 	if err != nil {
 		return "", err
 	}
 
-	return replaces(resp.Choices[0].Text, map[string]string{
+	return replaces(resp, map[string]string{
 		"答：": "",
 	}), nil
 }
 
 func (c *Chatgpt3) Name() string {
 	return "chatgpt3"
+}
+
+func (c *Chatgpt3) ensureInit() error {
+	apiKey := os.Getenv("CHATGPT_API_KEY")
+	if apiKey == "" {
+		return fmt.Errorf("chatgpt api key not set")
+	}
+	if c.cli == nil {
+		c.cli = chatgpt.New(apiKey, "watta-ai", time.Duration(0))
+		c.cli.ChatContext.SetBackground("群友们都是DD，爱玩抽象和发龙图，还会说怪话，攻击性极强")
+	}
+	return nil
 }

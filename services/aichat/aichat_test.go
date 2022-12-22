@@ -74,15 +74,19 @@ func TestChatgpt3_Reply(t *testing.T) {
 		t.Skip("CHATGPT_API_KEY is empty")
 	}
 
-	msg, err := aichat.Reply("编写一个 hello world 的 javascript 代码")
-	if err != nil {
-		if strings.Contains(err.Error(), "timeout") {
-			t.Skip(err)
-		}
-		t.Fatal(err)
+	conversations := []string{
+		"你好，我叫老陈，你叫什么？",
+		"你知道我是谁吗？",
+		"写一首诗来表达你现在的心情",
 	}
 
-	t.Logf("Reply: %s", msg)
+	for i, conversation := range conversations {
+		msg, err := aichat.Reply(conversation)
+		if err != nil {
+			t.Skip(err)
+		}
+		t.Logf("Reply %d: %s", i+1, msg)
+	}
 }
 
 func init() {
