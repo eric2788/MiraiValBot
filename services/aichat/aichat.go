@@ -14,6 +14,7 @@ var (
 		&QingYunKe{},
 		&TianXing{},
 		&MoliYun{},
+		&Chatgpt3{},
 	}
 
 	logger = utils.GetModuleLogger("service.aichat")

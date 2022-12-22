@@ -1,6 +1,9 @@
 package twitter
 
-import "html"
+import (
+	"html"
+	"strings"
+)
 
 const (
 	Tweet           = "TWEET"
@@ -158,5 +161,11 @@ func (t TweetStreamData) GetCommand() string {
 
 // with html unescaped string
 func (t TweetStreamData) UnEsacapedText() string {
+	i := strings.IndexByte(t.Text, '&')
+
+	if i < 0 {
+		return t.Text
+	}
+
 	return html.UnescapeString(t.Text)
 }
