@@ -115,7 +115,10 @@ func handleMessage(topic string, ps *redis.PubSub, ctx context.Context, cancel c
 		}
 	}()
 	size := file.ApplicationYaml.Redis.Buffer // 每次最大接收数量 (buffer)
-	channel := ps.Channel(redis.WithChannelSize(int(size)))
+	channel := ps.Channel(
+		redis.WithChannelSize(int(size)),
+		redis.WithChannelHealthCheckInterval(time.Minute),
+	)
 	for {
 		select {
 		case <-ctx.Done():
