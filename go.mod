@@ -27,7 +27,7 @@ require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/dghubble/sling v1.4.0 // indirect
-	github.com/eric2788/chatgpt v0.0.13-0.20221223015615-2b4cb357207b // indirect
+	github.com/eric2788/chatgpt v0.0.13-0.20221223062859-dbccba963be1 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect

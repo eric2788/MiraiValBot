@@ -106,7 +106,7 @@ func (c *Chatgpt3) handleError(err error) error {
 	} else if err == chatgpt.OverMaxQuestionLength {
 		return fmt.Errorf("chatgpt3 问题超过最大长度")
 	} else if err == chatgpt.OverMaxTextLength {
-		logger.Warnf("chatgpt3 文本超过最大长度，将尝试删除先前的对话记录")
+		logger.Warnf("chatgpt3 文本超过最大长度，将尝试删除先前的对话记录: %d => %d", ctx.GetSeqTimes(), ctx.GetSeqTimes()-1)
 		ctx.PollConversation()
 		return nil
 	}
