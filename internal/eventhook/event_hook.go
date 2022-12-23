@@ -14,6 +14,10 @@ type EventHooker interface {
 	HookEvent(bot *bot.Bot)
 }
 
+type EventStopper interface {
+	StopEvent(bot *bot.Bot)
+}
+
 var hookers []EventHooker
 
 func HookLifeCycle(hooker EventHooker) {

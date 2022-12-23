@@ -3,12 +3,18 @@ package aichat
 import (
 	"fmt"
 	"os"
+	"sync"
 	"time"
 
-	"github.com/solywsh/chatgpt"
+	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/modules/timer"
+	"github.com/eric2788/chatgpt"
 )
 
-var ctx *chatgpt.ChatContext
+var (
+	ctx *chatgpt.ChatContext
+	mu  sync.Mutex
+)
 
 // openAI
 type Chatgpt3 struct {
@@ -58,9 +64,12 @@ func (c *Chatgpt3) Name() string {
 
 func (c *Chatgpt3) ensureInit() {
 	if ctx == nil {
-		ctx = chatgpt.NewContext()
+		ctx = chatgpt.NewContext(
+			chatgpt.WithMaxSeqTimes(3000),
+			chatgpt.WithMaintainSeqTimes(true),
+			chatgpt.WithOldConversation("data/ai.conversation"),
+		)
 		ctx.SetBackground("群友们都是DD，爱玩抽象和发龙图，还会说怪话，攻击性极强")
-		ctx.SetMaxSeqTimes(3000)
 	}
 }
 
@@ -77,4 +86,23 @@ func (c *Chatgpt3) handleError(err error) error {
 		return fmt.Errorf("chatgpt3 文本超过最大长度")
 	}
 	return err
+}
+
+func SaveGPTConversation() error {
+	if ctx != nil {
+		mu.Lock()
+		defer mu.Unlock()
+		return ctx.SaveConversation("data/ai.conversation")
+	}
+	return nil
+}
+
+func init() {
+	timer.RegisterTimer("save-gpt-conversation", 10*time.Minute, func(bot *bot.Bot) (err error) {
+		err = SaveGPTConversation()
+		if err == nil {
+			logger.Infof("保存AI对话成功")
+		}
+		return
+	})
 }

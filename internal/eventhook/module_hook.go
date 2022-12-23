@@ -11,6 +11,7 @@ type eventHookModule struct {
 	tag    string
 	name   string
 	logger logrus.FieldLogger
+	stop   func(bot *bot.Bot)
 }
 
 func (e *eventHookModule) MiraiGoModule() bot.ModuleInfo {
@@ -35,6 +36,9 @@ func (e *eventHookModule) Start(bot *bot.Bot) {
 
 func (e *eventHookModule) Stop(bot *bot.Bot, wg *sync.WaitGroup) {
 	defer wg.Done()
+	if e.stop != nil {
+		e.stop(bot)
+	}
 	e.logger.Infof("%s 模組已關閉。", e.name)
 }
 
@@ -43,7 +47,11 @@ func RegisterAsModule(hooker EventHooker, name, tag string, logger logrus.FieldL
 		tag:    tag,
 		name:   name,
 		logger: logger,
+		stop:   nil,
 	}
 	bot.RegisterModule(module)
 	HookLifeCycle(hooker)
+	if stopper, ok := hooker.(EventStopper); ok {
+		module.stop = stopper.StopEvent
+	}
 }

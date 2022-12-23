@@ -8,6 +8,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/game"
+	"github.com/eric2788/MiraiValBot/services/aichat"
 	"github.com/eric2788/common-utils/array"
 )
 
@@ -54,6 +55,12 @@ func (a *atResponse) HookEvent(bot *bot.Bot) {
 
 		}
 	})
+}
+
+func (a *atResponse) StopEvent(bot *bot.Bot) {
+	if err := aichat.SaveGPTConversation(); err != nil {
+		logger.Errorf("保存AI对话失败: %v", err)
+	}
 }
 
 func init() {

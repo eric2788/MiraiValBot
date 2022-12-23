@@ -81,6 +81,8 @@ github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1m
 github.com/envoyproxy/go-control-plane v0.9.7/go.mod h1:cwu0lG7PUMfa9snN8LXBig5ynNVH9qI8YYLbd1fK2po=
 github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
+github.com/eric2788/chatgpt v0.0.13-0.20221223015615-2b4cb357207b h1:dBXGu7Vbt30YcZk8jukyN0CfXiBq9xDW7GGdL9BbIig=
+github.com/eric2788/chatgpt v0.0.13-0.20221223015615-2b4cb357207b/go.mod h1:OOs/FLrOt7uN05HYhTDD629AXzBuF1KzT1tfoK/2sro=
 github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a h1:nEjX518ApDs/rcK3E5s5aZlT1Mu+DJJ1vTugK3tOw2Y=
 github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a/go.mod h1:QVU3LSh/++wosX93mHQkxSQanA7uKPcuq/AW4bB8M1Y=
 github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879 h1:jh0xGmjpB8ZDwNT6QAo4PPJ7AS+QFzWNElq2vwG7ZKM=

@@ -50,6 +50,10 @@ func (g *game) HookEvent(bot *bot.Bot) {
 	})
 }
 
+func (g *game) StopEvent(bot *bot.Bot) {
+	logger.Info(StopGame())
+}
+
 func init() {
 	eventhook.RegisterAsModule(instance, "文字游戏", Tag, logger)
 }
