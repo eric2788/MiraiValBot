@@ -1,12 +1,12 @@
 package aichat
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/eric2788/MiraiValBot/services/copywriting"
 	"github.com/eric2788/MiraiValBot/utils/test"
 )
 
@@ -93,14 +93,18 @@ func TestChatgpt3_Reply(t *testing.T) {
 }
 
 func TestChatGptMaximumConversation(t *testing.T) {
-	if os.Getenv("CHATGPT_API_KEY") == "" {
-		t.Skip("CHATGPT_API_KEY is empty")
+	if os.Getenv("CHATGPT_API_KEY") == "" && os.Getenv("OPENAI_ACCESS_TOKEN") == "" {
+		t.Skip("CHATGPT_API_KEY or OPENAI_ACCESS_TOKEN is empty")
 	}
 
-	for i := 0; i < 15; i++ {
+	questions, err := copywriting.GetTianGouList()
+	if err != nil {
+		t.Skip(err)
+	}
+	for i := 0; i < len(questions); i++ {
 		<-time.After(time.Second * 1)
 		ai := &Chatgpt3{}
-		msg, err := ai.Reply(fmt.Sprintf("1 + 2 * 5 + %d = ?", i))
+		msg, err := ai.Reply(questions[i])
 		if err != nil {
 			t.Log(err)
 			continue

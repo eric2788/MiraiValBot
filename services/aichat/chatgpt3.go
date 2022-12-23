@@ -7,8 +7,12 @@ import (
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/timer"
 	"github.com/eric2788/chatgpt"
+
+	gpt "github.com/m1guelpf/chatgpt-telegram/src/chatgpt"
+	cfg "github.com/m1guelpf/chatgpt-telegram/src/config"
 )
 
 var (
@@ -21,14 +25,33 @@ type Chatgpt3 struct {
 }
 
 func (c *Chatgpt3) Reply(msg string) (string, error) {
+	return c.replyWithAPI(msg)
+}
 
+func (c *Chatgpt3) replyWithSite(msg string) (string, error) {
+	accessToken := os.Getenv("OPENAI_ACCESS_TOKEN")
+	if accessToken == "" {
+		return "", fmt.Errorf("openai access token not set")
+	}
+	config := &cfg.Config{
+		OpenAISession: accessToken,
+	}
+	cli := gpt.Init(config)
+	res, err := cli.SendMessage(msg, qq.ValGroupInfo.Code)
+	if err != nil {
+		return "", err
+	}
+	response, ok := <-res
+	if !ok {
+		return "", fmt.Errorf("chatgpt3 response channel closed")
+	}
+	return response.Message, nil
+}
+
+func (c *Chatgpt3) replyWithAPI(msg string) (string, error) {
 	apiKey := os.Getenv("CHATGPT_API_KEY")
 	if apiKey == "" {
 		return "", fmt.Errorf("chatgpt api key not set")
-	}
-
-	if len([]rune(msg)) >= 1024 {
-		return "问题过长，无法回答", nil
 	}
 
 	c.ensureInit()
@@ -77,13 +100,15 @@ func (c *Chatgpt3) ensureInit() {
 func (c *Chatgpt3) handleError(err error) error {
 	// 已达到最大对话次数，重置对话上下文
 	if err == chatgpt.OverMaxSequenceTimes {
-		logger.Debugf("chatgpt3 已达到最大对话次数, 将重置对话上下文")
+		logger.Warnf("chatgpt3 已达到最大对话次数, 将重置对话上下文")
 		ctx = nil
 		return nil
 	} else if err == chatgpt.OverMaxQuestionLength {
 		return fmt.Errorf("chatgpt3 问题超过最大长度")
 	} else if err == chatgpt.OverMaxTextLength {
-		return fmt.Errorf("chatgpt3 文本超过最大长度")
+		logger.Warnf("chatgpt3 文本超过最大长度，将尝试删除先前的对话记录")
+		ctx.PollConversation()
+		return nil
 	}
 	return err
 }
