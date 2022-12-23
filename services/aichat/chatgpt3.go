@@ -123,6 +123,15 @@ func SaveGPTConversation() error {
 	return nil
 }
 
+func ResetGPTConversation() {
+	if ctx == nil {
+		return
+	}
+	mu.Lock()
+	defer mu.Unlock()
+	ctx.ResetConversation()
+}
+
 func init() {
 	timer.RegisterTimer("save-gpt-conversation", 10*time.Minute, func(bot *bot.Bot) (err error) {
 		err = SaveGPTConversation()

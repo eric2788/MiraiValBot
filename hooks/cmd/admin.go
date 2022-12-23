@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"github.com/Mrs4s/MiraiGo/message"
 	qq "github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"github.com/eric2788/MiraiValBot/services/aichat"
 	"github.com/eric2788/MiraiValBot/utils/cache"
 )
 
@@ -42,14 +44,21 @@ func fetchEssence(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("已成功添加 %d 则群精华消息到缓存。", i)))
 }
 
+func resetConversation(args []string, source *command.MessageSource) error {
+	aichat.ResetGPTConversation()
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("已重置 GPT3 对话记录。")))
+}
+
 var (
 	fetchEssenceCommand = command.NewNode([]string{"fetchess"}, "刷新群精华消息到快取", true, fetchEssence)
 	migrateCacheCommand = command.NewNode([]string{"migrate", "搬迁"}, "搬迁缓存", true, migrateCache, "<从缓存类型>", "<到缓存类型>", "<缓存路径>", "[是否移除旧资料]")
+	resetConverCommand  = command.NewNode([]string{"resetchat", "重置对话"}, "重置gpt3对话记录", true, resetConversation)
 )
 
 var adminCommand = command.NewParent([]string{"admin", "管理员", "管理"}, "管理员指令",
 	fetchEssenceCommand,
 	migrateCacheCommand,
+	resetConverCommand,
 )
 
 func init() {
