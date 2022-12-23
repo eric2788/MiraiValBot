@@ -9,6 +9,7 @@ require (
 	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
 	github.com/bwmarrin/discordgo v0.26.1
 	github.com/corpix/uarand v0.2.0
+	github.com/eric2788/chatgpt v0.0.13-0.20221223062859-dbccba963be1
 	github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a
 	github.com/everpcpc/pixiv v0.0.0-20221106015558-888d1aecf879
 	github.com/go-redis/redis/v8 v8.11.5
@@ -17,7 +18,6 @@ require (
 	github.com/hqbobo/text2pic v0.0.0-20180823042751-2479e146d720
 	github.com/lucas-clemente/quic-go v0.31.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/solywsh/chatgpt v0.0.12
 	github.com/stretchr/testify v1.8.1
 	github.com/wdvxdr1123/go-silk v0.0.0-20220304095002-f67345df09ea
 	gopkg.in/yaml.v3 v3.0.1
@@ -25,30 +25,22 @@ require (
 
 require (
 	github.com/andybalholm/cascadia v1.3.1 // indirect
-	github.com/danwakefield/fnmatch v0.0.0-20160403171240-cbb64ac3d964 // indirect
 	github.com/dghubble/sling v1.4.0 // indirect
-	github.com/eric2788/chatgpt v0.0.13-0.20221223062859-dbccba963be1 // indirect
-	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
-	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/pprof v0.0.0-20221112000123-84eb7ad69597 // indirect
-	github.com/launchdarkly/eventsource v1.7.1 // indirect
-	github.com/m1guelpf/chatgpt-telegram v0.2.5 // indirect
 	github.com/marten-seemann/qpack v0.3.0 // indirect
 	github.com/marten-seemann/qtls-go1-18 v0.1.3 // indirect
 	github.com/marten-seemann/qtls-go1-19 v0.1.1 // indirect
 	github.com/onsi/ginkgo/v2 v2.5.0 // indirect
-	github.com/playwright-community/playwright-go v0.2000.1 // indirect
 	github.com/sashabaranov/go-gpt3 v0.0.0-20221216095610-1c20931ead68 // indirect
 	golang.org/x/mod v0.7.0 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/tools v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/square/go-jose.v2 v2.6.0 // indirect
 )
 
 require (
