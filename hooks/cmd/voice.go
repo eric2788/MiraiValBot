@@ -7,7 +7,6 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
-	"github.com/eric2788/MiraiValBot/services/aivoice"
 )
 
 func voiceQQ(args []string, source *command.MessageSource) error {
@@ -32,6 +31,8 @@ func voiceQQ(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voiceElement))
 }
 
+/*
+// Deprecated: 此功能已被禁用
 func voiceGenshin(args []string, source *command.MessageSource) error {
 	actor, content := args[0], strings.Join(args[1:], "，")
 
@@ -48,17 +49,18 @@ func voiceGenshin(args []string, source *command.MessageSource) error {
 	}
 	return qq.SendGroupMessage(message.NewSendingMessage().Append(voice))
 }
+*/
 
 var (
-	voiceQQCommand      = command.NewNode([]string{"qq", "腾讯"}, "腾讯QQ的语音", false, voiceQQ, "<讯息>")
-	voiceGenshinCommand = command.NewNode([]string{"genshin", "原神", "ys"}, "原神角色语音", false, voiceGenshin, "<角色>", "<讯息>")
+	voiceQQCommand = command.NewNode([]string{"qq", "腾讯"}, "腾讯QQ的语音", false, voiceQQ, "<讯息>")
+	// voiceGenshinCommand = command.NewNode([]string{"genshin", "原神", "ys"}, "原神角色语音", false, voiceGenshin, "<角色>", "<讯息>")
 )
 
 var voiceCommand = command.NewParent(
 	[]string{"voice", "speak", "语音"},
 	"语音指令",
 	voiceQQCommand,
-	voiceGenshinCommand,
+	// voiceGenshinCommand,
 )
 
 func init() {

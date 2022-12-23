@@ -1,6 +1,7 @@
 package aichat
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -87,6 +88,23 @@ func TestChatgpt3_Reply(t *testing.T) {
 			t.Skip(err)
 		}
 		<-time.After(time.Second * 5)
+		t.Logf("Reply %d: %s", i+1, msg)
+	}
+}
+
+func TestChatGptMaximumConversation(t *testing.T) {
+	if os.Getenv("CHATGPT_API_KEY") == "" {
+		t.Skip("CHATGPT_API_KEY is empty")
+	}
+
+	for i := 0; i < 15; i++ {
+		<-time.After(time.Second * 1)
+		ai := &Chatgpt3{}
+		msg, err := ai.Reply(fmt.Sprintf("1 + 2 * 5 + %d = ?", i))
+		if err != nil {
+			t.Log(err)
+			continue
+		}
 		t.Logf("Reply %d: %s", i+1, msg)
 	}
 }

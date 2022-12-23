@@ -67,12 +67,15 @@ var (
 	}
 )
 
+
 const (
 	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=%d"
 )
 
 var client = &http.Client{Timeout: time.Second * 300}
 
+// GetGenshinVoice get the voice of genshin impact
+// Deprecated: 该功能已被禁用
 func GetGenshinVoice(msg, actor string) ([]byte, error) {
 	if id, ok := actors[actor]; !ok {
 		return nil, fmt.Errorf("未知的角色: %s", actor)
