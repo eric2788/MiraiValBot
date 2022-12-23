@@ -92,7 +92,8 @@ func (c *Chatgpt3) ensureInit() {
 			chatgpt.WithMaintainSeqTimes(true),
 			chatgpt.WithOldConversation("data/ai.conversation"),
 		)
-		ctx.SetBackground("群友们都是DD，爱玩抽象和发龙图，还会说怪话，攻击性极强")
+		ctx.SetBackground("")
+		ctx.SetPreset("")
 	}
 }
 
