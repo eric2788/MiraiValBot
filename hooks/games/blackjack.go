@@ -35,6 +35,7 @@ type blackjack struct {
 	ctx    context.Context
 	stop   context.CancelFunc
 	turn   int
+	raised bool
 }
 
 func (p *blackjack) Start(args []string) error {
@@ -101,6 +102,11 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 	}
 
 	if args[0] == "加注" {
+		if p.raised {
+			reply.Append(qq.NewTextf("叫牌后无法再加注"))
+			_ = qq.SendGroupMessage(reply)
+			return game.ContinueResult
+		}
 		if len(args) < 2 {
 			reply.Append(qq.NewTextf("请输入加注多少, 如: 加注 100"))
 			_ = qq.SendGroupMessage(reply)
@@ -125,6 +131,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 		}
 		_ = qq.SendGroupMessage(reply)
 	} else if args[0] == "叫牌" {
+		p.raised = true
 		card := p.pickOneCardFor(msg.Sender.Uin)
 		reply.Append(qq.NewTextfLn("你叫了一张牌: %v", card))
 		score := p.caculatePoints(msg.Sender.Uin)
@@ -172,6 +179,7 @@ func (p *blackjack) nextTurnResult() *game.Result {
 		reply.Append(message.NewAt(turner.Uin, turner.DisplayName()))
 		reply.Append(message.NewText(" 的回合, 请输入操作: 加注, 叫牌, 停牌"))
 		_ = qq.SendGroupMessage(reply)
+		p.raised = false // 重设加注状态
 		return game.ContinueResult
 	}
 	return p.endGame()
@@ -249,11 +257,7 @@ func (p *blackjack) endGame() *game.Result {
 		}
 	}
 	_ = qq.SendGroupMessage(result)
-
-	// instead of one round terminate, we restart the game
-	//return game.TerminateResult
-	p.restart()
-	return game.ContinueResult
+	return game.TerminateResult
 }
 
 func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) string {
