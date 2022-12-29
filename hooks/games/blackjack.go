@@ -46,8 +46,8 @@ func (p *blackjack) Start(args []string) error {
 	p.turn = -1
 
 	// bot joined the game
-	p.joined[0] = qq.FindGroupMember(bot.Instance.Uin)
-	if p.joined[0] == nil {
+	p.joined[5] = qq.FindGroupMember(bot.Instance.Uin)
+	if p.joined[5] == nil {
 		return fmt.Errorf("机器人不在瓦群内")
 	}
 
@@ -56,7 +56,7 @@ func (p *blackjack) Start(args []string) error {
 	go func() {
 		<-p.ctx.Done()
 		p.stop()
-		if p.joined[0] == nil || p.joined[1] == nil {
+		if p.joined[0] == nil {
 			reply := message.NewSendingMessage()
 			reply.Append(qq.NewTextfLn("人数不足"))
 			reply.Append(qq.NewTextfLn(game.StopGame()))
@@ -126,8 +126,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 		_ = qq.SendGroupMessage(reply)
 	} else if args[0] == "叫牌" {
 		card := p.pickOneCardFor(msg.Sender.Uin)
-		reply.Append(qq.NewTextf("你叫了一张牌: %v", card))
-		_ = qq.SendGroupMessage(reply)
+		reply.Append(qq.NewTextfLn("你叫了一张牌: %v", card))
 		score := p.caculatePoints(msg.Sender.Uin)
 		if score > 21 {
 			reply.Append(qq.NewTextf("你的点数已超过21点(%d), 鉴定为爆牌", score))
