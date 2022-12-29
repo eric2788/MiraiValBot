@@ -43,7 +43,7 @@ func (p *blackjack) Start(args []string) error {
 	p.joined = [6]*client.GroupMemberInfo{}
 	p.cards = make(map[int64][]string)
 	p.bet = make(map[int64]int64)
-	p.turn = 0
+	p.turn = -1
 
 	// bot joined the game
 	p.joined[0] = qq.FindGroupMember(bot.Instance.Uin)
@@ -335,7 +335,7 @@ func (p *blackjack) pickOneCardFor(user int64) string {
 	suit := suits[p.ran.Intn(len(suits))]
 	// add to user's cards
 	p.cards[user] = append(p.cards[user], card+suit)
-	return card
+	return card + suit
 }
 
 func (p *blackjack) caculatePoints(user int64) uint8 {
