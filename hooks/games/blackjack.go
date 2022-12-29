@@ -249,7 +249,11 @@ func (p *blackjack) endGame() *game.Result {
 		}
 	}
 	_ = qq.SendGroupMessage(result)
-	return game.TerminateResult
+
+	// instead of one round terminate, we restart the game
+	//return game.TerminateResult
+	p.restart()
+	return game.ContinueResult
 }
 
 func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) string {
@@ -286,6 +290,40 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 	}
 
 	return fmt.Sprintf("未知操作: %v, 可用操作: 加入, 退出", args[0])
+}
+
+// restart 目前是一次性回合，但如果要改成连续回合，则使用这个函数
+func (p *blackjack) restart() {
+	// remove previous cards
+	p.cards = make(map[int64][]string)
+	p.turn = -1
+	// remove previous bet to 100
+	for uid, bal := range p.bet {
+		game.WithdrawPoint(uid, bal-100)
+		p.bet[uid] = 100
+	}
+	msg := message.NewSendingMessage()
+	msg.Append(qq.NewTextf("筹码已重置到100, 多余的点数已转到点数户口内。正在重新开始回合...."))
+	_ = qq.SendGroupMessage(msg)
+
+	p.ctx, p.stop = context.WithTimeout(context.Background(), time.Second*30)
+
+	go func() {
+		<-p.ctx.Done()
+		p.stop()
+		if p.joined[0] == nil {
+			reply := message.NewSendingMessage()
+			reply.Append(qq.NewTextfLn("人数不足"))
+			reply.Append(qq.NewTextfLn(game.StopGame()))
+			_ = qq.SendGroupMessage(reply)
+			return
+		}
+		p.gameStart()
+	}()
+
+	msg = message.NewSendingMessage()
+	msg.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 参与游戏 (耗费100点),@我输入 退出 退出并返还点数"))
+	_ = qq.SendGroupMessage(msg)
 }
 
 func (p *blackjack) gameStart() {
