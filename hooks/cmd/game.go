@@ -141,7 +141,7 @@ func addPoint(args []string, source *command.MessageSource) (err error) {
 		user, display = ats[0].Target, ats[0].Display
 	}
 	game.DepositPoint(user, pt)
-	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功给 %d 添加 %d 点", display, pt)))
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功给 %s 添加 %d 点", display, pt)))
 }
 
 func listPoint(args []string, source *command.MessageSource) (err error) {
@@ -150,7 +150,7 @@ func listPoint(args []string, source *command.MessageSource) (err error) {
 	if len(ats) > 0 {
 		user, display = ats[0].Target, ats[0].Display
 	}
-	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("%d 点数: %d", display, game.GetPoint(user))))
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("%s 点数: %d", display, game.GetPoint(user))))
 }
 
 func removePoint(args []string, source *command.MessageSource) (err error) {
@@ -168,9 +168,9 @@ func removePoint(args []string, source *command.MessageSource) (err error) {
 	}
 	msg := qq.CreateReply(source.Message)
 	if game.WithdrawPoint(user, pt) {
-		msg.Append(qq.NewTextf("成功从 %d 扣除 %d 点", display, pt))
+		msg.Append(qq.NewTextf("成功从 %s 扣除 %d 点", display, pt))
 	} else {
-		msg.Append(qq.NewTextf("扣除失败, %d 点数不足", display))
+		msg.Append(qq.NewTextf("扣除失败, %s 点数不足", display))
 	}
 	return qq.SendGroupMessage(msg)
 }
@@ -186,7 +186,7 @@ func setPoint(args []string, source *command.MessageSource) (err error) {
 		user, display = ats[0].Target, ats[0].Display
 	}
 	game.SetPoint(user, pt)
-	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %d 点数设置为 %d", display, pt)))
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %s 点数设置为 %d", display, pt)))
 }
 
 var (

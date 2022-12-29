@@ -341,7 +341,7 @@ func (p *blackjack) caculatePoints(user int64) uint8 {
 	for _, v := range p.cards[user] {
 		switch v[0] {
 		case 'A':
-			if points > 10 {
+			if points+11 > 21 {
 				points += 1
 			} else {
 				points += 11
