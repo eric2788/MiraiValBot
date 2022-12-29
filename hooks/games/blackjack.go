@@ -275,7 +275,7 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 		for i, v := range p.joined {
 			if v != nil && v.Uin == msg.Sender.Uin {
 				p.joined[i] = nil
-				p.bet[msg.Sender.Uin] = 0
+				delete(p.bet, msg.Sender.Uin)
 				game.DepositPoint(msg.Sender.Uin, 100)
 				return "退出成功, 已退还点数 100"
 			}
@@ -300,13 +300,16 @@ func (p *blackjack) gameStart() {
 		p.pickOneCardFor(v.Uin)
 		p.pickOneCardFor(v.Uin)
 
-		name := v.DisplayName()
 		if v.Uin == bot.Instance.Uin {
-			name = "庄家"
+			reply.Append(qq.NewTextfLn("庄家的牌: %s, %s", p.cards[v.Uin], "?"))
+		} else {
+			reply.Append(qq.NewTextfLn("%s 的牌: %s ; 分数: %d", v.DisplayName(), strings.Join(p.cards[v.Uin], ", "), p.caculatePoints(v.Uin)))
 		}
 
-		reply.Append(qq.NewTextfLn("%s 的牌: %s ; 分数: %d", name, strings.Join(p.cards[v.Uin], ", "), p.caculatePoints(v.Uin)))
 	}
+	reply.Append(qq.NewTextfLn("发牌结束, 开始回合"))
+	_ = qq.SendGroupMessage(reply)
+	p.nextTurnResult()
 }
 
 func (p *blackjack) Stop() {
