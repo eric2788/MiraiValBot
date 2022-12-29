@@ -68,7 +68,7 @@ func (p *blackjack) Start(args []string) error {
 	}()
 
 	sending := message.NewSendingMessage()
-	sending.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 参与游戏 (耗费100点)"))
+	sending.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 [筹码] 参与游戏 (默认筹码为100点)"))
 	return qq.SendGroupMessage(sending)
 }
 
@@ -101,36 +101,19 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 		return game.ContinueResult
 	}
 
-	if args[0] == "加注" {
-		if p.raised {
-			reply.Append(qq.NewTextf("叫牌后无法再加注"))
-			_ = qq.SendGroupMessage(reply)
-			return game.ContinueResult
+	if args[0] == "叫牌" {
+		if len(args) > 1 && args[1] == "翻倍" {
+			if p.raised {
+				reply.Append(qq.NewTextf("叫牌后无法再加注, 请重新输入"))
+				_ = qq.SendGroupMessage(reply)
+				return game.ContinueResult
+			} else {
+				p.bet[msg.Sender.Uin] *= 2
+				reply.Append(qq.NewTextf("加注成功, 当前筹码: %d", p.bet[msg.Sender.Uin]))
+				_ = qq.SendGroupMessage(reply)
+				reply = qq.CreateAtReply(msg)
+			}
 		}
-		if len(args) < 2 {
-			reply.Append(qq.NewTextf("请输入加注多少, 如: 加注 100"))
-			_ = qq.SendGroupMessage(reply)
-			return game.ContinueResult
-		}
-		bet, err := strconv.ParseInt(args[1], 10, 64)
-		if err != nil {
-			reply.Append(qq.NewTextf("请输入正确的数字(%v)", err))
-			_ = qq.SendGroupMessage(reply)
-			return game.ContinueResult
-		}
-		if bet <= 0 {
-			reply.Append(qq.NewTextf("加注不能小于1"))
-			_ = qq.SendGroupMessage(reply)
-			return game.ContinueResult
-		}
-		if game.WithdrawPoint(msg.Sender.Uin, bet) {
-			p.bet[msg.Sender.Uin] += bet
-			reply.Append(qq.NewTextf("加注成功, 现有筹码为 %d", p.bet[msg.Sender.Uin]))
-		} else {
-			reply.Append(qq.NewTextf("加注失败, 你的点数不足"))
-		}
-		_ = qq.SendGroupMessage(reply)
-	} else if args[0] == "叫牌" {
 		p.raised = true
 		card := p.pickOneCardFor(msg.Sender.Uin)
 		reply.Append(qq.NewTextfLn("你叫了一张牌: %v", card))
@@ -152,7 +135,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 		_ = qq.SendGroupMessage(reply)
 		return p.nextTurnResult()
 	} else {
-		reply.Append(qq.NewTextf("未知操作类型: %v, 可用操作: 加注, 叫牌, 停牌", args[0]))
+		reply.Append(qq.NewTextf("未知操作类型: %v, 可用操作: 叫牌 [翻倍], 停牌", args[0]))
 		_ = qq.SendGroupMessage(reply)
 	}
 	return game.ContinueResult
@@ -177,7 +160,7 @@ func (p *blackjack) nextTurnResult() *game.Result {
 		reply := message.NewSendingMessage()
 		reply.Append(message.NewText("现在轮到 "))
 		reply.Append(message.NewAt(turner.Uin, turner.DisplayName()))
-		reply.Append(message.NewText(" 的回合, 请输入操作: 加注, 叫牌, 停牌"))
+		reply.Append(message.NewText(" 的回合, 请输入操作: 叫牌 [翻倍], 停牌"))
 		_ = qq.SendGroupMessage(reply)
 		p.raised = false // 重设加注状态
 		return game.ContinueResult
@@ -265,19 +248,30 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 		if _, ok := p.bet[msg.Sender.Uin]; ok {
 			return "你已经加入了游戏"
 		}
+		balance := int64(100)
+		if len(args) > 1 {
+			var err error
+			balance, err = strconv.ParseInt(args[1], 10, 64)
+			if err != nil {
+				return fmt.Sprintf("無效的數字 %v: %v", args[1], err)
+			}
+			if balance < 0 {
+				return "筹码必须大于0"
+			}
+		}
 		for i, v := range p.joined {
 			if v == nil {
 				p.joined[i] = qq.FindGroupMember(msg.Sender.Uin)
 				if p.joined[i] == nil {
 					return "你不在瓦群内"
-				} else if !game.WithdrawPoint(msg.Sender.Uin, 100) {
-					return "你的点数不足100，无法转换筹码"
+				} else if !game.WithdrawPoint(msg.Sender.Uin, balance) {
+					return fmt.Sprintf("你的点数不足%d，无法转换筹码", balance)
 				}
-				p.bet[msg.Sender.Uin] = 100
+				p.bet[msg.Sender.Uin] = balance
 				if p.playerFull() {
 					p.stop()
 				}
-				return "加入成功, 已转换 100 点数 为 筹码"
+				return fmt.Sprintf("加入成功, 已转换 %d 点数 为 筹码", balance)
 			}
 		}
 		return "人满了"
