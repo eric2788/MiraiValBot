@@ -301,7 +301,7 @@ func (p *blackjack) gameStart() {
 		p.pickOneCardFor(v.Uin)
 
 		if v.Uin == bot.Instance.Uin {
-			reply.Append(qq.NewTextfLn("庄家的牌: %s, %s", p.cards[v.Uin], "?"))
+			reply.Append(qq.NewTextfLn("庄家的牌: %s, ?", p.cards[v.Uin][0]))
 		} else {
 			reply.Append(qq.NewTextfLn("%s 的牌: %s ; 分数: %d", v.DisplayName(), strings.Join(p.cards[v.Uin], ", "), p.caculatePoints(v.Uin)))
 		}
