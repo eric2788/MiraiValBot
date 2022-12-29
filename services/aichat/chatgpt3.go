@@ -32,7 +32,7 @@ func (c *Chatgpt3) replyWithAPI(msg string) (string, error) {
 
 	c.ensureInit()
 
-	cli := chatgpt.New(apiKey, "watta-ai", time.Duration(0))
+	cli := chatgpt.New(apiKey, "watta-aidraw", time.Duration(0))
 	cli.ChatContext = ctx
 	defer cli.Close()
 
@@ -66,7 +66,7 @@ func (c *Chatgpt3) ensureInit() {
 		ctx = chatgpt.NewContext(
 			chatgpt.WithMaxSeqTimes(3000),
 			chatgpt.WithMaintainSeqTimes(true),
-			chatgpt.WithOldConversation("data/ai.conversation"),
+			chatgpt.WithOldConversation("data/aidraw.conversation"),
 		)
 		ctx.SetBackground("")
 		ctx.SetPreset("")
@@ -94,7 +94,7 @@ func SaveGPTConversation() error {
 	if ctx != nil {
 		mu.Lock()
 		defer mu.Unlock()
-		return ctx.SaveConversation("data/ai.conversation")
+		return ctx.SaveConversation("data/aidraw.conversation")
 	}
 	return nil
 }

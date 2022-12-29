@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/eric2788/MiraiValBot/internal/file"
-	"github.com/eric2788/MiraiValBot/services/ai"
+	"github.com/eric2788/MiraiValBot/services/aidraw"
 	"github.com/eric2788/MiraiValBot/services/discord"
 	"github.com/eric2788/common-utils/request"
 	"net/http"
@@ -89,17 +89,17 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 		},
 	})
 
-	t := ai.WithNSFW
+	t := aidraw.WithNSFW
 	if nsfw {
-		t = ai.WithR18
+		t = aidraw.WithR18
 	}
 
 	if err != nil {
 		return
 	}
 
-	img, err := ai.GetNovelAI8zywImage(
-		ai.New8zywPayload(
+	img, err := aidraw.GetNovelAI8zywImage(
+		aidraw.New8zywPayload(
 			description,
 			t,
 			strings.Split(badPrompt, ",")...,

@@ -78,6 +78,7 @@ func TestChatgpt3_Reply(t *testing.T) {
 	conversations := []string{
 		"你好，我叫老陈，你叫什么？",
 		"你知道我叫什麼嗎",
+		"能用c++寫一段Heap Sort的程式碼嗎",
 	}
 
 	for i, conversation := range conversations {

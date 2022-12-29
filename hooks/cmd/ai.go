@@ -4,13 +4,15 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/eric2788/chatgpt"
 	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/services/ai"
+	"github.com/eric2788/MiraiValBot/services/aidraw"
 	"github.com/eric2788/MiraiValBot/utils/misc"
 
 	"github.com/Mrs4s/MiraiGo/message"
@@ -60,11 +62,11 @@ func aiChinesePaint(args []string, source *command.MessageSource) error {
 }
 
 func aiWaifu2(args []string, source *command.MessageSource) error {
-	return generateNovelAIImage(args, source, ai.WithoutR18)
+	return generateNovelAIImage(args, source, aidraw.WithoutR18)
 }
 
 func aiSetu(args []string, source *command.MessageSource) error {
-	return generateNovelAIImage(args, source, ai.WithNSFW)
+	return generateNovelAIImage(args, source, aidraw.WithNSFW)
 }
 
 func aiTags(args []string, source *command.MessageSource) error {
@@ -254,6 +256,28 @@ func aiImg2Img(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(msg)
 }
 
+func aiAsk(args []string, source *command.MessageSource) error {
+	reply := qq.CreateReply(source.Message)
+
+	if len(args) == 0 {
+		reply.Append(qq.NewTextfLn("请输入问题"))
+		return qq.SendGroupMessage(reply)
+	}
+	// 问答
+	apiKey := os.Getenv("CHATGPT_API_KEY")
+	if apiKey == "" {
+		return errors.New("未设置环境变量 CHATGPT_API_KEY")
+	}
+	text := strings.Join(qq.ParseMsgContent(source.Message.Elements).Texts, " ")
+	gpt := chatgpt.New(apiKey, fmt.Sprint(rand.Int31()), time.Second*10)
+	resp, err := gpt.Chat(text)
+	if err != nil {
+		return err
+	}
+	reply.Append(message.NewText(resp))
+	return qq.SendGroupMessage(reply)
+}
+
 var (
 	aiWaifuCommand      = command.NewNode([]string{"waifu"}, "文字生成二次元图", false, aiWaifu, "<文字>")
 	aiWaifu2Command     = command.NewNode([]string{"waifu2"}, "文字生成二次元图(无和谐)", false, aiWaifu2, "<文字>")
@@ -265,9 +289,10 @@ var (
 	aiPromptCommand     = command.NewNode([]string{"prompt", "咒语生成"}, "生成文字转图像的咒语", false, aiPrompt, "<开头的字>")
 	aiTagCommand        = command.NewNode([]string{"tags", "标签", "分析"}, "分析图片获取标签", false, aiTags)
 	aiSearchTagsCommand = command.NewNode([]string{"searchtags", "search", "搜索标签"}, "中文搜索图片标签", false, aiSearchTags, "<中文关键词>")
+	aiAskCommand        = command.NewNode([]string{"ask", "问答"}, "问答", false, aiAsk, "<问题>")
 )
 
-var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指令",
+var aiCommand = command.NewParent([]string{"aidraw", "人工智能"}, "AI相关指令",
 	aiWaifuCommand,
 	aiWaifu2Command,
 	aiSetuCommand,
@@ -278,6 +303,7 @@ var aiCommand = command.NewParent([]string{"ai", "人工智能"}, "AI相关指�
 	aiPaintCNCommand,
 	aiTagCommand,
 	aiSearchTagsCommand,
+	aiAskCommand,
 )
 
 func init() {
@@ -379,7 +405,7 @@ func generateHuggingFaceImage(args []string, source *command.MessageSource, rand
 	return qq.SendGroupMessage(msg)
 }
 
-func generateNovelAIImage(args []string, source *command.MessageSource, exclude ai.ExcludeType) error {
+func generateNovelAIImage(args []string, source *command.MessageSource, exclude aidraw.ExcludeType) error {
 	reply := qq.CreateReply(source.Message)
 
 	if len(args) == 0 {
@@ -392,8 +418,8 @@ func generateNovelAIImage(args []string, source *command.MessageSource, exclude 
 
 	inputs := strings.Join(args, " ")
 
-	url, err := ai.GetNovelAI8zywImage(
-		ai.New8zywPayload(
+	url, err := aidraw.GetNovelAI8zywImage(
+		aidraw.New8zywPayload(
 			inputs,
 			exclude,
 		),
@@ -410,7 +436,7 @@ func generateNovelAIImage(args []string, source *command.MessageSource, exclude 
 
 	reply = qq.CreateReply(source.Message)
 	reply.Append(img)
-	if exclude == ai.WithoutR18 {
+	if exclude == aidraw.WithoutR18 {
 		return qq.SendGroupMessage(reply)
 	} else {
 		return qq.SendGroupMessageAndRecall(reply, 30*time.Second)
