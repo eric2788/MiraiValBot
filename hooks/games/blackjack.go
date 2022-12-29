@@ -207,13 +207,13 @@ func (p *blackjack) botTurn() *game.Result {
 }
 
 func (p *blackjack) endGame() *game.Result {
-	reply := message.NewSendingMessage()
+	result := message.NewSendingMessage()
 	// 先计算庄家的点数
 	ownerScore := p.caculatePoints(bot.Instance.Uin)
-	reply.Append(qq.NewTextfLn("游戏结果如下:"))
-	reply.Append(qq.NewTextfLn("庄家的点数为 %d", ownerScore))
+	result.Append(qq.NewTextfLn("游戏结果如下:"))
+	result.Append(qq.NewTextfLn("庄家的点数为 %d [%s]", ownerScore, strings.Join(p.cards[bot.Instance.Uin], " | ")))
 	if ownerScore > 21 {
-		reply.Append(qq.NewTextfLn("(庄家爆牌)"))
+		result.Append(qq.NewTextfLn("(庄家爆牌)"))
 		ownerScore = 0
 	}
 
@@ -228,27 +228,28 @@ func (p *blackjack) endGame() *game.Result {
 		if pt > 21 {
 			// lose
 			p.bet[v.Uin] = 0
-			reply.Append(qq.NewTextfLn("%v 爆牌, 现有筹码为 %d", v.DisplayName(), p.bet[v.Uin]))
+			result.Append(qq.NewTextfLn("%v 爆牌, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 		} else if pt == 21 {
 			// if ownerScore == 21 , draw
 			if ownerScore < 21 {
 				// win
 				p.bet[v.Uin] *= 2
-				reply.Append(qq.NewTextfLn("%v 为黑杰克, 现有筹码为 %d", v.DisplayName(), p.bet[v.Uin]))
+				result.Append(qq.NewTextfLn("%v 为黑杰克, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				// draw
-				reply.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有筹码为 %d", v.DisplayName(), p.bet[v.Uin]))
+				result.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
 		} else {
 			if pt > ownerScore {
 				p.bet[v.Uin] = int64(math.Round(float64(p.bet[v.Uin]) * 1.5))
-				reply.Append(qq.NewTextfLn("%v 赢过庄家, 现有筹码为 %d", v.DisplayName(), p.bet[v.Uin]))
+				result.Append(qq.NewTextfLn("%v 赢过庄家, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				p.bet[v.Uin] = 0
-				reply.Append(qq.NewTextfLn("%v 输给庄家, 现有筹码为 %d", v.DisplayName(), p.bet[v.Uin]))
+				result.Append(qq.NewTextfLn("%v 输给庄家, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
 		}
 	}
+	_ = qq.SendGroupMessage(result)
 	return game.TerminateResult
 }
 
