@@ -3,6 +3,7 @@ package repeatchat
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
@@ -11,6 +12,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/utils/misc"
 )
 
@@ -32,6 +34,8 @@ func (r *repeatChat) HookEvent(bot *bot.Bot) {
 
 		// 無視群機器人的消息
 		if event.Sender.Uin == client.Uin {
+			return
+		} else if strings.HasPrefix(event.ToString(), command.Prefix) {
 			return
 		}
 

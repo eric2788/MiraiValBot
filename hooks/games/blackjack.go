@@ -56,7 +56,7 @@ func (p *blackjack) Start(args []string) error {
 	go func() {
 		<-p.ctx.Done()
 		p.stop()
-		if p.joined[0] == nil && p.joined[1] == nil {
+		if p.joined[0] == nil || p.joined[1] == nil {
 			reply := message.NewSendingMessage()
 			reply.Append(qq.NewTextfLn("人数不足"))
 			reply.Append(qq.NewTextfLn(game.StopGame()))
@@ -72,7 +72,7 @@ func (p *blackjack) Start(args []string) error {
 }
 
 func (p *blackjack) Handle(msg *message.GroupMessage) *game.Result {
-	args := qq.ParseMsgContent(msg.Elements).Texts
+	args := strings.Split(strings.TrimSpace(strings.Join(qq.ParseMsgContent(msg.Elements).Texts, " ")), " ")
 	reply := qq.CreateAtReply(msg)
 	if len(args) == 0 {
 		reply.Append(qq.NewTextf("你在港咩也?"))
@@ -154,10 +154,12 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 
 func (p *blackjack) nextTurn() bool {
 	p.turn++
-	if p.joined[p.turn] == nil {
+	if p.turn >= len(p.joined) {
+		return false
+	} else if p.joined[p.turn] == nil {
 		return p.nextTurn()
 	}
-	return p.turn < len(p.joined)
+	return true
 }
 
 func (p *blackjack) nextTurnResult() *game.Result {
@@ -338,18 +340,22 @@ func (p *blackjack) pickOneCardFor(user int64) string {
 
 func (p *blackjack) caculatePoints(user int64) uint8 {
 	points := uint8(0)
+	aces := 0
 	for _, v := range p.cards[user] {
 		switch v[0] {
 		case 'A':
-			if points+11 > 21 {
-				points += 1
-			} else {
-				points += 11
-			}
+			aces += 1
 		case 'J', 'Q', 'K':
 			points += 10
 		default:
 			points += uint8(v[0] - '0')
+		}
+	}
+	for i := 0; i < aces; i++ {
+		if points+11 <= 21 {
+			points += 11
+		} else {
+			points += 1
 		}
 	}
 	return points

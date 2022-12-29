@@ -12,6 +12,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/qq"
+	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/modules/game"
 	"github.com/eric2788/MiraiValBot/services/copywriting"
 	"github.com/eric2788/common-utils/array"
@@ -69,6 +70,8 @@ func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMess
 		r.lastInGame = false
 		return
 	} else if array.IndexOfInt64(qq.ParseMsgContent(msg.Elements).At, c.Uin) != -1 { // 防止跟 chat_reply 重复
+		return
+	} else if strings.HasPrefix(msg.ToString(), command.Prefix) {
 		return
 	}
 
