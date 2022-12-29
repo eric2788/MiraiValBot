@@ -33,6 +33,25 @@ func TestFixedArr(t *testing.T) {
 	t.Log(len(a))
 }
 
+func TestChar(t *testing.T) {
+	points := uint8(0)
+	card1, card2, card3 := "10♠", "3♠", "A♠"
+	for _, v := range []string{card1, card2, card3} {
+		// remove suit
+		ru := []rune(v)
+		v = string(ru[:len(ru)-1])
+		switch v {
+		case "A":
+			points += 1
+		case "J", "Q", "K", "10":
+			points += 10
+		default:
+			points += uint8(v[0] - '0')
+		}
+	}
+	t.Log(points)
+}
+
 func TestContextxDeadline(t *testing.T) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
 	go func() {

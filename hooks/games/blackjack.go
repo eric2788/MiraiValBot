@@ -304,9 +304,9 @@ func (p *blackjack) gameStart() {
 		p.pickOneCardFor(v.Uin)
 
 		if v.Uin == bot.Instance.Uin {
-			reply.Append(qq.NewTextfLn("庄家的牌: %s, ?", p.cards[v.Uin][0]))
+			reply.Append(qq.NewTextfLn("庄家的牌: [ %s | ? ]", p.cards[v.Uin][0]))
 		} else {
-			reply.Append(qq.NewTextfLn("%s 的牌: %s ; 分数: %d", v.DisplayName(), strings.Join(p.cards[v.Uin], ", "), p.caculatePoints(v.Uin)))
+			reply.Append(qq.NewTextfLn("%s 的牌: [%s] 为 %d 点", v.DisplayName(), strings.Join(p.cards[v.Uin], " | "), p.caculatePoints(v.Uin)))
 		}
 
 	}
@@ -343,10 +343,13 @@ func (p *blackjack) caculatePoints(user int64) uint8 {
 	points := uint8(0)
 	aces := 0
 	for _, v := range p.cards[user] {
-		switch v[0] {
-		case 'A':
+		// remove suit
+		ru := []rune(v)
+		v = string(ru[:len(ru)-1])
+		switch v {
+		case "A":
 			aces += 1
-		case 'J', 'Q', 'K':
+		case "J", "Q", "K", "10":
 			points += 10
 		default:
 			points += uint8(v[0] - '0')
