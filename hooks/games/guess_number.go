@@ -30,7 +30,7 @@ func (g *guessNumber) Start(args []string) error {
 
 	g.min = 1
 	g.max = 100
-	g.maxFailed = 5
+	g.maxFailed = 7
 
 	if len(args) > 0 {
 		min, err := strconv.Atoi(args[0])

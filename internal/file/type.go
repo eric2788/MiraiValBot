@@ -8,6 +8,7 @@ type (
 		Answers    map[string]bool            `json:"answers"`
 		Responses  map[string]string          `json:"responses"`
 		WordCounts map[string]map[int64]int64 `json:"word_counts"`
+		Points     map[int64]int64            `json:"points"`
 		Bilibili   *bilibiliSettings          `json:"bilibili"`
 		Youtube    *youtubeSettings           `json:"youtube"`
 		Twitter    *twitterSettings           `json:"twitter"`
@@ -53,6 +54,7 @@ type (
 		Answers    map[string]bool
 		Responses  map[string]string
 		WordCounts map[string]map[int64]int64
+		Points     map[int64]int64
 		Bilibili   *BilibiliSettings
 		Youtube    *YoutubeSettings
 		Twitter    *TwitterSettings
@@ -96,6 +98,7 @@ func (s *StorageData) toRealStorageData() *storageData {
 		Answers:    s.Answers,
 		Responses:  s.Responses,
 		WordCounts: s.WordCounts,
+		Points:     s.Points,
 		Youtube: &youtubeSettings{
 			BroadcastIdle: s.Youtube.BroadcastIdle,
 			AntiDuplicate: s.Youtube.AntiDuplicate,
@@ -128,6 +131,7 @@ func (s *StorageData) parse(sd *storageData) {
 	s.Answers = sd.Answers
 	s.Responses = sd.Responses
 	s.WordCounts = sd.WordCounts
+	s.Points = sd.Points
 	s.Bilibili = &BilibiliSettings{
 		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
 	}

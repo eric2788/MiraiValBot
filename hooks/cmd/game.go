@@ -127,12 +127,82 @@ func guessFinger(args []string, source *command.MessageSource) (err error) {
 	return qq.SendGroupMessage(msg)
 }
 
+func addPoint(args []string, source *command.MessageSource) (err error) {
+	pt, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("无效数字: %s", args[0])
+	}
+	if pt < 1 {
+		return fmt.Errorf("数字必须大于 0")
+	}
+	user, display := source.Message.Sender.Uin, source.Message.Sender.DisplayName()
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) > 0 {
+		user, display = ats[0].Target, ats[0].Display
+	}
+	game.DepositPoint(user, pt)
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功给 %d 添加 %d 点", display, pt)))
+}
+
+func listPoint(args []string, source *command.MessageSource) (err error) {
+	user, display := source.Message.Sender.Uin, source.Message.Sender.DisplayName()
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) > 0 {
+		user, display = ats[0].Target, ats[0].Display
+	}
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("%d 点数: %d", display, game.GetPoint(user))))
+}
+
+func removePoint(args []string, source *command.MessageSource) (err error) {
+	pt, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("无效数字: %s", args[0])
+	}
+	if pt < 1 {
+		return fmt.Errorf("数字必须大于 0")
+	}
+	user, display := source.Message.Sender.Uin, source.Message.Sender.DisplayName()
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) > 0 {
+		user, display = ats[0].Target, ats[0].Display
+	}
+	msg := qq.CreateReply(source.Message)
+	if game.WithdrawPoint(user, pt) {
+		msg.Append(qq.NewTextf("成功从 %d 扣除 %d 点", display, pt))
+	} else {
+		msg.Append(qq.NewTextf("扣除失败, %d 点数不足", display))
+	}
+	return qq.SendGroupMessage(msg)
+}
+
+func setPoint(args []string, source *command.MessageSource) (err error) {
+	pt, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("无效数字: %s", args[0])
+	}
+	user, display := source.Message.Sender.Uin, source.Message.Sender.DisplayName()
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) > 0 {
+		user, display = ats[0].Target, ats[0].Display
+	}
+	game.SetPoint(user, pt)
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %d 点数设置为 %d", display, pt)))
+}
+
 var (
 	startGameCommand   = command.NewNode([]string{"start", "开始", "启动"}, "开始一个游戏", false, startGame, "<游戏名称>", "[参数]")
 	stopGameCommand    = command.NewNode([]string{"stop", "中止", "关闭"}, "中止目前游戏", false, stopGame)
 	diceCommand        = command.NewNode([]string{"dice", "骰子", "掷骰子"}, "掷骰子", false, dice, "[数字]")
 	guessFingerCommand = command.NewNode([]string{"finger", "剪刀石头布", "出拳"}, "剪刀石头布", false, guessFinger, "[剪刀/石头/布]")
 	listGameCommand    = command.NewNode([]string{"list", "游戏列表"}, "可用游戏列表+参数", false, listGames)
+	pointsCommand      = command.NewParent([]string{
+		"points", "point", "点数", "积分", "金币",
+	}, "点数管理指令",
+		command.NewNode([]string{"add", "添加"}, "添加点数", true, addPoint, "<点数>", "[@用户]"),
+		command.NewNode([]string{"remove", "扣除"}, "扣除点数", true, removePoint, "<点数>", "[@用户]"),
+		command.NewNode([]string{"set", "设置"}, "设置点数", true, setPoint, "<点数>", "[@用户]"),
+		command.NewNode([]string{"list", "查看"}, "查看点数", false, listPoint, "[@用户]"),
+	)
 )
 
 var gameCommand = command.NewParent([]string{"game", "游戏"}, "文字游戏指令",
@@ -141,6 +211,7 @@ var gameCommand = command.NewParent([]string{"game", "游戏"}, "文字游戏指
 	diceCommand,
 	guessFingerCommand,
 	listGameCommand,
+	pointsCommand,
 )
 
 func init() {
