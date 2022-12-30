@@ -134,7 +134,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 		} else if score == 21 {
 			reply.Append(qq.NewTextf("你的点数为21点, 鉴定为黑杰克"))
 			_ = qq.SendGroupMessage(reply)
-			return p.endGame()
+			return p.nextTurnResult()
 		} else {
 			reply.Append(qq.NewTextf("你的点数目前为%d点", score))
 			_ = qq.SendGroupMessage(reply)
@@ -285,7 +285,7 @@ func (p *blackjack) endGame() *game.Result {
 
 		if ownerScore == 21 && p.insurance[v.Uin] > 0 {
 			p.bet[v.Uin] += (p.insurance[v.Uin] * 2)
-			result.Append(qq.NewTextfLn("庄家为黑杰克, %v 的保险生效, 现有赌注为 %d (+%dx2) [ %s ]", v.DisplayName(), p.bet[v.Uin], p.insurance[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			result.Append(qq.NewTextfLn("庄家为黑杰克, %v 的保险生效, 现有赌注为 %d (+%dx2)", v.DisplayName(), p.bet[v.Uin], p.insurance[v.Uin]))
 		}
 	}
 	_ = qq.SendGroupMessage(result)
