@@ -3,7 +3,6 @@ package games
 import (
 	"context"
 	"fmt"
-	"math"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -222,29 +221,32 @@ func (p *blackjack) endGame() *game.Result {
 		if pt > 21 {
 			// lose
 			p.bet[v.Uin] = 0
-			result.Append(qq.NewTextfLn("%v 爆牌, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			result.Append(qq.NewTextfLn("%v 爆牌, 现有筹码为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 		} else if pt == 21 {
 			// if ownerScore == 21 , draw
 			if ownerScore < 21 {
 				// win
-				p.bet[v.Uin] *= 2
-				result.Append(qq.NewTextfLn("%v 为黑杰克, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				p.bet[v.Uin] *= 3
+				result.Append(qq.NewTextfLn("%v 为黑杰克, 现有筹码为 %d (x3) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				// draw
-				result.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有筹码为 %d (不变) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
 		} else {
 			if pt > ownerScore {
-				p.bet[v.Uin] = int64(math.Round(float64(p.bet[v.Uin]) * 1.5))
-				result.Append(qq.NewTextfLn("%v 赢过庄家, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				p.bet[v.Uin] *= 2
+				result.Append(qq.NewTextfLn("%v 赢过庄家, 现有筹码为 %d (x2) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				p.bet[v.Uin] = 0
-				result.Append(qq.NewTextfLn("%v 输给庄家, 现有筹码为 %d [%s]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 输给庄家, 现有筹码为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
 		}
 	}
 	_ = qq.SendGroupMessage(result)
-	return game.TerminateResult
+	p.returnBets()
+	// restart again and wait for next game
+	p.Start(nil)
+	return game.ContinueResult
 }
 
 func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) string {
@@ -294,40 +296,6 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 	return fmt.Sprintf("未知操作: %v, 可用操作: 加入, 退出", args[0])
 }
 
-// restart 目前是一次性回合，但如果要改成连续回合，则使用这个函数
-func (p *blackjack) restart() {
-	// remove previous cards
-	p.cards = make(map[int64][]string)
-	p.turn = -1
-	// remove previous bet to 100
-	for uid, bal := range p.bet {
-		game.WithdrawPoint(uid, bal-100)
-		p.bet[uid] = 100
-	}
-	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextf("筹码已重置到100, 多余的点数已转到点数户口内。正在重新开始回合...."))
-	_ = qq.SendGroupMessage(msg)
-
-	p.ctx, p.stop = context.WithTimeout(context.Background(), time.Second*30)
-
-	go func() {
-		<-p.ctx.Done()
-		p.stop()
-		if p.joined[0] == nil {
-			reply := message.NewSendingMessage()
-			reply.Append(qq.NewTextfLn("人数不足"))
-			reply.Append(qq.NewTextfLn(game.StopGame()))
-			_ = qq.SendGroupMessage(reply)
-			return
-		}
-		p.gameStart()
-	}()
-
-	msg = message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 参与游戏 (耗费100点),@我输入 退出 退出并返还点数"))
-	_ = qq.SendGroupMessage(msg)
-}
-
 func (p *blackjack) gameStart() {
 	reply := message.NewSendingMessage()
 	reply.Append(qq.NewTextf("正在开始发牌...."))
@@ -358,11 +326,13 @@ func (p *blackjack) Stop() {
 	if p.stop != nil {
 		p.stop()
 	}
+}
+
+func (p *blackjack) returnBets() {
 	for uid, bet := range p.bet {
 		game.DepositPoint(uid, bet)
 	}
-	logger.Infof("21点游戏结束，已退还所有点数")
-	_ = qq.SendGroupMessage(message.NewSendingMessage().Append(message.NewText("已退还所有筹码至点数")))
+	_ = qq.SendGroupMessage(message.NewSendingMessage().Append(message.NewText("回合结束，已退还所有筹码至点数")))
 }
 
 func (p *blackjack) ArgHints() []string {
