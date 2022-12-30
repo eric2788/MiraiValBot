@@ -108,8 +108,12 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 				_ = qq.SendGroupMessage(reply)
 				return game.ContinueResult
 			} else {
-				p.bet[msg.Sender.Uin] *= 2
-				reply.Append(qq.NewTextf("加注成功, 当前筹码: %d", p.bet[msg.Sender.Uin]))
+				if game.WithdrawPoint(msg.Sender.Uin, p.bet[msg.Sender.Uin]) {
+					p.bet[msg.Sender.Uin] *= 2
+					reply.Append(qq.NewTextf("加注成功, 当前筹码: %d", p.bet[msg.Sender.Uin]))
+				} else {
+					reply.Append(qq.NewTextf("加注失败, 你的点数不足"))
+				}
 				_ = qq.SendGroupMessage(reply)
 				reply = qq.CreateAtReply(msg)
 			}
@@ -160,7 +164,7 @@ func (p *blackjack) nextTurnResult() *game.Result {
 		reply := message.NewSendingMessage()
 		reply.Append(message.NewText("现在轮到 "))
 		reply.Append(message.NewAt(turner.Uin, turner.DisplayName()))
-		reply.Append(message.NewText(" 的回合, 请输入操作: 叫牌 [翻倍], 停牌"))
+		reply.Append(message.NewText(" 的回合, 请输入操作: 叫牌 或 叫牌 翻倍 (叫牌前双倍加注), 停牌"))
 		_ = qq.SendGroupMessage(reply)
 		p.raised = false // 重设加注状态
 		return game.ContinueResult
