@@ -160,7 +160,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 			secure := p.bet[msg.Sender.Uin] / 2
 			p.insurance[msg.Sender.Uin] = secure
 			p.bet[msg.Sender.Uin] -= secure
-			reply.Append(qq.NewTextf("你从赌注中提取一半作为保险金, 当庄家开出黑杰克时将返回保险金额两倍", secure))
+			reply.Append(qq.NewTextf("你从赌注中提取一半(%d)作为保险金, 当庄家开出黑杰克时将返回保险金额两倍", secure))
 			p.secure = true
 		}
 		_ = qq.SendGroupMessage(reply)
