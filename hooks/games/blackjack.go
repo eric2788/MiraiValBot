@@ -358,6 +358,9 @@ func (p *blackjack) gameStart() {
 
 		if v.Uin == bot.Instance.Uin {
 			reply.Append(qq.NewTextfLn("庄家的牌: [ %s | ? ]", p.cards[v.Uin][0]))
+			if p.cards[v.Uin][0][0] == 'A' {
+				reply.Append(qq.NewTextfLn("(庄家明牌开出了A, 保险选项已开启)"))
+			}
 		} else {
 			reply.Append(qq.NewTextfLn("%s 的牌: [%s] 为 %d 点", v.DisplayName(), strings.Join(p.cards[v.Uin], " | "), p.caculatePoints(v.Uin)))
 		}
