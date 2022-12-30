@@ -13,6 +13,7 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/game"
+	"github.com/eric2788/common-utils/set"
 )
 
 // create a game of blackjack
@@ -27,14 +28,17 @@ var (
 )
 
 type blackjack struct {
-	cards  map[int64][]string
-	bet    map[int64]int64
-	ran    *rand.Rand
-	joined [6]*client.GroupMemberInfo
-	ctx    context.Context
-	stop   context.CancelFunc
-	turn   int
-	raised bool
+	cards     map[int64][]string
+	bet       map[int64]int64
+	surrender *set.Int64Set
+	insurance map[int64]int64
+	ran       *rand.Rand
+	joined    [6]*client.GroupMemberInfo
+	ctx       context.Context
+	stop      context.CancelFunc
+	turn      int
+	raised    bool
+	secure    bool
 }
 
 func (p *blackjack) Start(args []string) error {
@@ -44,6 +48,8 @@ func (p *blackjack) Start(args []string) error {
 	p.cards = make(map[int64][]string)
 	p.bet = make(map[int64]int64)
 	p.turn = -1
+	p.surrender = set.NewInt64()
+	p.insurance = make(map[int64]int64)
 
 	// bot joined the game
 	p.joined[5] = qq.FindGroupMember(bot.Instance.Uin)
@@ -67,7 +73,7 @@ func (p *blackjack) Start(args []string) error {
 	}()
 
 	sending := message.NewSendingMessage()
-	sending.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 [筹码] 参与游戏 (默认筹码为100点)"))
+	sending.Append(qq.NewTextfLn("三十秒后开始21点，@我输入 加入 [赌注] 参与游戏 (默认赌注为100点)"))
 	return qq.SendGroupMessage(sending)
 }
 
@@ -109,7 +115,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 			} else {
 				if game.WithdrawPoint(msg.Sender.Uin, p.bet[msg.Sender.Uin]) {
 					p.bet[msg.Sender.Uin] *= 2
-					reply.Append(qq.NewTextf("加注成功, 当前筹码: %d", p.bet[msg.Sender.Uin]))
+					reply.Append(qq.NewTextf("加注成功, 当前赌注: %d", p.bet[msg.Sender.Uin]))
 				} else {
 					reply.Append(qq.NewTextf("加注失败, 你的点数不足"))
 				}
@@ -133,12 +139,37 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 			reply.Append(qq.NewTextf("你的点数目前为%d点", score))
 			_ = qq.SendGroupMessage(reply)
 		}
+	} else if args[0] == "投降" {
+		if p.raised {
+			reply.Append(qq.NewTextf("叫牌后无法投降, 请重新输入"))
+			_ = qq.SendGroupMessage(reply)
+			return game.ContinueResult
+		}
+		p.surrender.Add(msg.Sender.Uin)
+		reply.Append(qq.NewTextf("你投降了, 不论结果如何将返回一半赌注"))
+		_ = qq.SendGroupMessage(reply)
+		return p.nextTurnResult()
+	} else if args[0] == "保险" {
+		if p.cards[bot.Instance.Uin][0][0] != 'A' {
+			reply.Append(qq.NewTextf("庄家明牌没有开出A, 无法投保险, 请重新输入"))
+		} else if p.raised {
+			reply.Append(qq.NewTextf("叫牌后无法投保险, 请重新输入"))
+		} else if p.secure {
+			reply.Append(qq.NewTextf("你已经投过保险, 请重新输入"))
+		} else {
+			secure := p.bet[msg.Sender.Uin] / 2
+			p.insurance[msg.Sender.Uin] = secure
+			p.bet[msg.Sender.Uin] -= secure
+			reply.Append(qq.NewTextf("你从赌注中提取一半作为保险金, 当庄家开出黑杰克时将返回保险金额", secure))
+			p.secure = true
+		}
+		_ = qq.SendGroupMessage(reply)
 	} else if args[0] == "停牌" {
 		reply.Append(qq.NewTextf("你停牌了"))
 		_ = qq.SendGroupMessage(reply)
 		return p.nextTurnResult()
 	} else {
-		reply.Append(qq.NewTextf("未知操作类型: %v, 可用操作: 叫牌 [翻倍], 停牌", args[0]))
+		reply.Append(qq.NewTextf("未知操作类型: %v, 可用操作: 叫牌 或 叫牌 翻倍 (叫牌前双倍加注), 停牌, 保险, 投降", args[0]))
 		_ = qq.SendGroupMessage(reply)
 	}
 	return game.ContinueResult
@@ -163,9 +194,10 @@ func (p *blackjack) nextTurnResult() *game.Result {
 		reply := message.NewSendingMessage()
 		reply.Append(message.NewText("现在轮到 "))
 		reply.Append(message.NewAt(turner.Uin, turner.DisplayName()))
-		reply.Append(message.NewText(" 的回合, 请输入操作: 叫牌 或 叫牌 翻倍 (叫牌前双倍加注), 停牌"))
+		reply.Append(message.NewText(" 的回合, 请输入操作: 叫牌 或 叫牌 翻倍 (叫牌前双倍加注), 停牌, 保险, 投降"))
 		_ = qq.SendGroupMessage(reply)
 		p.raised = false // 重设加注状态
+		p.secure = false // 重设保险状态
 		return game.ContinueResult
 	}
 	return p.endGame()
@@ -204,7 +236,7 @@ func (p *blackjack) endGame() *game.Result {
 	// 先计算庄家的点数
 	ownerScore := p.caculatePoints(bot.Instance.Uin)
 	result.Append(qq.NewTextfLn("游戏结果如下:"))
-	result.Append(qq.NewTextfLn("庄家的点数为 %d [%s]", ownerScore, strings.Join(p.cards[bot.Instance.Uin], " | ")))
+	result.Append(qq.NewTextfLn("庄家的点数为 %d [ %s ]", ownerScore, strings.Join(p.cards[bot.Instance.Uin], " | ")))
 	if ownerScore > 21 {
 		result.Append(qq.NewTextfLn("(庄家爆牌)"))
 		ownerScore = 0
@@ -217,29 +249,43 @@ func (p *blackjack) endGame() *game.Result {
 			continue
 		}
 
+		if p.surrender.Contains(v.Uin) {
+			// surrender
+			p.bet[v.Uin] /= 2
+			result.Append(qq.NewTextfLn("%v 投降, 现有赌注为 %d (x0.5) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			continue
+		}
+
 		pt := p.caculatePoints(v.Uin)
 		if pt > 21 {
 			// lose
 			p.bet[v.Uin] = 0
-			result.Append(qq.NewTextfLn("%v 爆牌, 现有筹码为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			result.Append(qq.NewTextfLn("%v 爆牌, 现有赌注为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 		} else if pt == 21 {
 			// if ownerScore == 21 , draw
 			if ownerScore < 21 {
 				// win
 				p.bet[v.Uin] *= 3
-				result.Append(qq.NewTextfLn("%v 为黑杰克, 现有筹码为 %d (x3) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 为黑杰克, 现有赌注为 %d (x3) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				// draw
-				result.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有筹码为 %d (不变) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 和庄家都是黑杰克, 现有赌注为 %d (不变) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
 		} else {
 			if pt > ownerScore {
 				p.bet[v.Uin] *= 2
-				result.Append(qq.NewTextfLn("%v 赢过庄家, 现有筹码为 %d (x2) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 赢过庄家, 现有赌注为 %d (x2) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			} else if pt == ownerScore {
+				result.Append(qq.NewTextfLn("%v 和庄家点数相同, 现有赌注为 %d (不变) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			} else {
 				p.bet[v.Uin] = 0
-				result.Append(qq.NewTextfLn("%v 输给庄家, 现有筹码为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+				result.Append(qq.NewTextfLn("%v 输给庄家, 现有赌注为 %d (x0) [ %s ]", v.DisplayName(), p.bet[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 			}
+		}
+
+		if ownerScore == 21 && p.insurance[v.Uin] > 0 {
+			p.bet[v.Uin] += p.insurance[v.Uin]
+			result.Append(qq.NewTextfLn("庄家为黑杰克, %v 的保险生效, 现有赌注为 %d (+%d) [ %s ]", v.DisplayName(), p.bet[v.Uin], p.insurance[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 		}
 	}
 	_ = qq.SendGroupMessage(result)
@@ -262,7 +308,7 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 				return fmt.Sprintf("無效的數字 %v: %v", args[1], err)
 			}
 			if balance < 0 {
-				return "筹码必须大于0"
+				return "赌注必须大于0"
 			}
 		}
 		for i, v := range p.joined {
@@ -271,13 +317,13 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 				if p.joined[i] == nil {
 					return "你不在瓦群内"
 				} else if !game.WithdrawPoint(msg.Sender.Uin, balance) {
-					return fmt.Sprintf("你的点数不足%d，无法转换筹码", balance)
+					return fmt.Sprintf("你的点数不足%d，无法转换赌注", balance)
 				}
 				p.bet[msg.Sender.Uin] = balance
 				if p.playerFull() {
 					p.stop()
 				}
-				return fmt.Sprintf("加入成功, 已转换 %d 点数 为 筹码", balance)
+				return fmt.Sprintf("加入成功, 已转换 %d 点数 为 赌注", balance)
 			}
 		}
 		return "人满了"
@@ -332,7 +378,7 @@ func (p *blackjack) returnBets() {
 	for uid, bet := range p.bet {
 		game.DepositPoint(uid, bet)
 	}
-	_ = qq.SendGroupMessage(message.NewSendingMessage().Append(message.NewText("回合结束，已退还所有筹码至点数")))
+	_ = qq.SendGroupMessage(message.NewSendingMessage().Append(message.NewText("回合结束，已退还所有赌注至点数")))
 }
 
 func (p *blackjack) ArgHints() []string {
