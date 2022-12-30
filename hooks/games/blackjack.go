@@ -160,7 +160,7 @@ func (p *blackjack) handleOption(args []string, msg *message.GroupMessage) *game
 			secure := p.bet[msg.Sender.Uin] / 2
 			p.insurance[msg.Sender.Uin] = secure
 			p.bet[msg.Sender.Uin] -= secure
-			reply.Append(qq.NewTextf("你从赌注中提取一半作为保险金, 当庄家开出黑杰克时将返回保险金额", secure))
+			reply.Append(qq.NewTextf("你从赌注中提取一半作为保险金, 当庄家开出黑杰克时将返回保险金额两倍", secure))
 			p.secure = true
 		}
 		_ = qq.SendGroupMessage(reply)
@@ -284,8 +284,8 @@ func (p *blackjack) endGame() *game.Result {
 		}
 
 		if ownerScore == 21 && p.insurance[v.Uin] > 0 {
-			p.bet[v.Uin] += p.insurance[v.Uin]
-			result.Append(qq.NewTextfLn("庄家为黑杰克, %v 的保险生效, 现有赌注为 %d (+%d) [ %s ]", v.DisplayName(), p.bet[v.Uin], p.insurance[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
+			p.bet[v.Uin] += (p.insurance[v.Uin] * 2)
+			result.Append(qq.NewTextfLn("庄家为黑杰克, %v 的保险生效, 现有赌注为 %d (+%dx2) [ %s ]", v.DisplayName(), p.bet[v.Uin], p.insurance[v.Uin], strings.Join(p.cards[v.Uin], " | ")))
 		}
 	}
 	_ = qq.SendGroupMessage(result)
