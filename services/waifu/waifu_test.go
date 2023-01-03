@@ -122,3 +122,46 @@ func TestGetLolicron(t *testing.T) {
 	}
 	t.Logf("found %d data", len(data))
 }
+
+func TestGetYuban(t *testing.T) {
+	yuban := &Yuban{}
+
+	data, err := yuban.GetImages(NewOptions(
+		WithTags("萝莉", "兽耳"),
+		WithAmount(5),
+		WithR18(false),
+	))
+
+	if err != nil {
+		t.Skip(err)
+	}
+
+	for _, d := range data {
+		t.Logf("title: %s, Tags: %s, R18: %t\n", d.Title, strings.Join(d.Tags, ","), d.R18)
+		if d.R18 {
+			t.Fatal("should not have r18")
+		}
+	}
+	t.Logf("found %d data", len(data))
+}
+
+func TestGetAnosuTop(t *testing.T) {
+	anosu := &AnosuTop{}
+	data, err := anosu.GetImages(NewOptions(
+		WithKeyword("genshin"),
+		WithAmount(5),
+		WithR18(false),
+	))
+
+	if err != nil {
+		t.Skip(err)
+	}
+
+	for _, d := range data {
+		t.Logf("title: %s, Tags: %s, R18: %t\n", d.Title, strings.Join(d.Tags, ","), d.R18)
+		if d.R18 {
+			t.Fatal("should not have r18")
+		}
+	}
+	t.Logf("found %d data", len(data))
+}

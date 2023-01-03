@@ -6,18 +6,13 @@ import (
 	"net/http"
 
 	"github.com/corpix/uarand"
-	"github.com/everpcpc/pixiv"
 )
 
-func tryGetImage(images *pixiv.Images) string {
-	if images.Original != "" {
-		return images.Original
-	} else if images.Large != "" {
-		return images.Large
-	} else if images.Medium != "" {
-		return images.Medium
-	} else if images.SquareMedium != "" {
-		return images.SquareMedium
+func tryGetImage(images ...string) string {
+	for _, img := range images {
+		if img != "" {
+			return img
+		}
 	}
 	return ""
 }
@@ -48,7 +43,12 @@ func GetImageFromIllust(id uint64) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	imgUrl := tryGetImage(data.Images)
+	imgUrl := tryGetImage(
+		data.Images.Original,
+		data.Images.Large,
+		data.Images.Medium,
+		data.Images.SquareMedium,
+	)
 	if imgUrl == "" {
 		return nil, fmt.Errorf("插画 %d 的图源为空", id)
 	}

@@ -2,9 +2,10 @@ package waifu
 
 import (
 	"fmt"
-	"golang.org/x/exp/maps"
 	"math/rand"
 	"time"
+
+	"golang.org/x/exp/maps"
 )
 
 type (
@@ -37,6 +38,8 @@ var providers = map[string]ImageApi{
 	"lolicron": &Lolicron{},
 	"pixivmoe": &PixelMoe{},
 	"danbooru": &Danbooru{},
+	"yuban":    &Yuban{},
+	"anosu":    &AnosuTop{},
 }
 
 func NewOptions(searcher ...Searcher) *SearchOptions {

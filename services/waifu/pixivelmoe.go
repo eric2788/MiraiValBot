@@ -74,7 +74,12 @@ func (p *PixelMoe) GetImages(option *SearchOptions) ([]*ImageData, error) {
 			continue
 		}
 
-		imgUrl := tryGetImage(data.Images)
+		imgUrl := tryGetImage(
+			data.Images.Original,
+			data.Images.Large,
+			data.Images.Medium,
+			data.Images.SquareMedium,
+		)
 
 		if imgUrl == "" {
 			logger.Warnf("所有圖像ID %d 的網址為空: %v", id, data.Images)
