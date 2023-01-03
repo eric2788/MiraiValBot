@@ -215,7 +215,7 @@ func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) boo
 
 func AddHandle(handle Handle) {
 	responses = append(responses, handle)
-	logger.Infof("新增 %s 回应成功", reflect.TypeOf(handle).Name())
+	logger.Infof("新增 %s 回应成功", reflect.TypeOf(handle).Elem().Name())
 }
 
 func init() {

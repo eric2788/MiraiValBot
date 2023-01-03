@@ -108,8 +108,18 @@ func ResetGPTConversation() {
 	ctx.ResetConversation()
 }
 
+func isEdited() bool {
+	if ctx == nil {
+		return false
+	}
+	return ctx.IsEdited()
+}
+
 func init() {
 	timer.RegisterTimer("save-gpt-conversation", 10*time.Minute, func(bot *bot.Bot) (err error) {
+		if !isEdited() { //anti spam
+			return
+		}
 		err = SaveGPTConversation()
 		if err == nil {
 			logger.Infof("保存AI对话成功")

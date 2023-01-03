@@ -2,6 +2,7 @@ package modules
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -33,4 +34,6 @@ func TestModulePolymorphism(t *testing.T) {
 	if dog, ok := animal.(IDog); ok {
 		dog.Walk()
 	}
+
+	t.Log(reflect.TypeOf(animal).Elem().Name())
 }
