@@ -5,6 +5,7 @@ import (
 	"github.com/eric2788/MiraiValBot/internal/file"
 	qq "github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
+	"strings"
 )
 
 func checkRes(args []string, source *command.MessageSource) error {
@@ -20,6 +21,14 @@ func checkRes(args []string, source *command.MessageSource) error {
 func setRes(args []string, source *command.MessageSource) error {
 
 	content, res := args[0], args[1]
+
+	logger.Debugf("content: %s, res: %s, args: %s", content, res, strings.Join(args, ", "))
+
+	if content == "" {
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("触发参数不能为空")))
+	} else if res == "" {
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("回应参数不能为空")))
+	}
 
 	file.UpdateStorage(func() {
 		file.DataStorage.Responses[content] = res
