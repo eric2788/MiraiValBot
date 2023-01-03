@@ -85,7 +85,20 @@ func InvokeCommand(content string, admin bool, source *MessageSource) (*Response
 	}
 	logger.Debugf("收到指令輸入: %s", content)
 	commands := strings.Split(strings.TrimPrefix(content, Prefix), " ")
-	cmd, args := commands[0], commands[1:]
+	cmd, plainArgs := commands[0], commands[1:]
+
+	var args []string
+
+	// remove all empty or space args
+	for _, arg := range plainArgs {
+		if strings.TrimSpace(arg) != "" {
+			args = append(args, arg)
+		}
+	}
+
+	logger.Debugf("original args(%d): %s", len(plainArgs), strings.Join(plainArgs, ", "))
+	logger.Debugf("filtered args(%d): %s", len(args), strings.Join(args, ", "))
+
 	for _, node := range commandTree {
 		labels := append(node.Alias, node.Command)
 
