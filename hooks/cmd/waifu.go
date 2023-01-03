@@ -20,7 +20,7 @@ func getWaifuR18(args []string, source *command.MessageSource) error {
 
 	tags := []string{""}
 
-	if len(args) > 1 {
+	if len(args) > 0 {
 		tags = strings.Split(strings.Join(args, " "), ",")
 	}
 
