@@ -307,7 +307,7 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 			if err != nil {
 				return fmt.Sprintf("無效的數字 %v: %v", args[1], err)
 			}
-			if balance < 0 {
+			if balance <= 0 {
 				return "赌注必须大于0"
 			}
 		}

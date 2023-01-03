@@ -89,8 +89,11 @@ func GetRandomImages(option *SearchOptions) ([]*ImageData, error) {
 		if err != nil {
 			logger.Errorf("使用 %s 獲取圖片失敗: %v, 將使用下一個API", key, err)
 			continue
+		} else if len(images) == 0 {
+			logger.Warnf("使用 %s 獲取圖片的結果為空, 將使用下一個API", key)
+			continue
 		}
 		return images, nil
 	}
-	return nil, fmt.Errorf("所有API都無法獲取圖片")
+	return nil, fmt.Errorf("所有API都無法獲取圖片或搜索結果爲空")
 }
