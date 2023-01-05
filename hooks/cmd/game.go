@@ -219,7 +219,7 @@ var (
 		command.NewNode([]string{"remove", "扣除"}, "扣除点数", true, removePoint, "<点数>", "[@用户]"),
 		command.NewNode([]string{"set", "设置"}, "设置点数", true, setPoint, "<点数>", "[@用户]"),
 		command.NewNode([]string{"list", "查看"}, "查看点数", false, listPoint, "[@用户]"),
-		command.NewNode([]string{"give", "转账"}, "转账点数", true, givePoint, "<点数>", "[@用户]"),
+		command.NewNode([]string{"give", "转账"}, "转账点数", false, givePoint, "<点数>", "[@用户]"),
 	)
 )
 
