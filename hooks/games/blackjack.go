@@ -313,12 +313,13 @@ func (p *blackjack) handleGameJoin(args []string, msg *message.GroupMessage) str
 		}
 		for i, v := range p.joined {
 			if v == nil {
-				p.joined[i] = qq.FindGroupMember(msg.Sender.Uin)
-				if p.joined[i] == nil {
+				member := qq.FindGroupMember(msg.Sender.Uin)
+				if member == nil {
 					return "你不在瓦群内"
 				} else if !game.WithdrawPoint(msg.Sender.Uin, balance) {
 					return fmt.Sprintf("你的点数不足%d，无法转换赌注", balance)
 				}
+				p.joined[i] = member
 				p.bet[msg.Sender.Uin] = balance
 				if p.playerFull() {
 					p.stop()
