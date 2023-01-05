@@ -199,11 +199,11 @@ func givePoint(args []string, source *command.MessageSource) (err error) {
 		return fmt.Errorf("请 @ 一个人")
 	}
 	user, display := ats[0].Target, ats[0].Display
-	if !game.WithdrawPoint(user, pt) {
-		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("转账失败, %s 点数不足", display)))
+	if !game.WithdrawPoint(source.Message.Sender.Uin, pt) {
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("转账失败, 你的点数不足")))
 	}
-	game.DepositPoint(ats[1].Target, pt)
-	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %d 点转给 %s", pt, ats[1].Display)))
+	game.DepositPoint(user, pt)
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %d 点转给 %s", pt, display)))
 }
 
 var (
