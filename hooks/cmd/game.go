@@ -189,6 +189,23 @@ func setPoint(args []string, source *command.MessageSource) (err error) {
 	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %s 点数设置为 %d", display, pt)))
 }
 
+func givePoint(args []string, source *command.MessageSource) (err error) {
+	pt, err := strconv.ParseInt(args[0], 10, 64)
+	if err != nil {
+		return fmt.Errorf("无效数字: %s", args[0])
+	}
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) == 0 {
+		return fmt.Errorf("请 @ 一个人")
+	}
+	user, display := ats[0].Target, ats[0].Display
+	if !game.WithdrawPoint(user, pt) {
+		return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("转账失败, %s 点数不足", display)))
+	}
+	game.DepositPoint(ats[1].Target, pt)
+	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(qq.NewTextf("成功将 %d 点转给 %s", pt, ats[1].Display)))
+}
+
 var (
 	startGameCommand   = command.NewNode([]string{"start", "开始", "启动"}, "开始一个游戏", false, startGame, "<游戏名称>", "[参数]")
 	stopGameCommand    = command.NewNode([]string{"stop", "中止", "关闭"}, "中止目前游戏", false, stopGame)
@@ -202,6 +219,7 @@ var (
 		command.NewNode([]string{"remove", "扣除"}, "扣除点数", true, removePoint, "<点数>", "[@用户]"),
 		command.NewNode([]string{"set", "设置"}, "设置点数", true, setPoint, "<点数>", "[@用户]"),
 		command.NewNode([]string{"list", "查看"}, "查看点数", false, listPoint, "[@用户]"),
+		command.NewNode([]string{"give", "转账"}, "转账点数", true, givePoint, "<点数>", "[@用户]"),
 	)
 )
 
