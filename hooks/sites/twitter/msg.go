@@ -9,7 +9,7 @@ import (
 )
 
 // CreateMessage 短視頻要單獨發送，否則無法發送原文
-func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*message.TextElement) (*message.SendingMessage, []*message.ShortVideoElement) {
+func CreateMessage(risk bool, msg *message.SendingMessage, data *TweetStreamData, alt ...*message.TextElement) (*message.SendingMessage, []*message.ShortVideoElement) {
 
 	extraUrls := ExtractExtraLinks(data)
 
@@ -27,8 +27,8 @@ func CreateMessage(msg *message.SendingMessage, data *TweetStreamData, alt ...*m
 		}
 	}
 
-	// 額外連結
-	if len(extraUrls) > 0 {
+	// 額外連結 (仅限非风控状态发送)
+	if len(extraUrls) > 0 && !risk {
 		msg.Append(qq.NextLn())
 		msg.Append(qq.NewTextLn("链接"))
 		for _, url := range extraUrls {

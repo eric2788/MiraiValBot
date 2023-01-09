@@ -277,12 +277,15 @@ func SendGroupTempMessage(gp int64, uid int64, msg *message.SendingMessage) (err
 
 func retry(maxTry int, seconds int64, do func(int) error, catch func(error) error, stillRiskFunc func()) {
 	try, stillRisky := 0, true
-	for try < maxTry {
+	for try < maxTry+1 {
 		if err := do(try); err != nil {
 			if catch(err) != nil {
-				logger.Warnf("執行重試操作時出现錯誤，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try+1)
-				<-time.After(time.Second * time.Duration(seconds))
 				try += 1
+				if try == maxTry+1 {
+					break
+				} 
+				logger.Warnf("執行重試操作時出现錯誤，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try)
+				<-time.After(time.Second * time.Duration(seconds))
 			} else {
 				stillRisky = false
 				break
