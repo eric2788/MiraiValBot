@@ -87,6 +87,17 @@ func valorantTrackRisky(displayName, shortHint, cmdId string, metaData *valorant
 			msg.Append(qq.NewTextfLn("对战地图: %s", metaData.Map))
 		}
 		msg.Append(qq.NewTextfLn("输入 !val match %s 查看详细内容。", cmdId))
+
+		alt := qq.GetRandomMessageByTry(currentTry)
+
+		if len(alt) > 0 {
+			msg.Append(qq.NextLn())
+		}
+
+		for _, ele := range alt {
+			msg.Append(ele)
+		}
+
 		return qq.SendGroupMessage(msg)
 	})
 
