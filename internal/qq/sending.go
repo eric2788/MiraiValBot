@@ -283,7 +283,7 @@ func retry(maxTry int, seconds int64, do func(int) error, catch func(error) erro
 				try += 1
 				if try == maxTry+1 {
 					break
-				} 
+				}
 				logger.Warnf("執行重試操作時出现錯誤，现正等候 %d 秒后重新发送 (第 %d 次重试)", seconds, try)
 				<-time.After(time.Second * time.Duration(seconds))
 			} else {
@@ -296,7 +296,7 @@ func retry(maxTry int, seconds int64, do func(int) error, catch func(error) erro
 		}
 	}
 	if stillRisky {
-		logger.Errorf("尝试执行 %d 次后依然有錯誤，放弃执行。", try)
+		logger.Errorf("尝试执行 %d 次后依然有錯誤，放弃执行。", try-1)
 		if stillRiskFunc != nil {
 			stillRiskFunc()
 		}
@@ -328,6 +328,7 @@ func SendWithRandomRiskyFunc(msg *message.SendingMessage, stillRisky func()) (er
 			clone.Append(NextLn())
 			for _, element := range alt {
 				clone.Append(element)
+				clone.Append(NextLn())
 			}
 		}
 		return SendGroupMessage(clone)
@@ -357,8 +358,8 @@ func GetRandomMessageByTry(try int) []*message.TextElement {
 
 		random, err := GetRandomGroupMessage(ValGroupInfo.Uin)
 
-		if try > 2 { // 發送多一則隨機消息
-			// 使用 1 確保不無限套娃
+		// 大于 2 次重试时，根据重试次数发送更多随机消息
+		for i := 0; i < try-2; i++ {
 			extras = append(extras, GetRandomMessageByTry(1)...)
 		}
 
