@@ -24,6 +24,7 @@ func CreateMessage(risk bool, msg *message.SendingMessage, data *TweetStreamData
 		// 額外的中文字來減低風控機率
 		for _, txt := range alt {
 			msg.Append(txt)
+			msg.Append(qq.NextLn())
 		}
 	}
 

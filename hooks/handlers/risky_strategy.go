@@ -96,6 +96,7 @@ func valorantTrackRisky(displayName, shortHint, cmdId string, metaData *valorant
 
 		for _, ele := range alt {
 			msg.Append(ele)
+			msg.Append(qq.NextLn())
 		}
 
 		return qq.SendGroupMessage(msg)

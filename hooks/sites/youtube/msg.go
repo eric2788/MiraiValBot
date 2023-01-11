@@ -59,6 +59,7 @@ func CreateQQMessage(desc string, info *LiveInfo, noTitle bool, alt []*message.T
 		msg.Append(qq.NextLn())
 		for _, a := range alt {
 			msg.Append(a)
+			msg.Append(qq.NextLn())
 		}
 	}
 
