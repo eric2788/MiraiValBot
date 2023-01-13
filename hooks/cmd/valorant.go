@@ -39,7 +39,7 @@ func info(args []string, source *command.MessageSource) error {
 	} else {
 		msg.Append(img)
 	}
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func forceUpdate(args []string, source *command.MessageSource) error {
@@ -75,7 +75,7 @@ func status(args []string, source *command.MessageSource) error {
 			appendDetails(msg, maintenance)
 		}
 	}
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func track(args []string, source *command.MessageSource) error {
@@ -130,7 +130,7 @@ func tracking(args []string, source *command.MessageSource) error {
 		reply.Append(message.NewText("没有正在监听的玩家"))
 	}
 
-	return qq.SendWithRandomRiskyStrategy(reply)
+	return qq.SendWithRandomRiskyStrategyRemind(reply, source.Message)
 }
 
 func matches(args []string, source *command.MessageSource) error {
@@ -181,7 +181,7 @@ func matches(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val rounds <对战ID> 查看对战回合"))
 	msg.Append(qq.NewTextfLn("输入 !val performance <对战ID> <名称#Tag> 查看对战玩家表现"))
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func match(args []string, source *command.MessageSource) error {
@@ -217,7 +217,7 @@ func match(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val players %s 查看对战玩家", cmdId))
 	msg.Append(qq.NewTextfLn("输入 !val rounds %s 查看对战回合", cmdId))
 	msg.Append(qq.NewTextfLn("输入 !val performance %s <名称#Tag> 查看对战玩家表现", cmdId))
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func matchPlayers(args []string, source *command.MessageSource) error {
@@ -240,7 +240,7 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 	}
 
 	sending := message.NewSendingMessage().Append(img)
-	return qq.SendWithRandomRiskyStrategy(sending)
+	return qq.SendWithRandomRiskyStrategyRemind(sending, source.Message)
 }
 
 func leaderboard(args []string, source *command.MessageSource) error {
@@ -257,59 +257,84 @@ func leaderboard(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	msg := message.NewSendingMessage()
+	go qq.SendRiskyMessageWithFunc(5, 60, func(currentTry int) error {
 
-	msg.Append(qq.NewTextfLn("对战 %s 的玩家排行榜", match.MetaData.MatchId))
-	if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
-		players := valorant.GetDeathMatchRanking(match)
-		for i, player := range players {
-			msg.Append(qq.NewTextLn("===================="))
-			msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
-			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
-		}
-	} else {
-		players := valorant.GetMatchRanking(match)
-		ffMap := valorant.GetFriendlyFireInfo(match)
+		msg := message.NewSendingMessage()
+		alts := qq.GetRandomMessageByTry(currentTry)
 
-		getFFDamage := func(player valorant.MatchPlayer) int {
-			if info, ok := ffMap[player.PUuid]; ok {
-				return int(math.Round(info.Outgoing))
-			} else {
-				return int(math.Round(player.Behaviour.FriendlyFire.Outgoing))
+		msg.Append(qq.NewTextfLn("对战 %s 的玩家排行榜", match.MetaData.MatchId))
+		if strings.ToLower(match.MetaData.Mode) == "deathmatch" {
+			players := valorant.GetDeathMatchRanking(match)
+			for i, player := range players {
+				msg.Append(qq.NewTextLn("===================="))
+				msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
+				msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
+				msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
+			}
+		} else {
+			players := valorant.GetMatchRanking(match)
+			ffMap := valorant.GetFriendlyFireInfo(match)
+
+			getFFDamage := func(player valorant.MatchPlayer) int {
+				if info, ok := ffMap[player.PUuid]; ok {
+					return int(math.Round(info.Outgoing))
+				} else {
+					return int(math.Round(player.Behaviour.FriendlyFire.Outgoing))
+				}
+			}
+
+			getFFKills := func(player valorant.MatchPlayer) int {
+				if info, ok := ffMap[player.PUuid]; ok {
+					return info.Kills
+				} else {
+					return 0
+				}
+			}
+
+			for i, player := range players {
+				totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
+				msg.Append(qq.NewTextLn("===================="))
+				msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
+
+				// 如果是競技模式，則顯示段位
+				if strings.ToLower(match.MetaData.Mode) == "competitive" {
+					msg.Append(qq.NewTextfLn("段位: %s", player.CurrentTierPatched))
+				}
+
+				msg.Append(qq.NewTextfLn("队伍: %s", player.Team))
+				msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
+				msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
+				if currentTry <= 4 {
+					msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
+				}
+				if currentTry <= 2 {
+					msg.Append(qq.NewTextfLn("队友伤害: %d", getFFDamage(player)))
+					msg.Append(qq.NewTextfLn("队友误杀: %d", getFFKills(player)))
+				}
+				if currentTry <= 3 {
+					msg.Append(qq.NewTextfLn("装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
+					msg.Append(qq.NewTextfLn("拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
+				}
 			}
 		}
 
-		getFFKills := func(player valorant.MatchPlayer) int {
-			if info, ok := ffMap[player.PUuid]; ok {
-				return info.Kills
-			} else {
-				return 0
-			}
+		if len(alts) > 0 {
+			msg.Append(qq.NextLn())
+		}
+		for _, ele := range alts {
+			msg.Append(ele)
+			msg.Append(qq.NextLn())
 		}
 
-		for i, player := range players {
-			totalShots := player.Stats.BodyShots + player.Stats.LegShots + player.Stats.Headshots
-			msg.Append(qq.NewTextLn("===================="))
-			msg.Append(qq.NewTextfLn("%d. - %s (%s)", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag), player.Character))
+		return qq.SendGroupMessage(msg)
+	}, func() {
+		// 重试失败后，提示信息被风控
+		remind := qq.CreateAtReply(source.Message)
+		remind.Append(message.NewText("回应发送失败，可能被风控咯 😔"))
+		_ = qq.SendGroupMessageByGroup(source.Message.GroupCode, remind)
+	})
 
-			// 如果是競技模式，則顯示段位
-			if strings.ToLower(match.MetaData.Mode) == "competitive" {
-				msg.Append(qq.NewTextfLn("段位: %s", player.CurrentTierPatched))
-			}
-
-			msg.Append(qq.NewTextfLn("队伍: %s", player.Team))
-			msg.Append(qq.NewTextfLn("均分: %d", player.Stats.Score))
-			msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d (%.2f)", player.Stats.Kills, player.Stats.Deaths, player.Stats.Assists, float64(player.Stats.Kills)/float64(player.Stats.Deaths)))
-			msg.Append(qq.NewTextfLn("爆头率: %.1f%%", formatPercentageInt(player.Stats.Headshots, totalShots)))
-			msg.Append(qq.NewTextfLn("队友伤害: %d", getFFDamage(player)))
-			msg.Append(qq.NewTextfLn("队友误杀: %d", getFFKills(player)))
-			msg.Append(qq.NewTextfLn("装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
-			msg.Append(qq.NewTextfLn("拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
-		}
-	}
-
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return nil
 }
 
 func performances(args []string, source *command.MessageSource) error {
@@ -354,7 +379,7 @@ func performances(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", performance.Killed, performance.Deaths, performance.Assists))
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func stats(args []string, source *command.MessageSource) error {
@@ -388,7 +413,7 @@ func stats(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("总队友伤害: %d", stats.TotalFriendlyDamage))
 	msg.Append(qq.NewTextfLn("总队友击杀: %d", stats.TotalFriendlyKills))
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
@@ -489,7 +514,7 @@ func matchRounds(args []string, source *command.MessageSource) error {
 	sending.Append(qq.NewTextfLn("PasteMe(国内): %s (五分钟过期 / 阅后即焚)", pmUrl))
 	sending.Append(qq.NewTextfLn("PasteBin(国外): %s (一天后过期)", pbUrl))
 
-	return qq.SendWithRandomRiskyStrategy(sending)
+	return qq.SendWithRandomRiskyStrategyRemind(sending, source.Message)
 }
 
 // mmr get MMRV1Details
@@ -522,7 +547,7 @@ func mmr(args []string, source *command.MessageSource) error {
 	} else {
 		logger.Errorf("无法获取段位图片: %v", err)
 	}
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 // mmrHistories get MMRHistories
@@ -554,7 +579,7 @@ func mmrHistories(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("分数变更: %s%d", symbol, data.MMRChangeToLastGame))
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 // mmrBySeason GetMMRDetailsBySeason
@@ -587,7 +612,7 @@ func mmrBySeason(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("\t%d. %s", i+1, act.PatchedTier))
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 // mmrActs GetMMRDetailsV2
@@ -618,7 +643,7 @@ func mmrActs(args []string, source *command.MessageSource) error {
 		}
 	}
 
-	return qq.SendWithRandomRiskyStrategy(msg)
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func weapons(args []string, source *command.MessageSource) error {
@@ -652,7 +677,7 @@ func weapons(args []string, source *command.MessageSource) error {
 			msg.Append(img)
 		}
 
-		qq.SendWithRandomRiskyStrategy(msg)
+		qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 	}
 
 	return nil
@@ -700,7 +725,7 @@ func agents(args []string, source *command.MessageSource) error {
 			msg.Append(img)
 		}
 
-		qq.SendWithRandomRiskyStrategy(msg)
+		qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 
 	}
 

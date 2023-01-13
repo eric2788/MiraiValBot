@@ -340,6 +340,15 @@ func SendWithRandomRiskyStrategy(msg *message.SendingMessage) (err error) {
 	return SendWithRandomRiskyFunc(msg, nil)
 }
 
+func SendWithRandomRiskyStrategyRemind(msg *message.SendingMessage, source *message.GroupMessage) (err error) {
+	return SendWithRandomRiskyFunc(msg, func() {
+		// 重试失败后，提示信息被风控
+		remind := CreateAtReply(source)
+		remind.Append(message.NewText("回应发送失败，可能被风控咯 😔"))
+		_ = SendGroupMessageByGroup(source.GroupCode, remind)
+	})
+}
+
 func CloneMessage(msg *message.SendingMessage) *message.SendingMessage {
 	clone := message.NewSendingMessage()
 	for _, element := range msg.Elements {
