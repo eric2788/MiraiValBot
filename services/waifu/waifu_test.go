@@ -2,15 +2,12 @@ package waifu
 
 import (
 	"fmt"
-	"io"
 	"net/url"
 	"strings"
 	"testing"
 
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/utils/test"
-
-	"github.com/eric2788/common-utils/request"
 )
 
 func init() {
@@ -102,15 +99,6 @@ func TestGetLolicron(t *testing.T) {
 	))
 
 	if err != nil {
-
-		if e, ok := err.(*request.HttpError); ok {
-			defer e.Response.Body.Close()
-			t.Logf("%+v", e)
-			if b, err := io.ReadAll(e.Response.Body); err == nil {
-				t.Skip(len(b))
-			}
-		}
-
 		t.Skip(err)
 	}
 
