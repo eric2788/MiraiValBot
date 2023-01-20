@@ -62,7 +62,7 @@ func permissionName(permission client.MemberPermission) string {
 	}
 }
 
-var checkCommand = command.NewNode([]string{"check", "查成分", "查"}, "查成分", false, check, "<用户>")
+var checkCommand = command.NewNode([]string{"check", "查成分", "查"}, "查成分", false, check, "[@用户]")
 
 func init() {
 	command.AddCommand(checkCommand)

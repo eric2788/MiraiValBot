@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"strconv"
+
 	"github.com/Mrs4s/MiraiGo/message"
 	qq "github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/command"
@@ -49,16 +52,35 @@ func resetConversation(args []string, source *command.MessageSource) error {
 	return qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("已重置 GPT3 对话记录。")))
 }
 
+func atUser(args []string, source *command.MessageSource) error {
+	times, err := strconv.Atoi(args[0])
+	if err != nil {
+		return err
+	}
+	ats := qq.ExtractMessageElement[*message.AtElement](source.Message.Elements)
+	if len(ats) == 0 {
+		return fmt.Errorf("没有找到@的用户")
+	}
+	msg := message.NewSendingMessage()
+	at := ats[0]
+	for i := 0; i < times; i++ {
+		msg.Append(at)
+	}
+	return qq.SendGroupMessage(msg)
+}
+
 var (
 	fetchEssenceCommand = command.NewNode([]string{"fetchess"}, "刷新群精华消息到快取", true, fetchEssence)
 	migrateCacheCommand = command.NewNode([]string{"migrate", "搬迁"}, "搬迁缓存", true, migrateCache, "<从缓存类型>", "<到缓存类型>", "<缓存路径>", "[是否移除旧资料]")
 	resetConverCommand  = command.NewNode([]string{"resetchat", "重置对话"}, "重置gpt3对话记录", true, resetConversation)
+	atUserCommand       = command.NewNode([]string{"at", "艾特"}, "艾特用户特定次数", true, atUser, "<次数> [@用户]")
 )
 
 var adminCommand = command.NewParent([]string{"admin", "管理员", "管理"}, "管理员指令",
 	fetchEssenceCommand,
 	migrateCacheCommand,
 	resetConverCommand,
+	atUserCommand,
 )
 
 func init() {
