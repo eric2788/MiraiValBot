@@ -33,9 +33,16 @@ func Init() {
 	redisConfig := file.ApplicationYaml.Redis
 	host := fmt.Sprintf("%s:%d", redisConfig.Host, redisConfig.Port)
 	rdb = rgo.NewClient(&rgo.Options{
-		Addr:     host,
-		Password: redisConfig.Password,
-		DB:       redisConfig.Database,
+		Addr:               host,
+		Password:           redisConfig.Password,
+		DB:                 redisConfig.Database,
+		PoolSize:           64,
+		PoolTimeout:        5 * time.Second,
+		DialTimeout:        3 * time.Second,
+		ReadTimeout:        3 * time.Second,
+		WriteTimeout:       4 * time.Second,
+		IdleCheckFrequency: time.Minute,
+		IdleTimeout:        5 * time.Minute,
 	})
 }
 
