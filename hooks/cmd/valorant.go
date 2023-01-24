@@ -155,6 +155,11 @@ func matches(args []string, source *command.MessageSource) error {
 
 	shorts := getShortIdsHint(uuidsToShort)
 
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 最近的对战:", info.Display))
 	for _, match := range matches {
@@ -181,7 +186,24 @@ func matches(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val rounds <对战ID> 查看对战回合"))
 	msg.Append(qq.NewTextfLn("输入 !val performance <对战ID> <名称#Tag> 查看对战玩家表现"))
 
-	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if !image {
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+
+	imgMsg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
+		imgMsg.Append(e)
+	}
+	img, err := imgMsg.ToGroupImageElement()
+	if err != nil {
+		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
 }
 
 func match(args []string, source *command.MessageSource) error {
@@ -248,6 +270,11 @@ func leaderboard(args []string, source *command.MessageSource) error {
 	id, err := valorant.GetRealId(args[0])
 	if err != nil {
 		return fmt.Errorf("id 解析失败: %v", err)
+	}
+
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
 	}
 
 	go qq.SendGroupMessage(qq.CreateReply(source.Message).Append(message.NewText("正在索取对战排行榜的资料..")))
@@ -326,7 +353,25 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NextLn())
 		}
 
-		return qq.SendGroupMessage(msg)
+		if !image {
+			return qq.SendGroupMessage(msg)
+		}
+
+		imgMsg, err := imgtxt.NewPrependMessage()
+		if err != nil {
+			logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
+			return qq.SendGroupMessage(msg)
+		}
+		for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
+			imgMsg.Append(e)
+		}
+		img, err := imgMsg.ToGroupImageElement()
+		if err != nil {
+			logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
+			return qq.SendGroupMessage(msg)
+		}
+		return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
+
 	}, func() {
 		// 重试失败后，提示信息被风控
 		remind := qq.CreateAtReply(source.Message)
@@ -366,6 +411,11 @@ func performances(args []string, source *command.MessageSource) error {
 		return qq.SendGroupMessage(msg)
 	}
 
+	image := false
+	if len(args) > 2 {
+		image = args[2] == "image" || strings.HasPrefix(args[2], "图") || args[2] == "true"
+	}
+
 	msg.Append(qq.NewTextfLn("玩家 %s 在对战 %s 中的击杀表现 (由高到低):", args[1], match.MetaData.MatchId))
 
 	for i, performance := range performances {
@@ -379,7 +429,24 @@ func performances(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", performance.Killed, performance.Deaths, performance.Assists))
 	}
 
-	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if !image {
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+
+	imgMsg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
+		imgMsg.Append(e)
+	}
+	img, err := imgMsg.ToGroupImageElement()
+	if err != nil {
+		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
 }
 
 func stats(args []string, source *command.MessageSource) error {
@@ -401,6 +468,11 @@ func stats(args []string, source *command.MessageSource) error {
 		return err
 	}
 
+	image := false
+	if len(args) > 2 {
+		image = args[2] == "image" || strings.HasPrefix(args[2], "图") || args[2] == "true"
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在最近 %d 场对战中的统计数据: ", args[0], stats.TotalMatches))
 	msg.Append(qq.NewTextfLn("爆头率: %.2f%%", stats.HeadshotRate))
@@ -413,7 +485,24 @@ func stats(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("总队友伤害: %d", stats.TotalFriendlyDamage))
 	msg.Append(qq.NewTextfLn("总队友击杀: %d", stats.TotalFriendlyKills))
 
-	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if !image {
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+
+	imgMsg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
+		imgMsg.Append(e)
+	}
+	img, err := imgMsg.ToGroupImageElement()
+	if err != nil {
+		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	}
+	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
@@ -741,9 +830,9 @@ var (
 	trackingCommand     = command.NewNode([]string{"tracking", "追踪中"}, "查询追踪中的玩家", false, tracking)
 	matchesCommand      = command.NewNode([]string{"matches", "对战历史"}, "查询对战历史", false, matches, "<名称#Tag>")
 	matchCommand        = command.NewNode([]string{"match", "对战"}, "查询对战详情", false, match, "<对战ID>")
-	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>")
-	performanceCommand  = command.NewNode([]string{"performance", "表现", "击杀表现"}, "查询对战玩家的击杀表现", false, performances, "<对战ID>", "<名称#Tag>")
-	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>", "[对战模式]")
+	leaderboardCommand  = command.NewNode([]string{"leaderboard", "排行榜"}, "查询对战排行榜", false, leaderboard, "<对战ID>", "[图片]")
+	performanceCommand  = command.NewNode([]string{"performance", "表现", "击杀表现"}, "查询对战玩家的击杀表现", false, performances, "<对战ID>", "<名称#Tag>", "[图片]")
+	statsCommand        = command.NewNode([]string{"stats", "统计数据"}, "查询该玩家在最近五场的统计数据", false, stats, "<名称#Tag>", "[对战模式]", "[图片]")
 	matchPlayerscommand = command.NewNode([]string{"players", "玩家"}, "查询对战玩家资讯", false, matchPlayers, "<对战ID>")
 	matchRoundsCommand  = command.NewNode([]string{"rounds", "回合"}, "查询对战回合资讯", false, matchRounds, "<对战ID>")
 	mmrCommand          = command.NewNode([]string{"mmr", "段位"}, "查询段位", false, mmr, "<名称#Tag>")
@@ -936,9 +1025,9 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		}
 		msg.Append(qq.NewTextLn("\t行为:"))
 		msg.Append(qq.NewTextfLn("\t\tAFK回合次数: %.2f", player.Behaviour.AfkRounds))
-		msg.Append(qq.NewTextfLn("\t\t误击队友伤害: %d", friendlyFire.Outgoing))
+		msg.Append(qq.NewTextfLn("\t\t误击队友伤害: %.f", friendlyFire.Outgoing))
 		msg.Append(qq.NewTextfLn("\t\t误杀队友次数: %d", friendlyFire.Kills))
-		msg.Append(qq.NewTextfLn("\t\t被误击队友伤害: %d", friendlyFire.Incoming))
+		msg.Append(qq.NewTextfLn("\t\t被误击队友伤害: %.f", friendlyFire.Incoming))
 		msg.Append(qq.NewTextfLn("\t\t被误杀队友次数: %d", friendlyFire.Deaths))
 		msg.Append(qq.NewTextfLn("\t\t拆包次数: %d", valorant.GetDefuseCount(match, player.PUuid)))
 		msg.Append(qq.NewTextfLn("\t\t装包次数: %d", valorant.GetPlantCount(match, player.PUuid)))
