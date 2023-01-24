@@ -766,7 +766,7 @@ func weapons(args []string, source *command.MessageSource) error {
 			msg.Append(img)
 		}
 
-		qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+		_ = qq.SendWithRandomRiskyStrategy(msg)
 	}
 
 	return nil
@@ -814,7 +814,7 @@ func agents(args []string, source *command.MessageSource) error {
 			msg.Append(img)
 		}
 
-		qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+		_ = qq.SendWithRandomRiskyStrategy(msg)
 
 	}
 
