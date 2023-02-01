@@ -7,6 +7,8 @@ import (
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/eric2788/MiraiValBot/utils/imgtxt"
+	"github.com/eric2788/common-utils/request"
 )
 
 type Reason uint8
@@ -26,6 +28,49 @@ type MessageSendError struct {
 
 func (m *MessageSendError) Error() string {
 	return m.Msg
+}
+
+func SendGroupImageText(msg *message.SendingMessage) error {
+	if ValGroupInfo == nil {
+		return fmt.Errorf("群资料尚未加载。")
+	}
+	return SendGroupImageTextByGroup(ValGroupInfo.Uin, msg)
+}
+
+func SendGroupImageTextByGroup(gp int64, msg *message.SendingMessage) error {
+	imgmsg, err := imgtxt.NewPrependMessage()
+	if err != nil {
+		return err
+	}
+	for _, e := range msg.Elements {
+		switch ele := e.(type) {
+		case *message.TextElement:
+			imgmsg.Append(ele.Content)
+		case *message.AtElement:
+			imgmsg.Append(ele.Display)
+		case *message.GroupImageElement:
+			img, err := request.GetBytesByUrl(ele.Url)
+			if err != nil {
+				logger.Errorf("获取群图片失败: %v", err)
+				continue
+			}
+			imgmsg.AppendImage(img)
+		}
+	}
+
+	img, err := imgmsg.GenerateImage()
+	if err != nil {
+		logger.Errorf("生成图片失败: %v", err)
+		return err
+	}
+	ele, err := NewImagesByByteWithGroup(gp, img)
+	if err != nil {
+		logger.Errorf("上传图片到群 %d 失败: %v", gp, err)
+		return err
+	}
+	msg = message.NewSendingMessage()
+	msg.Append(ele)
+	return SendGroupMessageByGroup(gp, msg)
 }
 
 func SendGroupMessage(msg *message.SendingMessage) error {
@@ -321,7 +366,11 @@ func SendRiskyMessageWithFunc(maxTry int, seconds int64, f func(currentTry int) 
 }
 
 func SendWithRandomRiskyFunc(msg *message.SendingMessage, stillRisky func()) (err error) {
-	go SendRiskyMessageWithFunc(5, 60, func(try int) error {
+	go SendRiskyMessageWithFunc(6, 60, func(try int) error {
+		if try == 6 {
+			logger.Warnf("连续5次发送群消息被风控，将尝试发送图片消息。")
+			return SendGroupImageText(msg)
+		}
 		clone := CloneMessage(msg)
 		alt := GetRandomMessageByTry(try)
 		if len(alt) > 0 {

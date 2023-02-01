@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Mrs4s/MiraiGo/message"
-	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
 	"github.com/hqbobo/text2pic"
@@ -47,7 +45,7 @@ func GetFontByURL(url string) (*truetype.Font, error) {
 func NewPrependMessage(withs ...func(*Options)) (*TextImage, error) {
 	options := &Options{
 		FontUrl: DefaultFont,
-		Width: DefaultWidth,
+		Width:   DefaultWidth,
 	}
 	for _, with := range withs {
 		with(options)
@@ -66,19 +64,24 @@ func NewPrependMessage(withs ...func(*Options)) (*TextImage, error) {
 }
 
 func WithFontURL(url string) func(*Options) {
-	return func (opt *Options)  {
+	return func(opt *Options) {
 		opt.FontUrl = url
 	}
 }
 
 func WithWidth(width int) func(*Options) {
-	return func (opt *Options)  {
+	return func(opt *Options) {
 		opt.Width = width
 	}
 }
 
-func (prepend *TextImage) Append(element *message.TextElement) *TextImage {
-	prepend.prepend.AddTextLine(element.Content, 10, prepend.font, text2pic.ColorBlack, text2pic.Padding{})
+func (prepend *TextImage) Append(line string) *TextImage {
+	prepend.prepend.AddTextLine(line, 10, prepend.font, text2pic.ColorBlack, text2pic.Padding{Left: 5, Right: 5, Top: 5, Bottom: 5})
+	return prepend
+}
+
+func (prepend *TextImage) AppendImage(img []byte) *TextImage {
+	prepend.prepend.AddPictureLine(bytes.NewReader(img), text2pic.Padding{Left: 5, Right: 5, Top: 5, Bottom: 5})
 	return prepend
 }
 
@@ -87,20 +90,4 @@ func (prepend *TextImage) GenerateImage() ([]byte, error) {
 	buffer := bytes.NewBuffer(b)
 	err := prepend.prepend.Draw(buffer, text2pic.TypePng)
 	return buffer.Bytes(), err
-}
-
-func (prepend *TextImage) ToGroupImageElement() (*message.GroupImageElement, error) {
-	b, err := prepend.GenerateImage()
-	if err != nil {
-		return nil, err
-	}
-	return qq.NewImageByByte(b)
-}
-
-func (prepend *TextImage) ToPrivateImageElement(uid int64) (*message.FriendImageElement, error) {
-	b, err := prepend.GenerateImage()
-	if err != nil {
-		return nil, err
-	}
-	return qq.NewImagesByByteWithPrivate(uid, b)
 }

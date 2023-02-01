@@ -12,7 +12,6 @@ import (
 	"github.com/eric2788/MiraiValBot/modules/command"
 	"github.com/eric2788/MiraiValBot/services/paste"
 	"github.com/eric2788/MiraiValBot/services/valorant"
-	"github.com/eric2788/MiraiValBot/utils/imgtxt"
 	"github.com/eric2788/common-utils/datetime"
 
 	v "github.com/eric2788/MiraiValBot/hooks/sites/valorant"
@@ -186,24 +185,15 @@ func matches(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("输入 !val rounds <对战ID> 查看对战回合"))
 	msg.Append(qq.NewTextfLn("输入 !val performance <对战ID> <名称#Tag> 查看对战玩家表现"))
 
-	if !image {
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
 	}
 
-	imgMsg, err := imgtxt.NewPrependMessage()
-	if err != nil {
-		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
-		imgMsg.Append(e)
-	}
-	img, err := imgMsg.ToGroupImageElement()
-	if err != nil {
-		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func match(args []string, source *command.MessageSource) error {
@@ -256,13 +246,8 @@ func matchPlayers(args []string, source *command.MessageSource) error {
 		return err
 	}
 
-	img, err := generateMatchPlayersImage(match)
-	if err != nil {
-		return err
-	}
-
-	sending := message.NewSendingMessage().Append(img)
-	return qq.SendWithRandomRiskyStrategyRemind(sending, source.Message)
+	sending := generateMatchPlayersLines(match)
+	return qq.SendGroupImageText(sending)
 }
 
 func leaderboard(args []string, source *command.MessageSource) error {
@@ -353,24 +338,15 @@ func leaderboard(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NextLn())
 		}
 
-		if !image {
-			return qq.SendGroupMessage(msg)
+		if image {
+			if err = qq.SendGroupImageText(msg); err == nil {
+				return nil
+			} else {
+				logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+			}
 		}
 
-		imgMsg, err := imgtxt.NewPrependMessage()
-		if err != nil {
-			logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
-			return qq.SendGroupMessage(msg)
-		}
-		for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
-			imgMsg.Append(e)
-		}
-		img, err := imgMsg.ToGroupImageElement()
-		if err != nil {
-			logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
-			return qq.SendGroupMessage(msg)
-		}
-		return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
+		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 
 	}, func() {
 		// 重试失败后，提示信息被风控
@@ -429,24 +405,15 @@ func performances(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("K/D/A: %d/%d/%d", performance.Killed, performance.Deaths, performance.Assists))
 	}
 
-	if !image {
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
 	}
 
-	imgMsg, err := imgtxt.NewPrependMessage()
-	if err != nil {
-		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
-		imgMsg.Append(e)
-	}
-	img, err := imgMsg.ToGroupImageElement()
-	if err != nil {
-		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func stats(args []string, source *command.MessageSource) error {
@@ -485,24 +452,15 @@ func stats(args []string, source *command.MessageSource) error {
 	msg.Append(qq.NewTextfLn("总队友伤害: %d", stats.TotalFriendlyDamage))
 	msg.Append(qq.NewTextfLn("总队友击杀: %d", stats.TotalFriendlyKills))
 
-	if !image {
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
 	}
 
-	imgMsg, err := imgtxt.NewPrependMessage()
-	if err != nil {
-		logger.Warnf("无法创建图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	for _, e := range qq.ExtractMessageElement[*message.TextElement](msg.Elements) {
-		imgMsg.Append(e)
-	}
-	img, err := imgMsg.ToGroupImageElement()
-	if err != nil {
-		logger.Warnf("无法上传图片消息，将使用文本消息发送: %v", err)
-		return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
-	}
-	return qq.SendGroupMessage(message.NewSendingMessage().Append(img))
+	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
 func matchRounds(args []string, source *command.MessageSource) error {
@@ -981,15 +939,12 @@ func appendDetails(msg *message.SendingMessage, maintenance valorant.MaintainInf
 	}
 }
 
-func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageElement, error) {
+func generateMatchPlayersLines(match *valorant.MatchData) *message.SendingMessage {
 
 	ffInfo := valorant.GetFriendlyFireInfo(match)
 	ranking := valorant.GetMatchRanking(match)
 
-	msg, err := imgtxt.NewPrependMessage()
-	if err != nil {
-		return nil, err
-	}
+	msg := message.NewSendingMessage()
 	for i, player := range ranking {
 		msg.Append(qq.NewTextfLn("\t第 %d 名: %s", i+1, fmt.Sprintf("%s#%s", player.Name, player.Tag)))
 
@@ -1056,7 +1011,7 @@ func generateMatchPlayersImage(match *valorant.MatchData) (*message.GroupImageEl
 		msg.Append(qq.NewTextfLn("\t\t总伤害 %d (%.1f%%)", player.DamageMade, formatPercentage(player.DamageMade, totalDamage)))
 	}
 
-	return msg.ToGroupImageElement()
+	return msg
 }
 
 func getShortIdHint(uuid string) (string, int64) {

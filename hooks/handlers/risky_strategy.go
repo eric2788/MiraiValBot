@@ -23,9 +23,15 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 
 		msg, videos := twitter.CreateMessage(try >= 3, clone, data, alt...)
 
-		// 先發送推文內容
-		if err := qq.SendGroupMessage(msg); err != nil {
-			return err
+		if try == 1 {
+			if err := qq.SendGroupImageText(msg); err != nil {
+				return err
+			}
+		} else {
+			// 先發送推文內容
+			if err := qq.SendGroupMessage(msg); err != nil {
+				return err
+			}
 		}
 		// 後發送視頻訊息
 		for _, video := range videos {
@@ -62,6 +68,12 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 		}
 
 		msg := youtube.CreateQQMessage(desc, info, noTitle, alt, titles...)
+
+		// 尝试发送一次图片信息
+		if try == 1 {
+			return qq.SendGroupImageText(msg)
+		}
+
 		return qq.SendGroupMessage(msg)
 	})
 
@@ -87,6 +99,11 @@ func valorantTrackRisky(displayName, shortHint, cmdId string, metaData *valorant
 			msg.Append(qq.NewTextfLn("对战地图: %s", metaData.Map))
 		}
 		msg.Append(qq.NewTextfLn("输入 !val match %s 查看详细内容。", cmdId))
+
+		// 尝试发送一次图片信息
+		if currentTry == 1 {
+			return qq.SendGroupImageText(msg)
+		}
 
 		alt := qq.GetRandomMessageByTry(currentTry)
 
