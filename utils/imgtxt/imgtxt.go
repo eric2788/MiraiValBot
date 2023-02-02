@@ -76,12 +76,12 @@ func WithWidth(width int) func(*Options) {
 }
 
 func (prepend *TextImage) Append(line string) *TextImage {
-	prepend.prepend.AddTextLine(line, 10, prepend.font, text2pic.ColorBlack, text2pic.Padding{Left: 5, Right: 5, Top: 5, Bottom: 5})
+	prepend.prepend.AddTextLine(line, 10, prepend.font, text2pic.ColorBlack, text2pic.Padding{Left: 20, Right: 20})
 	return prepend
 }
 
 func (prepend *TextImage) AppendImage(img []byte) *TextImage {
-	prepend.prepend.AddPictureLine(bytes.NewReader(img), text2pic.Padding{Left: 5, Right: 5, Top: 5, Bottom: 5})
+	prepend.prepend.AddPictureLine(bytes.NewReader(img), text2pic.Padding{Left: 20, Right: 20})
 	return prepend
 }
 

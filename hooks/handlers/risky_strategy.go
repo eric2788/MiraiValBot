@@ -23,7 +23,7 @@ func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetSt
 
 		msg, videos := twitter.CreateMessage(try >= 3, clone, data, alt...)
 
-		if try == 1 {
+		if try == 5 {
 			if err := qq.SendGroupImageText(msg); err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ func youtubeSendQQRisky(info *youtube.LiveInfo, desc string, blocks ...string) (
 		msg := youtube.CreateQQMessage(desc, info, noTitle, alt, titles...)
 
 		// 尝试发送一次图片信息
-		if try == 1 {
+		if try == 4 {
 			return qq.SendGroupImageText(msg)
 		}
 

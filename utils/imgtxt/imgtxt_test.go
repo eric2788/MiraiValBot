@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/eric2788/common-utils/request"
 	"github.com/google/uuid"
 )
 
@@ -89,6 +90,38 @@ func TestGenerateLeaderboardImage(t *testing.T) {
 			i+1, uuid.New().String()[:10], 50, 1, 2, 3, float64(20), 4, 5, 16,
 		))
 	}
+
+	b, err := msg.GenerateImage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := os.Create("test.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+	if _, err := f.Write(b); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGenerateImageInImage(t *testing.T) {
+	msg, err := NewPrependMessage()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	msg.Append("hello world!\n")
+	msg.Append("1234567\n")
+	msg.Append("789456123\n")
+	msg.Append("Image:\n")
+
+	img, err := request.GetBytesByUrl("https://img.freepik.com/free-vector/abstract-blue-modern-elegant-design-background_1017-32105.jpg")
+	if err != nil {
+		t.Skip(err)
+	}
+
+	msg.AppendImage(img)
 
 	b, err := msg.GenerateImage()
 	if err != nil {
