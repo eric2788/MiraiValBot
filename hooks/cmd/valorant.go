@@ -576,6 +576,12 @@ func mmr(args []string, source *command.MessageSource) error {
 	if err != nil {
 		return err
 	}
+
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
+	}
+
 	msg := message.NewSendingMessage()
 
 	plus := ""
@@ -594,6 +600,15 @@ func mmr(args []string, source *command.MessageSource) error {
 	} else {
 		logger.Errorf("无法获取段位图片: %v", err)
 	}
+
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
+	}
+
 	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
 }
 
@@ -607,6 +622,11 @@ func mmrHistories(args []string, source *command.MessageSource) error {
 	info, err := valorant.GetMMRHistories(name, tag, valorant.AsiaSpecific)
 	if err != nil {
 		return err
+	}
+
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
 	}
 
 	msg := message.NewSendingMessage()
@@ -624,6 +644,14 @@ func mmrHistories(args []string, source *command.MessageSource) error {
 		msg.Append(qq.NewTextfLn("段位: %s", data.CurrentTierPatched))
 		msg.Append(qq.NewTextfLn("ELO: %d", data.Elo))
 		msg.Append(qq.NewTextfLn("分数变更: %s%d", symbol, data.MMRChangeToLastGame))
+	}
+
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
 	}
 
 	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
@@ -647,6 +675,11 @@ func mmrBySeason(args []string, source *command.MessageSource) error {
 		return qq.SendWithRandomRiskyStrategy(msg)
 	}
 
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s 在赛季 %s 的 MMR 资料如下:", args[0], args[1]))
 	msg.Append(qq.NewTextfLn("最终段位: %s", data.FinalRankPatched))
@@ -657,6 +690,14 @@ func mmrBySeason(args []string, source *command.MessageSource) error {
 
 	for i, act := range data.ActRankWins {
 		msg.Append(qq.NewTextfLn("\t%d. %s", i+1, act.PatchedTier))
+	}
+
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
+		}
 	}
 
 	return qq.SendWithRandomRiskyStrategyRemind(msg, source.Message)
@@ -674,6 +715,11 @@ func mmrActs(args []string, source *command.MessageSource) error {
 		return err
 	}
 
+	image := false
+	if len(args) > 1 {
+		image = args[1] == "image" || strings.HasPrefix(args[1], "图") || args[1] == "true"
+	}
+
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextfLn("%s#%s 的赛季段位资料如下: ", acts.Name, acts.Tag))
 	msg.Append(qq.NewTextfLn("目前段位: %s", acts.CurrentData.CurrentTierPatched))
@@ -687,6 +733,14 @@ func mmrActs(args []string, source *command.MessageSource) error {
 			msg.Append(qq.NewTextfLn("	%s: 没有记录", season))
 		} else {
 			msg.Append(qq.NewTextfLn("	%s: %s", season, data.FinalRankPatched))
+		}
+	}
+
+	if image {
+		if err = qq.SendGroupImageText(msg); err == nil {
+			return nil
+		} else {
+			logger.Errorf("發送圖片消息失敗: %v，将改回文本发送", err)
 		}
 	}
 
