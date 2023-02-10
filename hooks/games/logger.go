@@ -8,11 +8,20 @@ import (
 
 var logger = utils.GetModuleLogger("valbot.games")
 
-func risky(err error) {
+func risky(err error) error {
 	if err == nil {
-		return
+		return nil
 	}
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextf("发送游戏信息时出现错误: %v", err))
-	_ = qq.SendGroupMessage(msg)
+	return qq.SendGroupMessage(msg)
+}
+
+func sendGameMsg(msg *message.SendingMessage) (err error) {
+	err = qq.SendGroupMessage(msg)
+	if err != nil {
+		logger.Warnf("发送游戏信息时出现错误: %v, 将改用文字图片", err)
+	}
+	err = risky(qq.SendGroupImageText(msg))
+	return
 }
