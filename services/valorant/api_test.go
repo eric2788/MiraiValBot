@@ -51,7 +51,7 @@ func TestRedisSaveGet(t *testing.T) {
 func passAllowedStatus(t *testing.T, err error) {
 	if isAllowedStatus(err) {
 		t.Skip("status code is in allowed status code")
-	}else{
+	} else {
 		t.Skipf("skipped with error: %v", err)
 	}
 }
@@ -107,7 +107,7 @@ func TestGetAccountDetails(t *testing.T) {
 }
 
 func TestGetMatchHistories(t *testing.T) {
-	histories, err := GetMatchHistories("麻將", "4396", AsiaSpecific)
+	histories, err := GetMatchHistories("HIME", "0210", AsiaSpecific)
 	if err != nil {
 		passAllowedStatus(t, err)
 		t.Fatal(err)
