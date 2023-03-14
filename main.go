@@ -85,7 +85,16 @@ func main() {
 	// 使用协议
 	// 不同协议可能会有部分功能无法使用
 	// 在登陆前切换协议
-	bot.UseProtocol(bot.AndroidPhone)
+	// 若沒有指明，則默認 AndroidPad
+	if os.Getenv("PROTOCOL") == "AndroidPhone" {
+		bot.UseProtocol(bot.AndroidPhone)
+	} else if os.Getenv("PROTOCOL") == "IPad" {
+		bot.UseProtocol(bot.IPad)
+	} else if os.Getenv("PROTOCOL") == "AndroidWatch" {
+		bot.UseProtocol(bot.AndroidWatch)
+	} else if os.Getenv("PROTOCOL") == "MacOS" {
+		bot.UseProtocol(bot.MacOS)
+	}
 
 	// 登录
 	err := bot.Login()
