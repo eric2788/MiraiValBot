@@ -198,7 +198,7 @@ func NewVideoByUrlWithGroup(gp int64, url, thumbUrl string) (*message.ShortVideo
 	if err != nil {
 		return nil, fmt.Errorf("封面解析失敗(%v)", err)
 	}
-	return bot.Instance.UploadShortVideo(NewGroupSource(gp), bytes.NewReader(video), bytes.NewReader(thumb), 5)
+	return bot.Instance.UploadShortVideo(NewGroupSource(gp), bytes.NewReader(video), bytes.NewReader(thumb))
 }
 
 func NewForwardNodeByGroup(msg *message.GroupMessage) *message.ForwardNode {

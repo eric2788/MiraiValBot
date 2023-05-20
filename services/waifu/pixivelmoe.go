@@ -9,7 +9,7 @@ import (
 	"github.com/corpix/uarand"
 	"github.com/eric2788/common-utils/request"
 	"github.com/everpcpc/pixiv"
-	"github.com/lucas-clemente/quic-go/http3"
+	"github.com/quic-go/quic-go/http3"
 )
 
 const (
