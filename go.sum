@@ -44,10 +44,13 @@ github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5 h1:hRk8Z8
 github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5/go.mod h1:RF49kmzvlYD/G0r0tomJWkk5ZbPlkqRe46jY/p7SG8Y=
 github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab h1:qIHwlHbiCrNSGsMmPj+RK9SnBirDbnY7Xzzbjbdv/9Y=
 github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab/go.mod h1:lecSP26qedhinCceWn1x02dLDxGotH5nTFlpIMilmVM=
+github.com/Mrs4s/MiraiGo v0.0.0-20230405122028-22ff0046638a h1:1n++/PjDcl4FzByEAnM4hT9CNMDOhr3eBYJ9jC0jTds=
+github.com/Mrs4s/MiraiGo v0.0.0-20230405122028-22ff0046638a/go.mod h1:mU3fBFU+7eO0kaGes7YRKtzIDtwIU84nSSwTV7NK2b0=
 github.com/PuerkitoBio/goquery v1.8.0 h1:PJTF7AmFCFKk1N6V6jmKfrNH9tV5pNE6lZMkG0gta/U=
 github.com/PuerkitoBio/goquery v1.8.0/go.mod h1:ypIiRMtY7COPGk+I/YbZLbxsxn9g5ejnI2HSMtkjZvI=
 github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0 h1:GEwcB4dL9vc4veW1fLNt0Fby3wspVflAn5v9/HbUwDM=
 github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0/go.mod h1:2Ie+hdBFQpQFDHfeklgxoFmQRCE7O+KwFpISeXq7OwA=
+github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d/go.mod h1:2Ie+hdBFQpQFDHfeklgxoFmQRCE7O+KwFpISeXq7OwA=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c h1:cNPOdTNiVwxLpROLjXCgbIPvdkE+BwvxDvgmdYmWx6Q=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c/go.mod h1:KqZzu7slNKROh3TSYEH/IUMG6f4M+1qubZ5e52QypsE=
 github.com/andybalholm/cascadia v1.3.1 h1:nhxRkql1kdYCc8Snf7D5/D3spOX+dBgjA6u8x004T2c=
@@ -244,6 +247,7 @@ github.com/remyoudompheng/bigfft v0.0.0-20220927061507-ef77025ab5aa/go.mod h1:qq
 github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5 h1:mZHayPoR0lNmnHyvtYjDeq0zlVHn9K/ZXoy17ylucdo=
 github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5/go.mod h1:GEXHk5HgEKCvEIIrSpFI3ozzG5xOKA2DVlEX/gGnewM=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
+github.com/rogpeppe/go-internal v1.6.1 h1:/FiVV8dS/e+YqF2JvO3yXRFbBLTIuSDkuC7aBOAvL+k=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/sashabaranov/go-gpt3 v0.0.0-20221216095610-1c20931ead68 h1:0g+W77usi8tTHViKpQQr7MHphLsI32zX8HtOeigDGKo=
 github.com/sashabaranov/go-gpt3 v0.0.0-20221216095610-1c20931ead68/go.mod h1:BIZdbwdzxZbCrcKGMGH6u2eyGe1xFuX9Anmh3tCP8lQ=

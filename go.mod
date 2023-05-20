@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20221012063720-9cf9eb99e5a5
-	github.com/Mrs4s/MiraiGo v0.0.0-20221102071937-64722799b7ab
+	github.com/Mrs4s/MiraiGo v0.0.0-20230405122028-22ff0046638a
 	github.com/PuerkitoBio/goquery v1.8.0
-	github.com/RomiChan/protobuf v0.0.0-20220624030127-3310cba9dbc0
+	github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/corpix/uarand v0.2.0
 	github.com/eric2788/chatgpt v0.0.13-0.20230103010843-b68b00433202
