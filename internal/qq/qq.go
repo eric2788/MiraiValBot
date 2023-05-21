@@ -209,7 +209,12 @@ func GetRandomGroupMessagesInfo(info *client.GroupInfo, plus int64) (msgs []*mes
 	gp := info.Code
 	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
-	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
+	startIndex := info.LastMsgSeq - file.DataStorage.Setting.MsgSeqAfter
+	if startIndex <= 0 {
+		logger.Warnf("Warn: 群 %d 的 MsgSeqAfter 設置過大，將會從 1 開始獲取隨機消息", gp)
+		startIndex = 1
+	}
+	id := rand.Int63n(startIndex) + file.DataStorage.Setting.MsgSeqAfter - plus
 	if botSaid.Contains(id) {
 		// 略過機器人訊息
 		return GetRandomGroupMessagesInfo(info, plus)
@@ -243,7 +248,12 @@ func getRandomGroupMessageWithMember(info *client.GroupInfo, uid, plus int64, ti
 	gp := info.Code
 	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
-	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter - plus
+	startIndex := info.LastMsgSeq - file.DataStorage.Setting.MsgSeqAfter
+	if startIndex <= 0 {
+		logger.Warnf("Warn: 群 %d 的 MsgSeqAfter 設置過大，將會從 1 開始獲取隨機消息", gp)
+		startIndex = 1
+	}
+	id := rand.Int63n(startIndex) + file.DataStorage.Setting.MsgSeqAfter - plus
 	if botSaid.Contains(id) {
 		// 略過機器人訊息
 		return getRandomGroupMessageWithMember(info, uid, plus, times)
@@ -279,7 +289,12 @@ func getRandomGroupMessageWithInfo(info *client.GroupInfo) (*message.GroupMessag
 	gp := info.Code
 	rand.Seed(time.Now().UnixNano())
 	// MsgSeqAfter ~ LastMsgSeq 範圍內的隨機訊息ID
-	id := rand.Int63n(info.LastMsgSeq-file.DataStorage.Setting.MsgSeqAfter) + file.DataStorage.Setting.MsgSeqAfter
+	startIndex := info.LastMsgSeq - file.DataStorage.Setting.MsgSeqAfter
+	if startIndex <= 0 {
+		logger.Warnf("Warn: 群 %d 的 MsgSeqAfter 設置過大，將會從 1 開始獲取隨機消息", gp)
+		startIndex = 1
+	}
+	id := rand.Int63n(startIndex) + file.DataStorage.Setting.MsgSeqAfter
 	if botSaid.Contains(id) {
 		// 略過機器人訊息
 		return getRandomGroupMessageWithInfo(info)
