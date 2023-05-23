@@ -21,7 +21,7 @@ func sendGameMsg(msg *message.SendingMessage) (err error) {
 	err = qq.SendGroupMessage(msg)
 	if err != nil {
 		logger.Warnf("发送游戏信息时出现错误: %v, 将改用文字图片", err)
+		err = risky(qq.SendGroupImageText(msg))
 	}
-	err = risky(qq.SendGroupImageText(msg))
 	return
 }

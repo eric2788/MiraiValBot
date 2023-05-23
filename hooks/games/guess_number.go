@@ -17,7 +17,7 @@ type guessNumber struct {
 	max       int
 	maxFailed int
 	failed    int
-	random *rand.Rand
+	random    *rand.Rand
 
 	guess int
 }
@@ -62,7 +62,7 @@ func (g *guessNumber) Start(args []string) error {
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextf("猜 %d ~ %d 内的一个数字，最多可以猜 %d 次，@我回答!", g.min, g.max, g.maxFailed))
-	return qq.SendGroupMessage(msg)
+	return sendGameMsg(msg)
 }
 
 func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {
@@ -72,13 +72,13 @@ func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {
 	guess, err := strconv.Atoi(txt)
 	if err != nil {
 		reply.Append(qq.NewTextf("%q 不是有效的数字", txt))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		return game.ContinueResult
 	}
 
 	if guess == g.guess {
 		reply.Append(qq.NewTextf("答案正确!!"))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 
 		return &game.Result{
 			EndGame: true,
@@ -89,7 +89,7 @@ func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {
 	g.failed++
 	if g.failed >= g.maxFailed {
 		reply.Append(qq.NewTextf("回答错误且回答次数已用完。 正确答案是: %d", g.guess))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		return game.TerminateResult
 	} else {
 		if guess > g.guess {
@@ -98,7 +98,7 @@ func (g *guessNumber) Handle(msg *message.GroupMessage) *game.Result {
 			g.min = guess
 		}
 		reply.Append(qq.NewTextf("回答错误, 范围缩小到 %d ~ %d, 回答次数剩余 %d/%d", g.min, g.max, g.maxFailed-g.failed, g.maxFailed))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		return game.ContinueResult
 	}
 }

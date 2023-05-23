@@ -12,10 +12,10 @@ import (
 
 type guessWhoSaid struct {
 	totalQuestions int
-	scores        map[int64]int
-	failed        int
-	maxFailed     int
-	currentSender *message.Sender
+	scores         map[int64]int
+	failed         int
+	maxFailed      int
+	currentSender  *message.Sender
 }
 
 func (g *guessWhoSaid) Start(args []string) error {
@@ -37,7 +37,7 @@ func (g *guessWhoSaid) Start(args []string) error {
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextLn("我将说一句话，你们猜猜是谁发的，直接回复我 @ta 就行"))
 	defer g.sendNextQuestion()
-	return qq.SendGroupMessage(msg)
+	return sendGameMsg(msg)
 }
 
 func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
@@ -61,11 +61,11 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 
 	if len(answers) == 0 {
 		reply.Append(qq.NewTextf("你没有@任何人"))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		return game.ContinueResult
 	} else if len(answers) > 1 {
 		reply.Append(qq.NewTextf("你@太多人啦，只能@一个"))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		return game.ContinueResult
 	}
 
@@ -73,7 +73,7 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 
 	if ans == g.currentSender.Uin {
 		reply.Append(qq.NewTextf("恭喜答对! 请听下一题"))
-		_ = qq.SendGroupMessage(reply)
+		_ = sendGameMsg(reply)
 		if score, ok := g.scores[msg.Sender.Uin]; ok {
 			g.scores[msg.Sender.Uin] = score + 1
 		} else {
@@ -86,18 +86,24 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 		g.failed += 1
 		if g.maxFailed-g.failed > 0 {
 			reply.Append(qq.NewTextf("你群还有 %d/%d 次机会", g.maxFailed-g.failed, g.maxFailed))
-			_ = qq.SendGroupMessage(reply)
+			_ = sendGameMsg(reply)
 			g.sendNextQuestion()
 			return game.ContinueResult
 		} else {
-			_ = qq.SendGroupMessage(reply)
+			_ = sendGameMsg(reply)
 			return g.calculateFinalResult()
 		}
 	}
 }
 
 func (g *guessWhoSaid) sendNextQuestion() {
-	_ = qq.SendGroupMessage(g.nextQuestion())
+
+	// send pre-sending message
+	preSend := message.NewSendingMessage()
+	preSend.Append(qq.NewTextfLn("猜猜下面的信息是谁发的 👇\n"))
+	_ = sendGameMsg(preSend)
+
+	_ = sendGameMsg(g.nextQuestion())
 	g.totalQuestions += 1
 }
 
@@ -128,12 +134,12 @@ func (g *guessWhoSaid) summaryScoreBoard() {
 		var userName string
 		if member := qq.FindGroupMember(uid); member != nil {
 			userName = member.DisplayName()
-		}else {
+		} else {
 			userName = fmt.Sprintf("(用戶: %d)", uid)
 		}
 		summary.Append(qq.NewTextfLn("%s: %d/%d", userName, score, g.totalQuestions))
 	}
-	_ = qq.SendGroupMessage(summary)
+	_ = sendGameMsg(summary)
 }
 
 func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
@@ -142,8 +148,8 @@ func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
 		logger.Errorf("获取随机信息出现错误: %v, 正在重新获取...", err)
 		return g.nextQuestion()
 	}
+
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("猜猜下面的信息是谁发的 👇\n"))
 
 	for _, ele := range random.Elements {
 		if _, ok := ele.(*message.ReplyElement); ok {
