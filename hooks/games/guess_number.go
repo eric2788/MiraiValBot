@@ -17,6 +17,7 @@ type guessNumber struct {
 	max       int
 	maxFailed int
 	failed    int
+	random *rand.Rand
 
 	guess int
 }
@@ -26,8 +27,9 @@ func (g *guessNumber) ArgHints() []string {
 }
 
 func (g *guessNumber) Start(args []string) error {
-	g.failed = 0
 
+	g.failed = 0
+	g.random = rand.New(rand.NewSource(time.Now().UnixNano()))
 	g.min = 1
 	g.max = 100
 	g.maxFailed = 7
@@ -56,8 +58,7 @@ func (g *guessNumber) Start(args []string) error {
 		g.maxFailed = maxFailed
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	g.guess = rand.Intn(g.max) + g.min
+	g.guess = g.random.Intn(g.max) + g.min
 
 	msg := message.NewSendingMessage()
 	msg.Append(qq.NewTextf("猜 %d ~ %d 内的一个数字，最多可以猜 %d 次，@我回答!", g.min, g.max, g.maxFailed))

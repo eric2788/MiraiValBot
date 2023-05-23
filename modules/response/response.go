@@ -22,7 +22,9 @@ const Tag = "valbot.response"
 
 var (
 	logger   = utils.GetModuleLogger(Tag)
-	instance = &response{}
+	instance = &response{
+		rand: rand.New(rand.NewSource(time.Now().UnixNano())),
+	}
 
 	longWongTalks = []string{
 		"恭迎龙王 %s (跪拜)",
@@ -48,6 +50,7 @@ var (
 type (
 	response struct {
 		lastInGame bool
+		rand *rand.Rand
 	}
 
 	Handle interface {
@@ -75,8 +78,7 @@ func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMess
 		return
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(responses), func(i, j int) {
+	r.rand.Shuffle(len(responses), func(i, j int) {
 		responses[i], responses[j] = responses[j], responses[i]
 	})
 	for _, response := range responses {
@@ -97,8 +99,6 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 		return
 	}
 
-	rand.Seed(time.Now().UnixNano())
-
 	switch notify := event.(type) {
 	case *client.GroupPokeNotifyEvent:
 
@@ -116,13 +116,13 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 			receiver := qq.FindGroupMember(notify.Receiver)
 
 			// 50% 触发CP
-			if rand.Intn(100)+1 > 50 {
+			if r.rand.Intn(100)+1 > 50 {
 
 				list, atk, def, err := copywriting.GetCPList()
 				if err != nil {
 					logger.Errorf("获取CP列表失败: %v", err)
 				} else {
-					random := list[rand.Intn(len(list))]
+					random := list[r.rand.Intn(len(list))]
 					replacer := strings.NewReplacer(atk, sender.DisplayName(), def, receiver.DisplayName())
 					msg.Append(message.NewText(replacer.Replace(random)))
 					_ = qq.SendGroupMessage(msg)
@@ -133,13 +133,13 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 			return
 		}
 
-		if rand.Intn(100)+1 > 10 {
-			random := pokeTalks[rand.Intn(len(pokeTalks))]
+		if r.rand.Intn(100)+1 > 10 {
+			random := pokeTalks[r.rand.Intn(len(pokeTalks))]
 			msg.Append(qq.NewTextfLn(random, sender.DisplayName()))
 			// 戳回去咯
 			c.SendGroupPoke(qq.ValGroupInfo.Code, notify.Sender)
 		} else { // 10% 机率触发发病
-			if success := sendWriting(msg, sender); !success {
+			if success := r.sendWriting(msg, sender); !success {
 				return
 			}
 		}
@@ -160,13 +160,13 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 			user := qq.FindGroupMember(notify.Uin)
 
 			// 80% 随机祝贺, 20% 发病
-			if rand.Intn(100)+1 > 20 {
+			if r.rand.Intn(100)+1 > 20 {
 				if notify.Honor == client.Talkative {
-					random := longWongTalks[rand.Intn(len(longWongTalks))]
+					random := longWongTalks[r.rand.Intn(len(longWongTalks))]
 					msg.Append(qq.NewTextf(random, user.DisplayName()))
 				}
 			} else {
-				if success := sendWriting(msg, user); !success {
+				if success := r.sendWriting(msg, user); !success {
 					return
 				}
 			}
@@ -177,28 +177,28 @@ func (r *response) handleGroupNotify(c *client.QQClient, event client.INotifyEve
 	}
 }
 
-func sendWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
-	if rand.Intn(100) > 49 {
-		return sendAsWriting(msg, sender)
+func (r *response) sendWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+	if r.rand.Intn(100) > 49 {
+		return r.sendAsWriting(msg, sender)
 	} else {
-		return sendFabing(msg, sender)
+		return r.sendFabing(msg, sender)
 	}
 }
 
-func sendAsWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+func (r *response) sendAsWriting(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
 	list, err := copywriting.GetRanranList()
 	if err != nil {
 		logger.Errorf("获取小作文模板失败: %v", err)
 		return false
 	}
-	random := list[rand.Intn(len(list))]
+	random := list[r.rand.Intn(len(list))]
 	msg.Append(message.NewText(strings.ReplaceAll(random.Text, random.Person, sender.DisplayName())))
 	return true
 }
 
-func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
+func (r *response) sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) bool {
 	var getter func() ([]string, string, error)
-	if rand.Intn(2) == 1 {
+	if r.rand.Intn(2) == 1 {
 		getter = copywriting.GetFabingList
 	} else {
 		getter = copywriting.GetFadianList
@@ -207,7 +207,7 @@ func sendFabing(msg *message.SendingMessage, sender *client.GroupMemberInfo) boo
 		logger.Errorf("获取发病模板失败: %v", err)
 		return false
 	} else {
-		random := list[rand.Intn(len(list))]
+		random := list[r.rand.Intn(len(list))]
 		msg.Append(message.NewText(strings.ReplaceAll(random, replace, sender.DisplayName())))
 		return true
 	}

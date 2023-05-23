@@ -11,6 +11,7 @@ import (
 )
 
 type guessWhoSaid struct {
+	totalQuestions int
 	scores        map[int64]int
 	failed        int
 	maxFailed     int
@@ -23,6 +24,7 @@ func (g *guessWhoSaid) Start(args []string) error {
 	g.failed = 0
 	g.maxFailed = 7
 	g.currentSender = nil
+	g.totalQuestions = 0
 
 	if len(args) > 0 {
 		max, err := strconv.Atoi(args[0])
@@ -96,6 +98,7 @@ func (g *guessWhoSaid) Handle(msg *message.GroupMessage) *game.Result {
 
 func (g *guessWhoSaid) sendNextQuestion() {
 	_ = qq.SendGroupMessage(g.nextQuestion())
+	g.totalQuestions += 1
 }
 
 func (g *guessWhoSaid) calculateFinalResult() *game.Result {
@@ -114,7 +117,23 @@ func (g *guessWhoSaid) calculateFinalResult() *game.Result {
 			logger.Warnf("找不到群成员: %d", winner)
 		}
 	}
+	defer g.summaryScoreBoard()
 	return result
+}
+
+func (g *guessWhoSaid) summaryScoreBoard() {
+	summary := message.NewSendingMessage()
+	summary.Append(qq.NewTextLn("各成员的分数如下:"))
+	for uid, score := range g.scores {
+		var userName string
+		if member := qq.FindGroupMember(uid); member != nil {
+			userName = member.DisplayName()
+		}else {
+			userName = fmt.Sprintf("(用戶: %d)", uid)
+		}
+		summary.Append(qq.NewTextfLn("%s: %d/%d", userName, score, g.totalQuestions))
+	}
+	_ = qq.SendGroupMessage(summary)
 }
 
 func (g *guessWhoSaid) nextQuestion() *message.SendingMessage {
