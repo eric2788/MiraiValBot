@@ -70,6 +70,10 @@ func aiSetu(args []string, source *command.MessageSource) error {
 		Model:  model,
 	}
 
+	presend := qq.CreateReply(source.Message)
+	presend.Append(qq.NewTextf("正在生成图片...."))
+	_ = qq.SendGroupMessage(presend)
+
 	res, err := aidraw.Draw(payload)
 	if err != nil {
 		return err
@@ -88,7 +92,7 @@ func aiSetu(args []string, source *command.MessageSource) error {
 	}
 
 	reply := qq.CreateReply(source.Message)
-	reply.Append(qq.NewTextf("(數據源: %v)", res.Source))
+	reply.Append(qq.NewTextf("(数据源: %v)", res.Source))
 	reply.Append(img)
 
 	return qq.SendGroupMessageAndRecall(reply, time.Second*30)
