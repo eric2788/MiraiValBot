@@ -25,12 +25,20 @@ func TestSexyAIDraw(t *testing.T) {
 
 }
 
-func TestSexyAIAuth(t *testing.T) {
-	res, err := SaiRequestOTP("abc@abc.com", false)
+func TestSexyAIOTP(t *testing.T) {
+	res, err := SaiRequestOTP("tsukiko852@gmail.com", false)
 	if err != nil {
 		t.Skip(err)
 	}
 	t.Logf("OTP: %+v", res)
+}
+
+func TestSexyAIAuth(t *testing.T) {
+	res, err := SaiAuth("tsukiko852@gmail.com", "53102", false)
+	if err != nil {
+		t.Skip(err)
+	}
+	t.Logf("Auth: %+v", res)
 }
 
 func init() {

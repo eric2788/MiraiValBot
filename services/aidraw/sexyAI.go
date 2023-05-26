@@ -249,6 +249,8 @@ func SaiAuth(email, otp string, register bool) (string, error) {
 		formData["username"] = fmt.Sprintf("user%v", random.Intn(1000000))
 	}
 
+	logger.Debugf("requesting with data: %v", formData)
+
 	res, err := sexyPost(path, request.Data(formData))
 	if err != nil {
 		return "", err
