@@ -3,6 +3,7 @@ package games
 import (
 	"context"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/eric2788/MiraiValBot/internal/qq"
 	"github.com/eric2788/MiraiValBot/modules/game"
-	"github.com/eric2788/common-utils/set"
 )
 
 // create a game of blackjack
@@ -30,7 +30,7 @@ var (
 type blackjack struct {
 	cards     map[int64][]string
 	bet       map[int64]int64
-	surrender *set.Int64Set
+	surrender mapset.Set[int64]
 	insurance map[int64]int64
 	ran       *rand.Rand
 	joined    [6]*client.GroupMemberInfo
@@ -48,7 +48,7 @@ func (p *blackjack) Start(args []string) error {
 	p.cards = make(map[int64][]string)
 	p.bet = make(map[int64]int64)
 	p.turn = -1
-	p.surrender = set.NewInt64()
+	p.surrender = mapset.NewSet[int64]()
 	p.insurance = make(map[int64]int64)
 
 	// bot joined the game

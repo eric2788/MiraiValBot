@@ -34,7 +34,6 @@ func crazyThursday(bot *bot.Bot) (err error) {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
-
 func init() {
 	timer.RegisterTimer("crazy.thursday", time.Hour*24, crazyThursday)
 }

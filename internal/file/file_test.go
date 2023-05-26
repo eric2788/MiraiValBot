@@ -3,23 +3,23 @@ package file
 import (
 	"encoding/json"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"os"
 	"testing"
 
-	"github.com/eric2788/common-utils/set"
 	"github.com/stretchr/testify/assert"
 )
 
 var bilibili = &DataStorage.Bilibili
 
 func TestLoadStorageReal(t *testing.T) {
-	fmt.Println((*bilibili).HighLightedUsers.Size())
+	fmt.Println(len((*bilibili).HighLightedUsers.ToSlice()))
 	DataStorage.Bilibili = &BilibiliSettings{
-		HighLightedUsers: set.FromInt64Arr([]int64{1, 2, 3}),
+		HighLightedUsers: mapset.NewSet[int64](1, 2, 3),
 	}
-	fmt.Println((*bilibili).HighLightedUsers.Size(), DataStorage.Bilibili.HighLightedUsers.Size())
+	fmt.Println(len((*bilibili).HighLightedUsers.ToSlice()), len(DataStorage.Bilibili.HighLightedUsers.ToSlice()))
 	(*bilibili).HighLightedUsers.Add(9)
-	fmt.Println((*bilibili).HighLightedUsers.Size(), DataStorage.Bilibili.HighLightedUsers.Size())
+	fmt.Println(len((*bilibili).HighLightedUsers.ToSlice()), len(DataStorage.Bilibili.HighLightedUsers.ToSlice()))
 }
 
 var content = `

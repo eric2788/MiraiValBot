@@ -19,7 +19,7 @@ func TestLongTu(t *testing.T) {
 	t.Log(imgLink)
 }
 
-func TestPanic(t *testing.T){
+func TestPanic(t *testing.T) {
 	a := []string{"a"}
 	t.Log(a[1:]) // no panic!
 }

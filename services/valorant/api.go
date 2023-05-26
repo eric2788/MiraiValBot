@@ -3,6 +3,7 @@ package valorant
 import (
 	"encoding/json"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"io"
 	"net/http"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"github.com/corpix/uarand"
 	"github.com/eric2788/MiraiValBot/internal/redis"
 	"github.com/eric2788/common-utils/request"
-	"github.com/eric2788/common-utils/set"
 )
 
 type Region string
@@ -32,14 +32,14 @@ const (
 )
 
 var (
-	AllowedModes = set.FromStrArr([]string{
+	AllowedModes = mapset.NewSet[string](
 		"competitive",
 		"unrated",
 		"spikerush",
 		"deathmatch",
 		"escalation",
 		"replication",
-	})
+	)
 	client = &http.Client{Timeout: time.Minute}
 	logger = utils.GetModuleLogger("valorant.api")
 )

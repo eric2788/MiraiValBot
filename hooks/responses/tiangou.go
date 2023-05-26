@@ -33,7 +33,7 @@ func (t *tiangou) ShouldHandle(msg *message.GroupMessage) bool {
 
 func (t *tiangou) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 	rand.Seed(time.Now().UnixNano())
-	
+
 	var getter func() ([]string, error)
 
 	if rand.Intn(100)+1 > 50 {
@@ -41,7 +41,7 @@ func (t *tiangou) Handle(c *client.QQClient, msg *message.GroupMessage) error {
 	} else {
 		getter = copywriting.GetTiangou2List
 	}
-	
+
 	list, err := getter()
 	if err != nil {
 		return fmt.Errorf("获取天狗列表失败: %v", err)

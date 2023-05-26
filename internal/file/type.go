@@ -1,6 +1,8 @@
 package file
 
-import "github.com/eric2788/common-utils/set"
+import (
+	mapset "github.com/deckarep/golang-set/v2"
+)
 
 // Real Type
 type (
@@ -68,7 +70,7 @@ type (
 	}
 
 	BilibiliSettings struct {
-		HighLightedUsers *set.Int64Set
+		HighLightedUsers mapset.Set[int64]
 	}
 
 	TwitterSettings struct {
@@ -76,10 +78,10 @@ type (
 	}
 
 	Listening struct {
-		Bilibili *set.Int64Set
-		Youtube  *set.StringSet
-		Twitter  *set.StringSet
-		Valorant *set.StringSet
+		Bilibili mapset.Set[int64]
+		Youtube  mapset.Set[string]
+		Twitter  mapset.Set[string]
+		Valorant mapset.Set[string]
 	}
 
 	Setting struct {
@@ -104,7 +106,7 @@ func (s *StorageData) toRealStorageData() *storageData {
 			AntiDuplicate: s.Youtube.AntiDuplicate,
 		},
 		Bilibili: &bilibiliSettings{
-			HighLightedUsers: s.Bilibili.HighLightedUsers.ToArr(),
+			HighLightedUsers: s.Bilibili.HighLightedUsers.ToSlice(),
 		},
 		Twitter: &twitterSettings{
 			ShowReply: s.Twitter.ShowReply,
@@ -119,10 +121,10 @@ func (s *StorageData) toRealStorageData() *storageData {
 			TagClassifyLimit: s.Setting.TagClassifyLimit,
 		},
 		Listening: &listening{
-			Bilibili: s.Listening.Bilibili.ToArr(),
-			Youtube:  s.Listening.Youtube.ToArr(),
-			Twitter:  s.Listening.Twitter.ToArr(),
-			Valorant: s.Listening.Valorant.ToArr(),
+			Bilibili: s.Listening.Bilibili.ToSlice(),
+			Youtube:  s.Listening.Youtube.ToSlice(),
+			Twitter:  s.Listening.Twitter.ToSlice(),
+			Valorant: s.Listening.Valorant.ToSlice(),
 		},
 	}
 }
@@ -133,7 +135,7 @@ func (s *StorageData) parse(sd *storageData) {
 	s.WordCounts = sd.WordCounts
 	s.Points = sd.Points
 	s.Bilibili = &BilibiliSettings{
-		HighLightedUsers: set.FromInt64Arr(sd.Bilibili.HighLightedUsers),
+		HighLightedUsers: mapset.NewSet(sd.Bilibili.HighLightedUsers...),
 	}
 	s.Youtube = &YoutubeSettings{
 		BroadcastIdle: sd.Youtube.BroadcastIdle,
@@ -152,10 +154,10 @@ func (s *StorageData) parse(sd *storageData) {
 		TagClassifyLimit: sd.Setting.TagClassifyLimit,
 	}
 	s.Listening = &Listening{
-		Bilibili: set.FromInt64Arr(sd.Listening.Bilibili),
-		Youtube:  set.FromStrArr(sd.Listening.Youtube),
-		Twitter:  set.FromStrArr(sd.Listening.Twitter),
-		Valorant: set.FromStrArr(sd.Listening.Valorant),
+		Bilibili: mapset.NewSet(sd.Listening.Bilibili...),
+		Youtube:  mapset.NewSet(sd.Listening.Youtube...),
+		Twitter:  mapset.NewSet(sd.Listening.Twitter...),
+		Valorant: mapset.NewSet(sd.Listening.Valorant...),
 	}
 }
 

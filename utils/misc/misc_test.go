@@ -14,7 +14,6 @@ func TestReadURLToSrcData(t *testing.T) {
 	t.Log(data, ty)
 }
 
-
 func TestXMLEscape(t *testing.T) {
 	a := "<hello world&>"
 	t.Log(XmlEscape(a))
@@ -24,8 +23,8 @@ type (
 	common interface {
 		Foo() string
 	}
-	foo struct {}
-	bar struct {}
+	foo struct{}
+	bar struct{}
 )
 
 func (f foo) Foo() string {
@@ -36,7 +35,7 @@ func (b bar) Foo() string {
 	return "bar"
 }
 
-func TestGetTypeName(t *testing.T){
+func TestGetTypeName(t *testing.T) {
 	var c common
 	c = foo{}
 	t.Log(reflect.TypeOf(c).Name())

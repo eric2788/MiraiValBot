@@ -1,11 +1,11 @@
 package broadcaster
 
 import (
+	mapset "github.com/deckarep/golang-set/v2"
 	"runtime/debug"
 	"strings"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/common-utils/set"
 	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 )
@@ -20,7 +20,7 @@ type BroadcastHandler[Data any] interface {
 
 type BroadCastHandle[Data any] struct {
 	logger     logrus.FieldLogger
-	exception  set.StringSet
+	exception  mapset.Set[string]
 	handlerMap map[string]func(bot *bot.Bot, data *Data) error
 	handler    BroadcastHandler[Data]
 }
@@ -88,7 +88,7 @@ func (b *BroadCastHandle[Data]) handleLiveData(bot *bot.Bot, data *Data) {
 func BuildHandle[Data any](logger logrus.FieldLogger, handler BroadcastHandler[Data]) *BroadCastHandle[Data] {
 	return &BroadCastHandle[Data]{
 		logger:     logger,
-		exception:  *set.NewString(),
+		exception:  mapset.NewSet[string](),
 		handlerMap: make(map[string]func(bot *bot.Bot, data *Data) error),
 		handler:    handler,
 	}

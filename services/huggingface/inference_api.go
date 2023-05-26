@@ -4,16 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/corpix/uarand"
+	"github.com/eric2788/common-utils/request"
 	"io"
 	"net/http"
 	"os"
 	"strings"
-	"github.com/corpix/uarand"
-	"github.com/eric2788/common-utils/request"
 )
 
 const url = "https://api-inference.huggingface.co/models/%s"
-
 
 func NewInferenceApi(model string, options ...Option) *InferenceApi {
 

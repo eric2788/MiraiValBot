@@ -67,7 +67,6 @@ var (
 	}
 )
 
-
 const (
 	VoiceAPI = "https://genshin.azurewebsites.net/api/speak?format=wav&text=%s&id=%d"
 )

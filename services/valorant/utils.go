@@ -192,7 +192,7 @@ func GetPlantCount(data *MatchData, id string) int {
 func GetStatistics(name, tag, filter string, region Region) (*Statistics, error) {
 
 	if filter != "" && !AllowedModes.Contains(strings.ToLower(filter)) {
-		return nil, fmt.Errorf("无效的模式: %s, 可用模式: %s", filter, strings.Join(AllowedModes.ToArr(), ", "))
+		return nil, fmt.Errorf("无效的模式: %s, 可用模式: %s", filter, strings.Join(AllowedModes.ToSlice(), ", "))
 	}
 
 	ac, err := GetAccountDetails(name, tag)

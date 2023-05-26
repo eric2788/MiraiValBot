@@ -50,7 +50,7 @@ var (
 type (
 	response struct {
 		lastInGame bool
-		rand *rand.Rand
+		rand       *rand.Rand
 	}
 
 	Handle interface {
@@ -72,7 +72,7 @@ func (r *response) handleGroupMessage(c *client.QQClient, msg *message.GroupMess
 	} else if r.lastInGame { // to make sure it wont reply immediately after game stopped
 		r.lastInGame = false
 		return
-	} else if array.IndexOfInt64(qq.ParseMsgContent(msg.Elements).At, c.Uin) != -1 { // 防止跟 chat_reply 重复
+	} else if array.Contains(qq.ParseMsgContent(msg.Elements).At, c.Uin) { // 防止跟 chat_reply 重复
 		return
 	} else if strings.HasPrefix(msg.ToString(), command.Prefix) {
 		return

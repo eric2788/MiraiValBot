@@ -1,6 +1,5 @@
 package compress
 
-
 type NoCompression struct {
 }
 

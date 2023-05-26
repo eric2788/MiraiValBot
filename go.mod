@@ -9,8 +9,9 @@ require (
 	github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/corpix/uarand v0.2.0
+	github.com/deckarep/golang-set/v2 v2.3.0
 	github.com/eric2788/chatgpt v0.0.13-0.20230103010843-b68b00433202
-	github.com/eric2788/common-utils v0.0.0-20221117023123-2fd4171b452a
+	github.com/eric2788/common-utils v0.0.0-20230526084059-6551b0dc4d72
 	github.com/everpcpc/pixiv v0.1.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0

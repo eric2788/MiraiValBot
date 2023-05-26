@@ -3,13 +3,13 @@ package valorant
 import (
 	"errors"
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/eric2788/MiraiValBot/internal/redis"
 	"github.com/eric2788/common-utils/request"
-	"github.com/eric2788/common-utils/set"
 )
 
 type (
@@ -19,12 +19,12 @@ type (
 	Language    string
 )
 
-var LangAvailable = set.FromStrArr([]string{
+var LangAvailable = mapset.NewSet[string](
 	string(EN),
 	string(TC),
 	string(SC),
 	string(JP),
-})
+)
 
 const (
 	ResourceBaseUrl = "https://valorant-api.com/v1"

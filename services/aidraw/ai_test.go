@@ -1,20 +1,31 @@
 package aidraw
 
 import (
+	"github.com/eric2788/MiraiValBot/utils/test"
 	"testing"
 )
 
-func TestGetNovelAI8zywImage(t *testing.T) {
+func TestSexyAIDraw(t *testing.T) {
 
-	url, err := GetNovelAI8zywImage(
-		New8zywPayload(
-			"1girl, best quality, masterpiece, cat ears, solo",
-			WithoutR18,
-		),
-	)
-	if err != nil {
-		t.Skip(err)
+	sessionID = ""
+
+	if sessionID == "" {
+		t.Skip("sessionID is empty, skipped test")
 	}
 
-	t.Log(url)
+	res, err := sexyAIDraw(Payload{
+		Prompt: "cat ears girl in the house",
+		Model:  "real",
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("result image: %v", res.ImgUrl)
+
+}
+
+func init() {
+	test.InitTesting()
 }

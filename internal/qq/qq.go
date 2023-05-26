@@ -2,12 +2,12 @@ package qq
 
 import (
 	"fmt"
+	mapset "github.com/deckarep/golang-set/v2"
 	"math/rand"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/eric2788/common-utils/set"
 	"golang.org/x/exp/maps"
 	"golang.org/x/exp/slices"
 
@@ -93,7 +93,7 @@ func GetGroupEssenceMsgIds() ([]int64, error) {
 		return essencesCache, err
 	}
 
-	var messages = set.NewInt64()
+	var messages = mapset.NewSet[int64]()
 
 	for _, dist := range gpDist {
 		messages.Add(int64(dist.MessageID))
@@ -103,7 +103,7 @@ func GetGroupEssenceMsgIds() ([]int64, error) {
 		messages.Add(id)
 	}
 
-	return messages.ToArr(), nil
+	return messages.ToSlice(), nil
 
 }
 

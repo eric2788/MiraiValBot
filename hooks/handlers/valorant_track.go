@@ -31,7 +31,7 @@ func OnMatchesUpdated(_ *bot.Bot, data *valorant.MatchMetaDataSub) error {
 		cmdId = fmt.Sprintf("%d", short)
 	}
 
-	return valorantTrackRisky(displayName, shortHint,  cmdId, metaData)
+	return valorantTrackRisky(displayName, shortHint, cmdId, metaData)
 }
 
 func init() {

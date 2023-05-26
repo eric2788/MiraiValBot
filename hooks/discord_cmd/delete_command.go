@@ -55,7 +55,6 @@ func (d *deleteCommand) Handler(session *discordgo.Session, interact *discordgo.
 	return
 }
 
-
 func init() {
 	discord.RegisterCommand(&deleteCommand{})
 }

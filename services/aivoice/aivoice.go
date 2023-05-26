@@ -14,8 +14,8 @@ import (
 var logger = utils.GetModuleLogger("valbot.aivoice")
 
 const (
-	AudioBitRate          = "12.2k" // in Hz
-	AudioSamplingRateAMR  = "8000"
+	AudioBitRate         = "12.2k" // in Hz
+	AudioSamplingRateAMR = "8000"
 )
 
 func WavToSilk(b []byte) (data []byte, err error) {
@@ -43,10 +43,10 @@ func WavToSilk(b []byte) (data []byte, err error) {
 		return nil, err
 	}
 	logger.Infof("converting to silk...")
-	defer func ()  {
+	defer func() {
 		if err == nil {
 			logger.Infof("converted to silk: %s", tempName+".silk")
-		}		
+		}
 	}()
 	data, err = silk.EncodePcmBuffToSilk(pcmByte, 24000, 24000, true)
 	return

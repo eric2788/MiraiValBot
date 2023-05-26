@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"github.com/eric2788/common-utils/stream"
 	"strings"
 
 	"github.com/Mrs4s/MiraiGo/client"
@@ -104,7 +105,7 @@ func InvokeCommand(content string, admin bool, source *MessageSource) (*Response
 
 		logger.Debugf("指令对比: %s vs %v", cmd, labels)
 
-		if array.IndexOfString(labels, cmd) != -1 {
+		if array.Contains(labels, cmd) {
 			return invokeCommandInternal(node, admin, []string{}, args, source)
 		}
 	}
@@ -135,7 +136,7 @@ func invokeCommandInternal(node Node, admin bool, parents []string, args []strin
 			for _, subNode := range node.ChildNodes {
 				labels := append(subNode.Alias, subNode.Command)
 				logger.Debugf("指令对比: %s vs %v, 参数: %v", cmd, labels, args)
-				if array.IndexOfString(labels, cmd) != -1 {
+				if array.Contains(labels, cmd) {
 					return invokeCommandInternal(subNode, admin, parents, args, source)
 				}
 			}
@@ -178,9 +179,11 @@ func showHelpLines(parents []string, nodes []Node) string {
 }
 
 func filterNecessary(placeholders []string) []string {
-	return array.FilterString(placeholders, func(s string) bool {
-		return !(strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]"))
-	})
+	return stream.From(placeholders).
+		Filter(func(s string) bool {
+			return !(strings.HasPrefix(s, "[") && strings.HasSuffix(s, "]"))
+		}).
+		ToArr()
 }
 
 func showHelpLine(parents []string, node Node) string {

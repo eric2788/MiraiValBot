@@ -106,7 +106,7 @@ type (
 		Behaviour struct {
 			AfkRounds    float64      `json:"afk_rounds"`
 			FriendlyFire FriendlyFire `json:"friendly_fire"`
-			RoundInSpawn float64          `json:"round_in_spawn"`
+			RoundInSpawn float64      `json:"round_in_spawn"`
 		} `json:"behavior"`
 
 		Platform struct {

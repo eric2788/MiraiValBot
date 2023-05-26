@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
-	"github.com/eric2788/MiraiValBot/simulate"
 	"github.com/eric2788/MiraiValBot/hooks/sites/bilibili"
+	"github.com/eric2788/MiraiValBot/simulate"
 
 	_ "github.com/eric2788/MiraiValBot/hooks/handlers"
 )
