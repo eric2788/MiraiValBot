@@ -1,15 +1,14 @@
 package aidraw
 
 import (
+	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/utils/test"
 	"testing"
 )
 
 func TestSexyAIDraw(t *testing.T) {
 
-	sessionID = ""
-
-	if sessionID == "" {
+	if file.DataStorage.AiDraw.SexyAISession == "" {
 		t.Skip("sessionID is empty, skipped test")
 	}
 
@@ -24,6 +23,14 @@ func TestSexyAIDraw(t *testing.T) {
 
 	t.Logf("result image: %v", res.ImgUrl)
 
+}
+
+func TestSexyAIAuth(t *testing.T) {
+	res, err := SaiRequestOTP("abc@abc.com", false)
+	if err != nil {
+		t.Skip(err)
+	}
+	t.Logf("OTP: %+v", res)
 }
 
 func init() {

@@ -16,6 +16,11 @@ type (
 		Twitter    *twitterSettings           `json:"twitter"`
 		Setting    *setting                   `json:"setting"`
 		Listening  *listening                 `json:"listening"`
+		AiDraw     *aiDrawSettings            `json:"aiDraw"`
+	}
+
+	aiDrawSettings struct {
+		SexyAISession string `json:"sexy_ai_session"`
 	}
 
 	youtubeSettings struct {
@@ -62,6 +67,11 @@ type (
 		Twitter    *TwitterSettings
 		Setting    *Setting
 		Listening  *Listening
+		AiDraw     *AIDrawSettings
+	}
+
+	AIDrawSettings struct {
+		SexyAISession string
 	}
 
 	YoutubeSettings struct {
@@ -111,6 +121,9 @@ func (s *StorageData) toRealStorageData() *storageData {
 		Twitter: &twitterSettings{
 			ShowReply: s.Twitter.ShowReply,
 		},
+		AiDraw: &aiDrawSettings{
+			SexyAISession: s.AiDraw.SexyAISession,
+		},
 		Setting: &setting{
 			VerboseDelete:    s.Setting.VerboseDelete,
 			Verbose:          s.Setting.Verbose,
@@ -143,6 +156,9 @@ func (s *StorageData) parse(sd *storageData) {
 	}
 	s.Twitter = &TwitterSettings{
 		ShowReply: sd.Twitter.ShowReply,
+	}
+	s.AiDraw = &AIDrawSettings{
+		SexyAISession: sd.AiDraw.SexyAISession,
 	}
 	s.Setting = &Setting{
 		VerboseDelete:    sd.Setting.VerboseDelete,

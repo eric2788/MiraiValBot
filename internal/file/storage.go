@@ -35,6 +35,9 @@ var defaultStorageData = storageData{
 	Twitter: &twitterSettings{
 		ShowReply: true,
 	},
+	AiDraw: &aiDrawSettings{
+		SexyAISession: "",
+	},
 	Setting: &setting{
 		VerboseDelete:    false,
 		Verbose:          false,

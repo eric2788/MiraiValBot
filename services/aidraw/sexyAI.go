@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/modules/timer"
 	"github.com/eric2788/common-utils/request"
 	"github.com/eric2788/common-utils/stream"
@@ -68,8 +69,6 @@ var (
 		}),
 	)
 
-	sessionID string = ""
-
 	modelMap = map[string]string{
 		"real1": "model2",
 		"real2": "model3",
@@ -97,7 +96,7 @@ func sexyAIDraw(payload Payload) (*Response, error) {
 		return nil, fmt.Errorf("未知模型: %v, 可用模型: %v", payload.Model, stream.FromMap(modelMap).Keys().Join(", "))
 	}
 
-	logger.Debugf("Requesting sexyAI Image with sessionID: %v", sessionID)
+	logger.Debugf("Requesting sexyAI Image with sessionID: %v", file.DataStorage.AiDraw.SexyAISession)
 
 	var res saiResp
 	_, err := sexyAIRequester.Post("/generateImage", &res,
@@ -106,7 +105,7 @@ func sexyAIDraw(payload Payload) (*Response, error) {
 			"prompt":    prefixPrompt + payload.Prompt,
 			"negprompt": badPrompt,
 			"seed":      random.Uint64(),
-			"sessionID": sessionID,
+			"sessionID": file.DataStorage.AiDraw.SexyAISession,
 			"steps":     20,
 		}),
 	)
@@ -148,7 +147,7 @@ func waitForImageGenerated(imgId string) (string, error) {
 			<-time.After(time.Second * 5)
 			res, err := sexyPost("/getImageStatus", request.Data(map[string]interface{}{
 				"imageID":   imgId,
-				"sessionID": sessionID,
+				"sessionID": file.DataStorage.AiDraw.SexyAISession,
 			}))
 			if err != nil {
 				cancel()
@@ -176,9 +175,13 @@ func waitForImageGenerated(imgId string) (string, error) {
 }
 
 func init() {
+	initializeSession()
+}
+
+func initializeSession() {
 	res, err := sexyPost("/getSelfUser", request.Data(map[string]interface{}{
 		"isAtLeast18Confirmed": true,
-		"sessionID":            sessionID,
+		"sessionID":            file.DataStorage.AiDraw.SexyAISession,
 	}))
 	if err != nil {
 		logger.Errorf("sexyAI初始化失败: %v", err)
@@ -190,8 +193,24 @@ func init() {
 		logger.Errorf("sexyAI初始化失败: %v", err)
 		return
 	}
-	sessionID = auth.SessionID
-	logger.Infof("成功獲取 SexyAI SessionID: %v, Username: %v", sessionID, auth.UserName)
+
+	if !auth.IsAuthenticated && file.DataStorage.AiDraw.SexyAISession != "" {
+		logger.Infof("檢測到 SexyAI Session 已失效, 正在刷新新的 Session ID...")
+		file.UpdateStorage(func() {
+			file.DataStorage.AiDraw.SexyAISession = ""
+		})
+		initializeSession()
+		return
+	}
+
+	if auth.SessionID != file.DataStorage.AiDraw.SexyAISession {
+		logger.Infof("检测到 SexyAI 的 SessionId 已变更: %v -> %v", file.DataStorage.AiDraw.SexyAISession, auth.SessionID)
+		file.UpdateStorage(func() {
+			file.DataStorage.AiDraw.SexyAISession = auth.SessionID
+		})
+	}
+
+	logger.Infof("成功獲取 SexyAI SessionID: %v, Username: %v", file.DataStorage.AiDraw.SexyAISession, auth.UserName)
 	timer.RegisterTimer("sexyAI-keepAlive", time.Minute*5, keepAlive)
 
 	drawableSources["sexyai"] = sexyAIDraw
@@ -201,7 +220,7 @@ func SaiRequestOTP(email string, newUser bool) (bool, error) {
 	res, err := sexyPost("/requestOTP", request.Data(map[string]interface{}{
 		"email":     email,
 		"newUser":   newUser,
-		"sessionID": sessionID,
+		"sessionID": file.DataStorage.AiDraw.SexyAISession,
 	}))
 	if err != nil {
 		return false, err
@@ -220,7 +239,7 @@ func SaiAuth(email, otp string, register bool) (string, error) {
 		"email":                email,
 		"isAtLeast18Confirmed": true,
 		"otp":                  otp,
-		"sessionID":            sessionID,
+		"sessionID":            file.DataStorage.AiDraw.SexyAISession,
 	}
 	if register {
 		path = "/createUser"
@@ -250,7 +269,7 @@ func SaiAuth(email, otp string, register bool) (string, error) {
 func keepAlive(bot *bot.Bot) error {
 	res, err := sexyPost("/getSelfUser", request.Data(map[string]interface{}{
 		"isAtLeast18Confirmed": true,
-		"sessionID":            sessionID,
+		"sessionID":            file.DataStorage.AiDraw.SexyAISession,
 	}))
 	var auth saiAuthResult
 	err = res.Scan(&auth)
@@ -262,7 +281,7 @@ func keepAlive(bot *bot.Bot) error {
 		return nil
 	}
 
-	logger.Warnf("SexyAI SessionID %v 已失效，需要重新登入", sessionID)
+	logger.Warnf("SexyAI SessionID %v 已失效，需要重新登入", file.DataStorage.AiDraw.SexyAISession)
 	return nil
 }
 
