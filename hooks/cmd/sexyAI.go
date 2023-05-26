@@ -36,7 +36,7 @@ func auth(args []string, source *command.MessageSource, register bool) error {
 		otp = args[1]
 	}
 
-	logger.Debugf("email: %v, otp: %v", email, otp)
+	logger.Debugf("email: %q, otp: %q", email, otp)
 
 	reply := qq.CreateReply(source.Message)
 

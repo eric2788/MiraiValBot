@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Logiase/MiraiGo-Template/bot"
+	"github.com/eric2788/MiraiValBot/internal/eventhook"
 	"github.com/eric2788/MiraiValBot/internal/file"
 	"github.com/eric2788/MiraiValBot/modules/timer"
 	"github.com/eric2788/common-utils/request"
@@ -49,6 +50,8 @@ type (
 		IsAuthenticated bool   `json:"isAuthenticated"`
 		IsDisabled      *bool  `json:"isDisabled"`
 	}
+
+	hooker struct{}
 )
 
 func (resp *saiResp) Scan(res interface{}) error {
@@ -174,7 +177,7 @@ func waitForImageGenerated(imgId string) (string, error) {
 	}
 }
 
-func init() {
+func (h *hooker) HookEvent(bot *bot.Bot) {
 	initializeSession()
 }
 
@@ -261,6 +264,8 @@ func SaiAuth(email, otp string, register bool) (string, error) {
 		return "", fmt.Errorf("解析Auth信息失败: %v", err)
 	}
 
+	logger.Debugf("auth result: %+v", auth)
+
 	if !auth.IsAuthenticated {
 		return auth.UserName, fmt.Errorf("登錄失败: %v", auth.Email)
 	}
@@ -296,4 +301,8 @@ func sexyPost(url string, confs ...request.Configurer) (*saiResp, error) {
 		return nil, errors.New(res.ErrorMessage)
 	}
 	return &res, nil
+}
+
+func init() {
+	eventhook.HookLifeCycle(&hooker{})
 }
