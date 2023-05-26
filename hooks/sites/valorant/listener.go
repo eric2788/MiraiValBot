@@ -44,7 +44,7 @@ func StopListen(name, tag string) (bool, error) {
 	nameTag := fmt.Sprintf("%s#%s", name, tag)
 
 	idToDelete, uuidToUnSub := "", ""
-	for line := range (*listening).Valorant.Iterator() {
+	for line := range (*listening).Valorant.Iter() {
 		parts := strings.Split(line, "//")
 		if len(parts) != 2 {
 			logger.Warnf("Invalid line in listening: %s", line)
@@ -62,7 +62,7 @@ func StopListen(name, tag string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		(*listening).Valorant.Delete(idToDelete)
+		(*listening).Valorant.Remove(idToDelete)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
@@ -76,7 +76,7 @@ func StopListen(name, tag string) (bool, error) {
 
 func GetListening() []string {
 	var displayNames []string
-	for line := range (*listening).Valorant.Iterator() {
+	for line := range (*listening).Valorant.Iter() {
 		parts := strings.Split(line, "//")
 		if len(parts) != 2 {
 			logger.Warnf("Invalid line in listening: %s", line)

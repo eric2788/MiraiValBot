@@ -9,7 +9,7 @@ import (
 	"github.com/eric2788/MiraiValBot/services/discord"
 	"github.com/eric2788/common-utils/request"
 	"net/http"
-	"strings"
+	"time"
 )
 
 type novelAI struct {
@@ -36,24 +36,57 @@ func (n *novelAI) ApplicationCommand() *discordgo.ApplicationCommand {
 				Required:    true,
 			},
 			{
-				Type: discordgo.ApplicationCommandOptionBoolean,
-				Name: "nsfw",
-				NameLocalizations: map[discordgo.Locale]string{
-					discordgo.ChineseTW: "涩涩",
-					discordgo.ChineseCN: "涩涩",
-				},
-				Description: "是否包含R18色图",
-				Required:    true,
-			},
-			{
+				// model with choices
 				Type: discordgo.ApplicationCommandOptionString,
-				Name: "badprompt",
+				Name: "model",
 				NameLocalizations: map[discordgo.Locale]string{
-					discordgo.ChineseTW: "不良标签",
-					discordgo.ChineseCN: "不良标签",
+					discordgo.ChineseTW: "模型",
+					discordgo.ChineseCN: "模型",
 				},
-				Description: "选填, 用,分隔, 过滤不良标签",
+				Description: "选填, 模型名称, 默认为 anime",
 				Required:    false,
+				Choices: []*discordgo.ApplicationCommandOptionChoice{
+					{
+						Name:  "anime",
+						Value: "anime",
+						NameLocalizations: map[discordgo.Locale]string{
+							discordgo.ChineseTW: "動漫",
+							discordgo.ChineseCN: "动漫",
+						},
+					},
+					{
+						Name:  "real1",
+						Value: "real1",
+						NameLocalizations: map[discordgo.Locale]string{
+							discordgo.ChineseTW: "寫實1",
+							discordgo.ChineseCN: "写实1",
+						},
+					},
+					{
+						Name:  "real2",
+						Value: "real2",
+						NameLocalizations: map[discordgo.Locale]string{
+							discordgo.ChineseTW: "寫實2",
+							discordgo.ChineseCN: "写实2",
+						},
+					},
+					{
+						Name:  "real3",
+						Value: "real3",
+						NameLocalizations: map[discordgo.Locale]string{
+							discordgo.ChineseTW: "寫實3",
+							discordgo.ChineseCN: "写实3",
+						},
+					},
+					{
+						Name:  "real (Random)",
+						Value: "real",
+						NameLocalizations: map[discordgo.Locale]string{
+							discordgo.ChineseTW: "寫實 (隨機)",
+							discordgo.ChineseCN: "写实 (随机)",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -66,13 +99,12 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 	optionMap := discord.ToOptionMap(data)
 
 	description := optionMap["description"].StringValue()
-	nsfw := optionMap["nsfw"].BoolValue()
-	badPrompt := ""
-	if bp, ok := optionMap["badprompt"]; ok {
-		badPrompt = bp.StringValue()
+	model := ""
+	if bp, ok := optionMap["model"]; ok {
+		model = bp.StringValue()
 	}
 
-	if interact.ChannelID != fmt.Sprint(config.NsfwChannel) && nsfw {
+	if interact.ChannelID != fmt.Sprint(config.NsfwChannel) {
 		err = session.InteractionRespond(interact.Interaction, &discordgo.InteractionResponse{
 			Type: discordgo.InteractionResponseChannelMessageWithSource,
 			Data: &discordgo.InteractionResponseData{
@@ -89,22 +121,14 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 		},
 	})
 
-	t := aidraw.WithNSFW
-	if nsfw {
-		t = aidraw.WithR18
-	}
-
 	if err != nil {
 		return
 	}
 
-	img, err := aidraw.GetNovelAI8zywImage(
-		aidraw.New8zywPayload(
-			description,
-			t,
-			strings.Split(badPrompt, ",")...,
-		),
-	)
+	img, err := aidraw.Draw(aidraw.Payload{
+		Prompt: description,
+		Model:  model,
+	})
 
 	if err != nil {
 		_, _ = session.FollowupMessageCreate(interact.Interaction, true, &discordgo.WebhookParams{
@@ -113,7 +137,14 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 		return
 	}
 
-	b, err := request.GetBytesByUrl(img)
+	var b []byte
+	if img.ImgUrl != "" {
+		b, err = request.GetBytesByUrl(img.ImgUrl)
+	} else if len(img.ImgData) > 0 {
+		b = img.ImgData
+	} else {
+		err = fmt.Errorf("图片数据为空")
+	}
 
 	if err != nil {
 		_, _ = session.FollowupMessageCreate(interact.Interaction, true, &discordgo.WebhookParams{
@@ -125,7 +156,7 @@ func (n *novelAI) Handler(session *discordgo.Session, interact *discordgo.Intera
 	_, err = session.FollowupMessageCreate(interact.Interaction, true, &discordgo.WebhookParams{
 		Files: []*discordgo.File{
 			{
-				Name:        img,
+				Name:        fmt.Sprintf("aidraw-%d.png", time.Now().Unix()),
 				ContentType: http.DetectContentType(b),
 				Reader:      bytes.NewReader(b),
 			},

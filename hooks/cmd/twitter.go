@@ -58,11 +58,11 @@ func tTerminate(args []string, source *command.MessageSource) error {
 }
 
 func tListening(args []string, source *command.MessageSource) error {
-	listening := file.DataStorage.Listening.Twitter
+	listening := file.DataStorage.Listening.Twitter.ToSlice()
 	reply := qq.CreateReply(source.Message)
 
-	if listening.Size() > 0 {
-		reply.Append(qq.NewTextf("正在监听的推特用户: %v", strings.Join(listening.ToArr(), ", ")))
+	if len(listening) > 0 {
+		reply.Append(qq.NewTextf("正在监听的推特用户: %v", strings.Join(listening, ", ")))
 	} else {
 		reply.Append(message.NewText("没有在监听的推特用户"))
 	}

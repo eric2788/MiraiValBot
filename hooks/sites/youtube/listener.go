@@ -75,7 +75,7 @@ func StopListen(channel string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		(*listening).Youtube.Delete(channel)
+		(*listening).Youtube.Remove(channel)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

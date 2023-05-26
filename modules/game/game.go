@@ -29,7 +29,7 @@ func (g *game) HookEvent(bot *bot.Bot) {
 
 		content := qq.ParseMsgContent(event.Elements)
 
-		if array.IndexOfInt64(content.At, client.Uin) != -1 && len(content.Texts) > 0 {
+		if array.Contains(content.At, client.Uin) && len(content.Texts) > 0 {
 
 			result := currentGame.Handle(event)
 			if result.EndGame {

@@ -43,7 +43,7 @@ func (a *atResponse) HookEvent(bot *bot.Bot) {
 
 		content := qq.ParseMsgContent(msg.Elements)
 
-		if array.IndexOfInt64(content.At, cl.Uin) != -1 && len(content.Texts) > 0 {
+		if array.Contains(content.At, cl.Uin) && len(content.Texts) > 0 {
 
 			for _, strategy := range a.strategies {
 				send, err := strategy.Response(msg)

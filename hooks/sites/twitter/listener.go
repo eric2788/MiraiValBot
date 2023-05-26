@@ -58,7 +58,7 @@ func StopListen(user string) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		(*listening).Twitter.Delete(user)
+		(*listening).Twitter.Remove(user)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)

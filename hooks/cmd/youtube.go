@@ -91,7 +91,7 @@ func yTerminate(args []string, source *command.MessageSource) error {
 }
 
 func yListening(args []string, source *command.MessageSource) error {
-	listening := file.DataStorage.Listening.Youtube.ToArr()
+	listening := file.DataStorage.Listening.Youtube.ToSlice()
 
 	reply := qq.CreateReply(source.Message)
 	if len(listening) > 0 {

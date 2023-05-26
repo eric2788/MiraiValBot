@@ -751,7 +751,7 @@ func weapons(args []string, source *command.MessageSource) error {
 
 	if !valorant.LangAvailable.Contains(args[0]) {
 		msg := qq.CreateReply(source.Message)
-		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
+		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToSlice(), ", ")))
 		return qq.SendGroupMessage(msg)
 	}
 
@@ -788,7 +788,7 @@ func agents(args []string, source *command.MessageSource) error {
 
 	if !valorant.LangAvailable.Contains(args[0]) {
 		msg := qq.CreateReply(source.Message)
-		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToArr(), ", ")))
+		msg.Append(qq.NewTextf("未知语言，目前支援的语言: %s", strings.Join(valorant.LangAvailable.ToSlice(), ", ")))
 		return qq.SendGroupMessage(msg)
 	}
 

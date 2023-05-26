@@ -26,7 +26,7 @@ func RemoveHighlightUser(user int64) bool {
 	}
 
 	file.UpdateStorage(func() {
-		(*bSettings).HighLightedUsers.Delete(user)
+		(*bSettings).HighLightedUsers.Remove(user)
 	})
 
 	return true

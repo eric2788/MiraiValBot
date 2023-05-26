@@ -24,7 +24,7 @@ func (m *messageHandler) PubSubPrefix() string {
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
-	listening := file.DataStorage.Listening.Valorant.ToArr()
+	listening := file.DataStorage.Listening.Valorant.ToSlice()
 	topics := make([]string, len(listening))
 	for i, line := range listening {
 		parts := strings.Split(line, "//")

@@ -31,7 +31,7 @@ func (m *messageHandler) GetCommand(data *LiveInfo) string {
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
-	listening := file.DataStorage.Listening.Youtube.ToArr()
+	listening := file.DataStorage.Listening.Youtube.ToSlice()
 	topics := make([]string, len(listening))
 	for i, v := range listening {
 		topics[i] = fmt.Sprintf("ylive:%s", v)

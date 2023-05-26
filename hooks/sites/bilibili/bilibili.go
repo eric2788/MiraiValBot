@@ -31,7 +31,7 @@ func (h *messageHandler) GetCommand(data *LiveData) string {
 }
 
 func (h *messageHandler) GetOfflineListening() []string {
-	listening := file.DataStorage.Listening.Bilibili.ToArr()
+	listening := file.DataStorage.Listening.Bilibili.ToSlice()
 	topics := make([]string, len(listening))
 	for i, v := range listening {
 		topics[i] = fmt.Sprintf("blive:%d", v)

@@ -93,7 +93,7 @@ func StopListen(room int64) (bool, error) {
 	}
 
 	file.UpdateStorage(func() {
-		(*listening).Bilibili.Delete(room)
+		(*listening).Bilibili.Remove(room)
 	})
 
 	info, _ := bot.GetModule(bc.Tag)
