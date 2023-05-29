@@ -1,6 +1,9 @@
 package chat_reply
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
@@ -17,6 +20,7 @@ const Tag = "valbot.chat_reply"
 var (
 	logger   = utils.GetModuleLogger(Tag)
 	instance = &atResponse{
+		ran: rand.New(rand.NewSource(time.Now().UnixNano())),
 		strategies: []ResponseStrategy{
 			AIChat,
 			&RandomResponse{},
@@ -26,6 +30,7 @@ var (
 
 type (
 	atResponse struct {
+		ran *rand.Rand
 		strategies []ResponseStrategy
 	}
 
@@ -45,6 +50,7 @@ func (a *atResponse) HookEvent(bot *bot.Bot) {
 
 		if array.Contains(content.At, cl.Uin) && len(content.Texts) > 0 {
 
+			/*
 			for _, strategy := range a.strategies {
 				send, err := strategy.Response(msg)
 				if err == nil {
@@ -52,6 +58,24 @@ func (a *atResponse) HookEvent(bot *bot.Bot) {
 					break
 				}
 			}
+			*/
+
+			var strategies = append([]ResponseStrategy{}, a.strategies...)
+
+			// make random 2% to only random response
+			if rand.Intn(100) < 2 {
+				array.Remove[ResponseStrategy](strategies, AIChat)
+			}
+
+
+			for _, strategy := range strategies {
+				send, err := strategy.Response(msg)
+				if err == nil {
+					_ = qq.SendGroupMessageByGroup(msg.GroupCode, send)
+					break
+				}
+			}
+
 
 		}
 	})
