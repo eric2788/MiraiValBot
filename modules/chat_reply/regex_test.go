@@ -4,6 +4,8 @@ import (
 	"regexp"
 	"strconv"
 	"testing"
+
+	"github.com/eric2788/common-utils/array"
 	//"github.com/stretchr/testify/assert"
 )
 
@@ -39,4 +41,15 @@ func TestRegexp(t *testing.T) {
 	if lastTo < len(content) {
 		t.Logf("Append %s", content[lastTo:])
 	}
+}
+
+func TestArrayAppend(t *testing.T) {
+	a := []int{1, 2, 3}
+
+	b := append([]int{}, a...)
+
+	array.Remove(b, 1)
+
+	t.Log(a)
+	t.Log(b)
 }
