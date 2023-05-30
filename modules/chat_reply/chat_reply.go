@@ -64,7 +64,7 @@ func (a *atResponse) HookEvent(bot *bot.Bot) {
 
 			// make random 2% to only random response
 			if rand.Intn(100) < 2 {
-				array.Remove[ResponseStrategy](strategies, AIChat)
+				strategies = array.Remove[ResponseStrategy](strategies, AIChat)
 			}
 
 

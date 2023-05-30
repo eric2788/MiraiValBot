@@ -1,11 +1,13 @@
 package chat_reply
 
 import (
+	"reflect"
 	"regexp"
 	"strconv"
 	"testing"
 
 	"github.com/eric2788/common-utils/array"
+	"github.com/eric2788/common-utils/stream"
 	//"github.com/stretchr/testify/assert"
 )
 
@@ -44,12 +46,22 @@ func TestRegexp(t *testing.T) {
 }
 
 func TestArrayAppend(t *testing.T) {
-	a := []int{1, 2, 3}
+	a := []ResponseStrategy{&RandomResponse{}, AIChat}
 
-	b := append([]int{}, a...)
+	t.Log("a: ", str(a))
 
-	array.Remove(b, 1)
+	b := append([]ResponseStrategy{}, a...)
 
-	t.Log(a)
-	t.Log(b)
+	t.Log("before B", str(b))
+	
+	b = array.Remove[ResponseStrategy](b, AIChat)
+
+	t.Log("after B", str(b))
+}
+
+
+func str(ss[] ResponseStrategy) string {
+	return stream.MapTo(stream.From(ss), func(s ResponseStrategy) string {
+		return reflect.TypeOf(s).String()
+	}).Join(", ")
 }
