@@ -230,7 +230,7 @@ func (b *bilibili) ParseURL(url string) Broadcaster {
 						msg.Append(img)
 					}
 
-					return qq.SendGroupMessage(msg)
+					return qq.SendWithRandomRiskyStrategy(msg)
 				}
 			}
 		} else {
