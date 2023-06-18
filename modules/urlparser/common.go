@@ -104,7 +104,7 @@ func (c *common) sendAsGroupMessage(data *embedData, event *message.GroupMessage
 		}
 	}
 
-	return qq.SendGroupMessage(msg)
+	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
 func (c *common) asServiceElement(data *embedData) *message.ServiceElement {
