@@ -467,6 +467,10 @@ func IsMuted(uid int64) bool {
 
 // reLogin - 參考了 Sora233/Mirai-Template 中的重連方式
 func reLogin(qBot *bot.Bot) error {
+	if err := recover(); err != nil {
+		logger.Errorf("reLogin 發生致命錯誤: %v", err)
+		return fmt.Errorf("%v", err)
+	}
 	if qBot.Online.Load() {
 		return nil
 	}
