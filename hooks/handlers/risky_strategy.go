@@ -13,7 +13,7 @@ func withBilibiliRisky(msg *message.SendingMessage) (err error) {
 	return qq.SendWithRandomRiskyStrategy(msg)
 }
 
-func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetStreamData) (err error) {
+func tweetSendQQRisky(originalMsg *message.SendingMessage, data *twitter.TweetData) (err error) {
 
 	go qq.SendRiskyMessage(5, 60, func(try int) error {
 

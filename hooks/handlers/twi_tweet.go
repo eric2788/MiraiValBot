@@ -11,10 +11,12 @@ import (
 	"github.com/eric2788/MiraiValBot/services/discord"
 )
 
-func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleTweet(_ *bot.Bot, c *twitter.TweetContent) error {
+
+	data := c.Tweet
 
 	discordMessage := &discordgo.MessageEmbed{
-		Description: fmt.Sprintf("%s 发布了一则推文", data.User.Name),
+		Description: fmt.Sprintf("%s 发布了一则推文", c.NickName),
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "内容",
@@ -22,11 +24,11 @@ func HandleTweet(_ *bot.Bot, data *twitter.TweetStreamData) error {
 			},
 		},
 	}
-	twitter.AddEntitiesByDiscord(discordMessage, data)
+	twitter.AddEntitiesByDiscord(discordMessage, c)
 	go discord.SendNewsEmbed(discordMessage)
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 发布了一则新推文", data.User.Name))
+	msg.Append(qq.NewTextfLn("%s 发布了一则新推文", c.NickName))
 	return tweetSendQQRisky(msg, data)
 }
 

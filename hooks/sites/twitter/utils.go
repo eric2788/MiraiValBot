@@ -3,7 +3,6 @@ package twitter
 import (
 	"fmt"
 	"regexp"
-	"strings"
 )
 
 var (
@@ -14,10 +13,11 @@ func TextWithoutTCLink(txt string) string {
 	return noTweetLinkPattern.ReplaceAllString(txt, "")
 }
 
-func ExtractExtraLinks(data *TweetStreamData) []string {
+func ExtractExtraLinks(data *TweetData) []string {
 
 	extraUrls := make([]string, 0)
 
+	/*
 	// 分開替代連結和額外連結
 	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
 		for _, url := range data.Entities.Urls {
@@ -30,6 +30,11 @@ func ExtractExtraLinks(data *TweetStreamData) []string {
 				data.Text = replaced
 			}
 		}
+	}
+	*/
+
+	if data.URLs != nil {
+		extraUrls = append(extraUrls, data.URLs...)
 	}
 
 	// 取代完畢之後，刪走多餘的 tc link

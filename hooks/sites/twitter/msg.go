@@ -9,7 +9,7 @@ import (
 )
 
 // CreateMessage 短視頻要單獨發送，否則無法發送原文
-func CreateMessage(risk bool, msg *message.SendingMessage, data *TweetStreamData, alt ...*message.TextElement) (*message.SendingMessage, []*message.ShortVideoElement) {
+func CreateMessage(risk bool, msg *message.SendingMessage, data *TweetData, alt ...*message.TextElement) (*message.SendingMessage, []*message.ShortVideoElement) {
 
 	extraUrls := ExtractExtraLinks(data)
 
@@ -37,78 +37,162 @@ func CreateMessage(risk bool, msg *message.SendingMessage, data *TweetStreamData
 		}
 	}
 
-	// 媒體
-	if data.ExtendedEntities != nil && data.ExtendedEntities.Media != nil {
-		media := *data.ExtendedEntities.Media
-		for i, m := range media {
-			switch m.Type {
-			// 圖片
-			case "photo":
-				img, err := qq.NewImageByUrl(m.MediaUrlHttps)
-				if err != nil {
-					logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
-					msg.Append(qq.NewTextfLn("\n图片%d: %s", i+1, m.MediaUrlHttps))
-				} else {
-					msg.Append(img)
-				}
-			// Gif 圖片
-			case "animated_gif":
-				fallthrough
-			// 視頻
-			case "video":
-				videoInfo := m.VideoInfo
-				success := false
-				for _, variant := range videoInfo.Variants {
-					if variant.ContentType != "video/mp4" {
-						continue
-					}
-					video, err := qq.NewVideoByUrl(variant.Url, m.MediaUrlHttps)
-					if err != nil {
-						logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
-						continue
-					}
-					videos = append(videos, video)
-					success = true
-					break
-				}
-				if !success {
-					logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
-					img, err := qq.NewImageByUrl(m.MediaUrlHttps)
-					if err != nil {
-						logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
-						msg.Append(qq.NewTextf("\n视频封面\n%s", m.MediaUrlHttps))
-					} else {
-						msg.Append(img)
-					}
-				}
-			default:
-				logger.Warnf("未知的媒體類型: %s", m.Type)
+	if data.Photos != nil {
+		for i, m := range data.Photos {
+			img, err := qq.NewImageByUrl(m.URL)
+			if err != nil {
+				logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.URL, err)
+				msg.Append(qq.NewTextfLn("\n图片%d: %s", i+1, m.URL))
+			} else {
+				msg.Append(img)
 			}
 		}
 	}
+
+	if data.GIFs != nil || data.Videos != nil {
+
+		medias := append(data.Videos, data.GIFs...)
+
+		for _, m := range medias {
+			video, err := qq.NewVideoByUrl(m.URL, m.Preview)
+			if err != nil {
+				logger.Warnf("推特視頻加載失敗: %v，將改用圖片推送。", err)
+				img, err := qq.NewImageByUrl(m.Preview)
+				if err != nil {
+					logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.Preview, err)
+					msg.Append(qq.NewTextf("\n视频封面\n%s", m.Preview))
+				} else {
+					msg.Append(img)
+				}
+			} else {
+				videos = append(videos, video)
+			}
+		}
+	}
+
+	/*
+		// 媒體
+		if data.ExtendedEntities != nil && data.ExtendedEntities.Media != nil {
+			media := *data.ExtendedEntities.Media
+			for i, m := range media {
+				switch m.Type {
+				// 圖片
+				case "photo":
+					img, err := qq.NewImageByUrl(m.MediaUrlHttps)
+					if err != nil {
+						logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
+						msg.Append(qq.NewTextfLn("\n图片%d: %s", i+1, m.MediaUrlHttps))
+					} else {
+						msg.Append(img)
+					}
+				// Gif 圖片
+				case "animated_gif":
+					fallthrough
+				// 視頻
+				case "video":
+					videoInfo := m.VideoInfo
+					success := false
+					for _, variant := range videoInfo.Variants {
+						if variant.ContentType != "video/mp4" {
+							continue
+						}
+						video, err := qq.NewVideoByUrl(variant.Url, m.MediaUrlHttps)
+						if err != nil {
+							logger.Warnf("加載推特視頻 %s 時出現錯誤: %v, 尋找下一個線路。", variant.Url, err)
+							continue
+						}
+						videos = append(videos, video)
+						success = true
+						break
+					}
+					if !success {
+						logger.Warnf("推特視頻加載失敗，將改用圖片推送。")
+						img, err := qq.NewImageByUrl(m.MediaUrlHttps)
+						if err != nil {
+							logger.Warnf("加载推特图片 %s 时出现错误: %v, 将尝试发送链接", m.MediaUrlHttps, err)
+							msg.Append(qq.NewTextf("\n视频封面\n%s", m.MediaUrlHttps))
+						} else {
+							msg.Append(img)
+						}
+					}
+				default:
+					logger.Warnf("未知的媒體類型: %s", m.Type)
+				}
+			}
+		}
+	*/
+
 	return msg, videos
 }
 
-func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, data *TweetStreamData) {
+func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, c *TweetContent) {
+	data := c.Tweet
+
 	msg.Author = &discordgo.MessageEmbedAuthor{
-		Name:    data.User.Name,
-		URL:     GetUserLink(data.User.ScreenName),
-		IconURL: data.User.ProfileImageUrlHttps,
+		Name:    c.NickName,
+		URL:     GetUserLink(data.Username),
 	}
+
+	if c.Profile != nil {
+		msg.Author.IconURL = c.Profile.Avatar
+	}
+
 	if msg.Fields == nil {
 		msg.Fields = make([]*discordgo.MessageEmbedField, 0)
 	}
-	if data.Entities.Urls != nil && len(data.Entities.Urls) > 0 {
+	if data.URLs != nil && len(data.URLs) > 0 {
+		/*
 		urls := make([]string, 0)
 		for _, url := range data.Entities.Urls {
 			urls = append(urls, url.ExpandedUrl)
 		}
+		*/
 		msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
 			Name:  "链接",
-			Value: strings.Join(urls, "\n"),
+			Value: strings.Join(data.URLs, "\n"),
 		})
 	}
 
+	if data.Photos != nil {
+
+		if len(data.Photos) == 1 {
+			m := data.Photos[0]
+			msg.Image = &discordgo.MessageEmbedImage{
+				URL: m.URL,
+			}
+		} else {
+			photoUrls := make([]string, 0)
+			for _, m := range data.Photos {
+				photoUrls = append(photoUrls, m.URL)
+			}
+			msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+				Name:  "图片",
+				Value: strings.Join(photoUrls, "\n"),
+			})
+		}
+	}
+
+	if data.GIFs != nil || data.Videos != nil {
+		
+		medias := append(data.Videos, data.GIFs...)
+
+		if len(medias) == 1 {
+			msg.Video = &discordgo.MessageEmbedVideo{
+				URL: medias[0].URL,
+			}
+		} else {
+			videoUrls := make([]string, 0)
+			for _, m := range medias {
+				videoUrls = append(videoUrls, m.URL)
+			}
+			msg.Fields = append(msg.Fields, &discordgo.MessageEmbedField{
+				Name:  "视频",
+				Value: strings.Join(videoUrls, "\n"),
+			})
+		}
+	}
+
+	/*
 	if data.ExtendedEntities != nil && len(*data.ExtendedEntities.Media) > 0 {
 		if len(*data.ExtendedEntities.Media) == 1 {
 			m := (*data.ExtendedEntities.Media)[0]
@@ -161,4 +245,5 @@ func AddEntitiesByDiscord(msg *discordgo.MessageEmbed, data *TweetStreamData) {
 			}
 		}
 	}
+	*/
 }
