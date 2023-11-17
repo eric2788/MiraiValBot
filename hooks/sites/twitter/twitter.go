@@ -17,14 +17,17 @@ func (m *messageHandler) PubSubPrefix() string {
 	return "twitter:"
 }
 
-func (m *messageHandler) ToLiveData(message *redis.Message) (*TweetStreamData, error) {
-	var twitterStream = &TweetStreamData{}
+func (m *messageHandler) ToLiveData(message *redis.Message) (*TweetContent, error) {
+	var twitterStream = &TweetContent{}
 	err := json.Unmarshal([]byte(message.Payload), twitterStream)
 	return twitterStream, err
 }
 
-func (m *messageHandler) GetCommand(data *TweetStreamData) string {
-	return data.GetCommand()
+func (m *messageHandler) GetCommand(data *TweetContent) string {
+	if data.Tweet == nil {
+		return ""
+	}
+	return data.Tweet.GetCommand()
 }
 
 func (m *messageHandler) GetOfflineListening() []string {
@@ -39,7 +42,7 @@ func (m *messageHandler) GetOfflineListening() []string {
 func (m *messageHandler) HandleError(bot *bot.Bot, error error) {
 }
 
-var MessageHandler = broadcaster.BuildHandle[TweetStreamData](logger, &messageHandler{})
+var MessageHandler = broadcaster.BuildHandle[TweetContent](logger, &messageHandler{})
 
 func init() {
 	broadcaster.RegisterHandler("twitter", MessageHandler)

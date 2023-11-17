@@ -12,7 +12,7 @@ import (
 	"github.com/eric2788/MiraiValBot/services/discord"
 )
 
-func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
+func HandleTweetReply(_ *bot.Bot, data *twitter.TweetContent) error {
 
 	// 设置了不推送推文回复
 	if !file.DataStorage.Twitter.ShowReply {
@@ -20,15 +20,15 @@ func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
 	}
 
 	discordMsg := &discordgo.MessageEmbed{
-		Description: fmt.Sprintf("[%s](%s) 回复了 [%s](%s) 的一则推文", data.User.Name, twitter.GetUserLink(data.User.ScreenName), *data.InReplyToScreenName, twitter.GetUserLink(*data.InReplyToScreenName)),
+		Description: fmt.Sprintf("[%s](%s) 回复了 [%s](%s) 的一则推文", data.NickName, twitter.GetUserLink(data.Profile.Username), data.Tweet.InReplyToStatus.Name, twitter.GetUserLink(data.Tweet.InReplyToStatus.Username)),
 		Fields: []*discordgo.MessageEmbedField{
 			{
 				Name:  "回复贴文",
-				Value: twitter.GetStatusLink(*data.InReplyToScreenName, data.InReplyToStatusIdStr),
+				Value: twitter.GetStatusLink(data.Tweet.InReplyToStatus.Username, data.Tweet.InReplyToStatusID),
 			},
 			{
 				Name:  "回复内容",
-				Value: twitter.TextWithoutTCLink(data.UnEsacapedText()),
+				Value: twitter.TextWithoutTCLink(data.Tweet.UnEsacapedText()),
 			},
 		},
 	}
@@ -36,13 +36,13 @@ func HandleTweetReply(_ *bot.Bot, data *twitter.TweetStreamData) error {
 	go discord.SendNewsEmbed(discordMsg)
 
 	msg := message.NewSendingMessage()
-	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.User.Name, *data.InReplyToScreenName))
+	msg.Append(qq.NewTextfLn("%s 回复了 %s 的一则推文", data.NickName, data.Tweet.InReplyToStatus.Name))
 	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextLn("回复贴文"))
-	msg.Append(qq.NewTextfLn("https://twitter.com/%s/status/%s", *data.InReplyToScreenName, data.InReplyToStatusIdStr))
+	msg.Append(qq.NewTextfLn("https://twitter.com/%s/status/%s", data.Tweet.InReplyToStatus.Username, data.Tweet.InReplyToStatusID))
 	msg.Append(qq.NextLn())
 	msg.Append(qq.NewTextLn("内容"))
-	return tweetSendQQRisky(msg, data)
+	return tweetSendQQRisky(msg, data.Tweet)
 }
 
 // withRisky error must be nil
