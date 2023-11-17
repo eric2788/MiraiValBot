@@ -4,22 +4,22 @@ go 1.20
 
 require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20230418122219-e8ad16023fd0
-	github.com/Mrs4s/MiraiGo v0.0.0-20230405122028-22ff0046638a
+	github.com/Mrs4s/MiraiGo v0.0.0-20231010012600-c025459da09e
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/RomiChan/protobuf v0.1.1-0.20230204044148-2ed269a2e54d
 	github.com/bwmarrin/discordgo v0.27.1
 	github.com/corpix/uarand v0.2.0
-	github.com/deckarep/golang-set/v2 v2.3.0
+	github.com/deckarep/golang-set/v2 v2.3.1
 	github.com/eric2788/chatgpt v0.0.13-0.20230103010843-b68b00433202
-	github.com/eric2788/common-utils v0.0.0-20230526084059-6551b0dc4d72
-	github.com/everpcpc/pixiv v0.1.1
+	github.com/eric2788/common-utils v0.0.0-20230530025427-301a0a7f2da8
+	github.com/everpcpc/pixiv v0.1.2
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.4.0
 	github.com/hqbobo/text2pic v0.0.0-20180823042751-2479e146d720
-	github.com/quic-go/quic-go v0.34.0
-	github.com/sirupsen/logrus v1.9.2
-	github.com/stretchr/testify v1.8.1
+	github.com/quic-go/quic-go v0.40.0
+	github.com/sirupsen/logrus v1.9.3
+	github.com/stretchr/testify v1.8.4
 	github.com/wdvxdr1123/go-silk v0.0.0-20220304095002-f67345df09ea
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -35,9 +35,11 @@ require (
 	github.com/onsi/ginkgo/v2 v2.9.5 // indirect
 	github.com/quic-go/qpack v0.4.0 // indirect
 	github.com/quic-go/qtls-go1-19 v0.3.2 // indirect
-	github.com/quic-go/qtls-go1-20 v0.2.2 // indirect
+	github.com/quic-go/qtls-go1-20 v0.4.1 // indirect
 	github.com/sashabaranov/go-gpt3 v1.4.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
+	go.uber.org/mock v0.3.0 // indirect
+	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/tools v0.9.1 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
